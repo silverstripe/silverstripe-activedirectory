@@ -1,0 +1,12 @@
+---
+Name: ldapconfig
+---
+Group:
+  extensions:
+    - LDAPGroupExtension
+Member:
+  extensions:
+    - LDAPMemberExtension
+
+LDAPAuthenticator:
+  name: "LDAP"

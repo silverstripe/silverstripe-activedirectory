@@ -1,0 +1,21 @@
+---
+Name: samlsettings
+After: '#rootroutes'
+---
+Director:
+  rules:
+    'saml': SAMLController
+
+Member:
+  extensions:
+    - SAMLMemberExtension
+
+Injector:
+  SAMLConfService: SAMLConfiguration
+
+SAMLAuthenticator:
+  name: "SAML"
+
+SAMLConfiguration:
+  strict: true
+  debug: false

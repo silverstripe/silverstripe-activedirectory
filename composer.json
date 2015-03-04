@@ -1,0 +1,28 @@
+{
+	"name": "silverstripe/activedirectory",
+	"description": "Adds Active Directory support to SilverStripe including user synchronisation and SSO/LDAP authentication via SAML 2.0",
+	"type": "silverstripe-module",
+	"keywords": ["silverstripe", "ad", "active", "directory", "ldap", "sso", "saml"],
+	"license": "BSD-3-Clause",
+	"authors": [
+		{
+			"name": "Sean Harvey",
+			"email": "sean@silverstripe.com"
+		},
+		{
+			"name": "Stig Lindqvist",
+			"email": "stig@silverstripe.com"
+		}
+	],
+	"require": {
+		"silverstripe/framework": "~3.1",
+		"silverstripe/queuedjobs": "~2.3@stable",
+		"zendframework/zend-ldap": "2.2.9",
+		"zendframework/zend-authentication": "2.2.9",
+		"zendframework/zend-session": "2.2.9",
+		"onelogin/php-saml": "2.*@stable"
+	},
+	"require-dev": {
+		"phpunit/PHPUnit": "~3.7@stable"
+	}
+}
