@@ -1,6 +1,6 @@
 # SilverStripe Active Directory module
 
-[![Build Status](https://secure.travis-ci.org/silverstripe/activedirectory.png)](https://travis-ci.org/silverstripe/activedirectory)
+[![Build Status](https://secure.travis-ci.org/silverstripe/silverstripe-activedirectory.svg)](https://travis-ci.org/silverstripe/silverstripe-activedirectory)
 
 ## Introduction
 
