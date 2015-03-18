@@ -1,6 +1,6 @@
 # See https://github.com/silverstripe-labs/silverstripe-travis-support for setup details
 
-language: php 
+language: php
 
 php:
  - 5.4
@@ -26,6 +26,6 @@ before_script:
  - git config --global user.name "Travis test-runner"
 
 
-script: 
+script:
   - vendor/bin/phpunit activedirectory/tests/
 
