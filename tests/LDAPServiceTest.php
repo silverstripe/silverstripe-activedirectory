@@ -28,20 +28,19 @@ class LDAPServiceTest extends SapphireTest {
 
 	public function testGroups() {
 		$expected = array(
-			'CN=Group1,CN=Users,DC=playpen,DC=local',
-			'CN=Group2,CN=Users,DC=playpen,DC=local',
-			'CN=Group3,CN=Users,DC=playpen,DC=local',
-			'CN=Group4,CN=Users,DC=playpen,DC=local',
-			'CN=Group5,CN=Users,DC=playpen,DC=local',
-			'CN=Group6,CN=Others,DC=playpen,DC=local',
-			'CN=Group7,CN=Others,DC=playpen,DC=local',
-			'CN=Group8,CN=Others,DC=playpen,DC=local'
+			'CN=Group1,CN=Users,DC=playpen,DC=local' => array('dn' => 'CN=Group1,CN=Users,DC=playpen,DC=local'),
+			'CN=Group2,CN=Users,DC=playpen,DC=local' => array('dn' => 'CN=Group2,CN=Users,DC=playpen,DC=local'),
+			'CN=Group3,CN=Users,DC=playpen,DC=local' => array('dn' => 'CN=Group3,CN=Users,DC=playpen,DC=local'),
+			'CN=Group4,CN=Users,DC=playpen,DC=local' => array('dn' => 'CN=Group4,CN=Users,DC=playpen,DC=local'),
+			'CN=Group5,CN=Users,DC=playpen,DC=local' => array('dn' => 'CN=Group5,CN=Users,DC=playpen,DC=local'),
+			'CN=Group6,CN=Others,DC=playpen,DC=local' => array('dn' => 'CN=Group6,CN=Others,DC=playpen,DC=local'),
+			'CN=Group7,CN=Others,DC=playpen,DC=local' => array('dn' => 'CN=Group7,CN=Others,DC=playpen,DC=local'),
+			'CN=Group8,CN=Others,DC=playpen,DC=local' => array('dn' => 'CN=Group8,CN=Others,DC=playpen,DC=local')
 		);
 
 		$results = $this->service->getGroups();
 
-		$this->assertEquals($expected, array_keys($results));
-		$this->assertEquals($expected, array_values($results));
+		$this->assertEquals($expected, $results);
 	}
 
 	public function testUpdateMemberFromLDAP() {
