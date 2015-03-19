@@ -43,7 +43,7 @@ according to [AD FS 2.0 setup and configuration](docs/en/adfs_setup.md).
 
 The IdP settings and public certificate should be provided by who set this up in the AD FS 2.0 server.
 
- - entityId: provided by the IdP, but for AD FS it's typically "https://test.com/adfs/services/trusst"
+ - entityId: provided by the IdP, but for AD FS it's typically "https://test.com/adfs/services/trust"
  - x509cert: public key for the AD FS 
  - singleSignOnService: The endpoint for where to send the SAML login request.
  
