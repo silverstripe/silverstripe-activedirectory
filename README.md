@@ -45,6 +45,14 @@ version 1.
 There is a free upgrade from that can be downloaded from 
 [Microsofts Download Center](http://www.microsoft.com/en-us/download/details.aspx?id=10909).
 
+The installation should be straight forward, but here is an example:
+ [Installing Active Directory Federation Services (ADFS) 2.0](http://pipe2text.com/?page_id=285).
+ 
+If your exposing the SAML endpoint over https, you also need to make sure that that there is a SSL 
+certificate that matches the web endpoint.
+ 
+The client browser will use this endpoint for SSO purposes e.g: https://adfs-server.test.com/adfs/ls/
+
 ### 3. Configure AD FS 2.0
 
 You will have to ensure that AD FS 2.0 is setup correctly with certificates and proper domain names for the endpoints.

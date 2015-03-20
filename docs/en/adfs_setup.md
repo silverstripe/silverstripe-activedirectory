@@ -7,14 +7,6 @@ For that, a new relying party needs to be created. A relying party in AD FS 2.0 
 application (a Web site or a Web service) and contains all the security-related information, such as 
 encryption certificate, claims transformation rules and so on.
 
-First ensure that you have installed AD FS 2.0, an example on how to do that can be seen 
-at [Installing Active Directory Federation Services (ADFS) 2.0](http://pipe2text.com/?page_id=285).
-
-__Note__: A [free download to upgrade ADFS 1.0 to 2.0](http://www.microsoft.com/en-us/download/details.aspx?id=10909) is available from Microsoft.
-
-You will also ensure that there is a SSL certificate that matches the web endpoint that AD FS configured and
-installed.
-
 ## Configuration of the Identity Provide (IdP)
 
 ### Open the AD FS Console
