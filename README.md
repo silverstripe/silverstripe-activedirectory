@@ -12,39 +12,69 @@ It also allows you to import Active Directory users and groups to SilverStripe.
  * PHP 5.3.3+ with extensions: ldap, openssl, dom, and mcrypt
  * SilverStripe 3.1+
  * Active Directory and ADFS 2.0
+ 
+This has module has been tested on  
 
-## Installation
-
-In your existing SilverStripe project, install this module using composer:
-
-	composer require "silverstripe/activedirectory:*"
-
-## Configuration
+## Installation & Configuration
 
 The configuration and setup from beginning can look like this:
 
- 1. Install an Microsoft AD server
- 2. Install / Update AD FS to version 2.0 on the Microsoft server
- 3. Configure AD FS 2.0
- 3. Install SilverStripe active directory module
- 4. Setup SilverStripe site SAML configuration (for step 6)
- 5. Setup SilverStripe site LDAP configuration
- 6. Create SAML Relying Party in ADFS on the Microsoft server
- 7. Configure SilverStripe Authenticators
+  1. Install a Microsoft AD server
+  2. Install / Update AD FS to version 2.0 on the Microsoft server
+  3. Configure AD FS 2.0
+  4. Install SilverStripe active directory module
+  5. Setup SilverStripe site SAML configuration with SP info
+  6. Create SAML Relying Party in ADFS on the Microsoft server
+  7. Setup SilverStripe site SAML configuration with IdP info
+  8. Setup SilverStripe site LDAP configuration
+  9. Configure SilverStripe Authenticators
 
-### Configure AD FS 2.0
+### 1. Install a Microsoft AD server
+
+This module have only been tested using Microsoft AD on a _Windows Server 2008 R2_. 
+
+Providing instructions on how to install an AD server is out of scope for this module,
+but there are many resources to be found via google.
+
+### 2. Install / Update AD FS to version 2.0 on the Microsoft server
+
+To be able to use the SAML Single Sign On functionality you will have to ensure that
+you have installed AD FS 2.0 correctly. In some cases AD FS is installed, but only 
+version 1. 
+
+There is a free upgrade from that can be downloaded from 
+[Microsofts Download Center](http://www.microsoft.com/en-us/download/details.aspx?id=10909).
+
+### 3. Configure AD FS 2.0
+
+You will have to ensure that AD FS 2.0 is setup correctly with certificates and proper domain names for the endpoints.
+
+@todo fill out with more information if necessary
+
+### 4. Install SilverStripe active directory module
+
+	composer require "silverstripe/activedirectory:*"
+
+### 5. Setup SilverStripe site SAML configuration with SP info
+
+Note that you will not be able to setup the IdP configuration until step 6 has been done
 
 [AD FS 2.0 setup and configuration](docs/en/adfs_setup.md).
 
-### Setup SilverStripe site SAML configuration
+### 6. Create SAML Relying Party in ADFS on the Microsoft server
 
-[SAML Service Provider (SP) Setup](docs/en/saml_setup.md)
+[AD FS 2.0 setup and configuration](docs/en/adfs_setup.md).
 
-### Setup SilverStripe site LDAP configuration
+### 7. Setup SilverStripe site SAML configuration with IdP info
+ 
+With the information from step 6 you should be able to setup the IdP endpoint and 
+certificate.
+
+### 8. Setup SilverStripe site LDAP configuration
 
 [LDAP Setup](docs/en/ldap_setup.md)
 
-### Configure SilverStripe Authenticators
+### 9. Configure SilverStripe Authenticators
 
 To be able to use the SAML or the LDAP authenticator you will need to set them up in the
 `mysite/config.php`.
@@ -61,6 +91,8 @@ You can unregister the default authenticator by adding this line
 
 But you shouldn't do that before you have mapped an LDAP group to the SilverStripe `Administrator`
 Security Group, since no user would have access to the SilverStripe Security admin.
+
+
 
 ## Usage
 
