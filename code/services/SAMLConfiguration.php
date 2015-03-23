@@ -60,11 +60,13 @@ class SAMLConfiguration extends Object {
 			'url' => $idp['singleSignOnService'],
 			'binding' => OneLogin_Saml2_Constants::BINDING_HTTP_REDIRECT,
 		);
-		$conf['idp']['singleLogoutService'] = array(
-			'url' => $idp['singleLogoutService'],
-			'binding' => OneLogin_Saml2_Constants::BINDING_HTTP_REDIRECT,
-		);
-		// @todo(stig): tighten this up to be more secure
+		if(isset($idp['singleLogoutService'])) {
+			$conf['idp']['singleLogoutService'] = array(
+				'url' => $idp['singleLogoutService'],
+				'binding' => OneLogin_Saml2_Constants::BINDING_HTTP_REDIRECT,
+			);
+		}
+
 		$conf['idp']['x509cert'] = file_get_contents(BASE_PATH.'/'.$idp['x509cert']);
 
 		// SECURITY SECTION
