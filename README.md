@@ -11,51 +11,43 @@ It also allows you to import Active Directory users and groups to SilverStripe.
 
  * PHP 5.3.3+ with extensions: ldap, openssl, dom, and mcrypt
  * SilverStripe 3.1+
- * Active Directory and ADFS 2.0
+ * Active Directory and ADFS 2.0 (Active Directory Federation Services)
  
-This has module has been tested on  
-
 ## Installation & Configuration
 
 The configuration and setup from beginning can look like this:
 
-  1. Install a Microsoft AD server
-  2. Install / Update AD FS to version 2.0 on the Microsoft server
-  3. Configure AD FS 2.0
-  4. Install SilverStripe active directory module
-  5. Setup SilverStripe site SAML configuration with SP info
-  6. Create SAML Relying Party in ADFS on the Microsoft server
-  7. Setup SilverStripe site SAML configuration with IdP info
-  8. Setup SilverStripe site LDAP configuration
-  9. Configure SilverStripe Authenticators
+ 1. Install a Microsoft AD server
+ 2. Install / Update AD FS to version 2.0 on the Microsoft server
+ 3. Configure AD FS 2.0
+ 4. Install SilverStripe active directory module
+ 5. Setup SilverStripe site SAML configuration with SP info
+ 6. Create SAML Relying Party in ADFS on the Microsoft server
+ 7. Setup SilverStripe site SAML configuration with IdP info
+ 8. Setup SilverStripe site LDAP configuration
+ 9. Configure SilverStripe Authenticators
 
 ### 1. Install a Microsoft AD server
 
-This module have only been tested using Microsoft AD on a _Windows Server 2008 R2_. 
+This module has only been tested using Active Directory on Windows Server 2008 R2.
 
 Providing instructions on how to install an AD server is out of scope for this module,
-but there are many resources to be found via google.
+but there are many resources to be found via Google.
 
 ### 2. Install / Update AD FS to version 2.0 on the Microsoft server
 
-To be able to use the SAML Single Sign On functionality you will have to ensure that
-you have installed AD FS 2.0 correctly. In some cases AD FS is installed, but only 
-version 1. 
+To be able to use the SAML Single Sign On functionality you need to have ADFS 2.0.
+In some cases ADFS 1.0 is installed, but you can upgrade for free with [an update from Microsoft](http://www.microsoft.com/en-us/download/details.aspx?id=10909).
 
-There is a free upgrade from that can be downloaded from 
-[Microsofts Download Center](http://www.microsoft.com/en-us/download/details.aspx?id=10909).
+[Installing Active Directory Federation Services (ADFS) 2.0](http://pipe2text.com/?page_id=285) information is available.
 
-The installation should be straight forward, but here is an example:
- [Installing Active Directory Federation Services (ADFS) 2.0](http://pipe2text.com/?page_id=285).
- 
-If your exposing the SAML endpoint over https, you also need to make sure that that there is a SSL 
-certificate that matches the web endpoint.
- 
+If you're exposing the SAML endpoint over HTTPS, you also need to make sure that that there is a SSL certificate that matches the web endpoint.
+
 The client browser will use this endpoint for SSO purposes e.g: https://adfs-server.test.com/adfs/ls/
 
 ### 3. Configure AD FS 2.0
 
-You will have to ensure that AD FS 2.0 is setup correctly with certificates and proper domain names for the endpoints.
+You need to ensure that ADFS 2.0 is setup correctly with certificates and proper domain names for the endpoints.
 
 @todo fill out with more information if necessary
 
@@ -75,8 +67,7 @@ Note that you will not be able to setup the IdP configuration until step 6 has b
 
 ### 7. Setup SilverStripe site SAML configuration with IdP info
  
-With the information from step 6 you should be able to setup the IdP endpoint and 
-certificate.
+With the information from step 6 you should be able to setup the IdP endpoint and certificate.
 
 ### 8. Setup SilverStripe site LDAP configuration
 
@@ -99,8 +90,6 @@ You can unregister the default authenticator by adding this line
 
 But you shouldn't do that before you have mapped an LDAP group to the SilverStripe `Administrator`
 Security Group, since no user would have access to the SilverStripe Security admin.
-
-
 
 ## Usage
 
