@@ -29,15 +29,35 @@ class LDAPDebugController extends Controller {
 		return $list;
 	}
 
-	public function Groups() {
-		$groups = $this->ldapService->getGroups();
+	public function SearchLocations() {
+		$locations = Config::inst()->get('LDAPService', 'search_locations');
 		$list = new ArrayList();
-		foreach($groups as $dn) {
+		if($locations) {
+			foreach($locations as $location) {
+				$list->push(new ArrayData(array(
+					'Value' => $location
+				)));
+			}
+		} else {
+			$list->push($this->Options()->find('Name', 'baseDn'));
+		}
+
+		return $list;
+	}
+
+	public function Groups() {
+		$groups = $this->ldapService->getGroups(false);
+		$list = new ArrayList();
+		foreach($groups as $record) {
 			$list->push(new ArrayData(array(
-				'DN' => $dn
+				'DN' => $record['dn']
 			)));
 		}
 		return $list;
+	}
+
+	public function Users() {
+		return count($this->ldapService->getUsers());
 	}
 
 }
