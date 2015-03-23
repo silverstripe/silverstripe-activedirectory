@@ -24,8 +24,8 @@ you have specified above:
 	    - 'CN=Users,DC=mydomain,DC=local'
 	    - 'CN=Others,DC=mydomain,DC=local'
 
-Note that these search locations should only be containers or organisational units within your Active Directory.
-Specifying groups for search locations currently does not work.
+Note that these search locations should only be tree nodes (e.g. containers, organisational units, domains) within your Active Directory.
+Specifying groups will not work. [More information](http://stackoverflow.com/questions/9945518/can-ldap-matching-rule-in-chain-return-subtree-search-results-with-attributes) is available on the distinction between a node and a group.
 
 TIP: On Windows, there is a utility called `ldp.exe` which is useful for exploring your directory to find which DN to use.
 
