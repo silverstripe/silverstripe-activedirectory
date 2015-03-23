@@ -38,7 +38,8 @@ a page listing the connection options used, as well as all AD groups that can be
 ## Mapping AD attributes to Member fields
 
 `Member.ldap_field_mappings` defines the AD attributes that should be mapped to `Member` fields.
-By default, it will map the AD first name, surname and email to the Member record fields.
+By default, it will map the AD first name, surname and email to the built-in FirstName, Surname,
+and Email Member fields.
 
 You can map AD attributes to custom fields by specifying configuration in your `mysite/_config/ldap.yml`:
 
@@ -47,7 +48,10 @@ You can map AD attributes to custom fields by specifying configuration in your `
 	    'someadattribute': 'MyMemberField'
 	    'anotherattribute': 'AnotherMemberField'
 
-NOTE: Attributes in the configuration should be in lowercase!
+A couple of things to note:
+
+ * The field must be created on your `Member` extensions first
+ * The AD attributes names must be in lowercase
 
 There is a special case for the `thumbnailphoto` attribute which can contain a photo of a user in AD.
 This comes through from AD in binary format.

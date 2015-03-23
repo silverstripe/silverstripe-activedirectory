@@ -218,17 +218,18 @@ class LDAPService extends Object implements Flushable {
 	 * @param Member
 	 * @param array|null $data If passed, this is pre-existing AD attribute data to update the Member with.
 	 *			If not given, the data will be looked up by the user's GUID.
-	 * @throws Exception
 	 */
 	public function updateMemberFromLDAP($member, $data = null) {
 		if (!$member->GUID) {
-			throw new Exception(sprintf('Cannot update Member ID %s, GUID not set', $member->ID));
+			SS_Log::log(sprintf('Cannot update Member ID %s, GUID not set', $member->ID), SS_Log::WARN);
+			return false;
 		}
 
 		if(!$data) {
 			$data = $this->getUserByGUID($member->GUID);
 			if(!$data) {
-				throw new Exception(sprintf('Could not retrieve data for user. GUID: %s', $member->GUID));
+				SS_Log::log(sprintf('Could not retrieve data for user. GUID: %s', $member->GUID), SS_Log::WARN);
+				return false;
 			}
 		}
 
@@ -238,17 +239,22 @@ class LDAPService extends Object implements Flushable {
 
 		foreach($member->config()->ldap_field_mappings as $attribute => $field) {
 			if(!$member->hasField($field)) {
-				throw new Exception(sprintf(
-					'Member field %s configured in Member.ldap_field_mappings, but there is no such field',
-					$field
-				));
+				SS_Log::log(sprintf(
+					'Member field %s configured in Member.ldap_field_mappings, but there is no such field (GUID: %s, Member ID: %s)',
+					$field,
+					$data['objectguid'],
+					$member->ID
+				), SS_Log::WARN);
+
+				continue;
 			}
 
 			if(!isset($data[$attribute])) {
 				SS_Log::log(sprintf(
-					'Attribute %s configured in Member.ldap_field_mappings, but not available in AD data (GUID: %s)',
+					'Attribute %s configured in Member.ldap_field_mappings, but no available attribute in AD data (GUID: %s, Member ID: %s)',
 					$attribute,
-					$data['objectguid']
+					$data['objectguid'],
+					$member->ID
 				), SS_Log::WARN);
 
 				continue;
@@ -257,10 +263,12 @@ class LDAPService extends Object implements Flushable {
 			if($attribute == 'thumbnailphoto') {
 				$imageClass = $member->getRelationClass($field);
 				if(!$imageClass instanceof Image) {
-					throw new Exception(sprintf(
+					SS_Log::log(sprintf(
 						'Member field %s configured for thumbnailphoto AD attribute, but it isn\'t a valid relation to an Image class',
 						$field
-					));
+					), SS_Log::WARN);
+
+					continue;
 				}
 
 				$filename = sprintf('thumbnailphoto-%s.jpg', $data['samaccountname']);
