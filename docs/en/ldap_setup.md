@@ -41,22 +41,23 @@ a page listing the connection options used, as well as all AD groups that can be
 By default, it will map the AD first name, surname and email to the built-in FirstName, Surname,
 and Email Member fields.
 
-You can map AD attributes to custom fields by specifying configuration in your `mysite/_config/ldap.yml`:
+You can map AD attributes to custom fields by specifying configuration in your `mysite/_config/ldap.yml`. The three
+different AD fields types that can be mapped are: textual, array and thumbnail photo.
 
 	Member:
 	  ldap_field_mappings:
-	    'someadattribute': 'MyMemberField'
-	    'anotherattribute': 'AnotherMemberField'
+	    'description': 'Description'
+	    'othertelephone': 'OtherTelephone'
+	    'thumbnailphoto': 'Photo'
 
 A couple of things to note:
 
- * The field must be created on your `Member` extensions first
  * The AD attributes names must be in lowercase
+ * You must provide a receiver on the `Member` on your own (a field, or a setter - see example below).
 
-There is a special case for the `thumbnailphoto` attribute which can contain a photo of a user in AD.
-This comes through from AD in binary format.
-If you have a `has_one` relation to an `Image` on the Member, you can map that field to this
-attribute, and it will put the file into place and assign the image to that field.
+There is a special case for the `thumbnailphoto` attribute which can contain a photo of a user in AD. This comes
+through from AD in binary format. If you have a `has_one` relation to an `Image` on the Member, you can map that field
+to this attribute, and it will put the file into place and assign the image to that field.
 
 By default, thumbnails are saved into `assets/Uploads`, but you can specify the location
 (relative to /assets) by setting the following configuration:
@@ -65,3 +66,34 @@ By default, thumbnails are saved into `assets/Uploads`, but you can specify the 
 	  ldap_thumbnail_path: 'some-path'
 
 The image files will be saved in this format: `thumbnailphoto-{sAMAccountName}.jpg`.
+
+### Example
+
+Here is an extension that will handle different types of field mappings defined in the `mysite/_config/ldap.yml`
+mentioned above. You will still need to apply that extension to `Member` to get it to work.
+
+```php
+<?php
+class MyMemberExtension extends DataExtension {
+
+	private static $db = array(
+		// 'description' is a regular textual field and is written automatically.
+		'Description' => 'Varchar(50)',
+		...
+	);
+
+	private static $has_one = array(
+		// 'thumbnailphoto' writes to has_one Image automatically.
+		'Photo' => 'Image'
+	);
+
+	/**
+	 * 'othertelephone' is an array, needs manual processing.
+	 */
+	public function setOtherTelephone($array) {
+		$serialised = implode(',', $array));
+		...
+	}
+
+}
+```
