@@ -14,6 +14,7 @@ Example configuration for `mysite/_config/ldap.yml`:
 	    'networkTimeout': 10
 
 The `baseDn` option defines the initial scope of the directory where the connector can perform queries.
+This should be set to the root base DN, e.g. DC=mydomain,DC=local
 
 You can then set specific locations to search your directory. Note that these locations must be within the `baseDn`
 you have specified above:
@@ -23,8 +24,8 @@ you have specified above:
 	    - 'CN=Users,DC=mydomain,DC=local'
 	    - 'CN=Others,DC=mydomain,DC=local'
 
-If you don't set `LDAPService.search_locations` configuration, it defaults to searching within the `baseDn` provided in `LDAPGateway.options`.
-Note that you should only pick search locations that reside within the `baseDn` set in `LDAPGateway.options`, otherwise things will not work correctly.
+Note that these search locations should only be containers or organisational units within your Active Directory.
+Specifying groups for search locations currently does not work.
 
 TIP: On Windows, there is a utility called `ldp.exe` which is useful for exploring your directory to find which DN to use.
 
@@ -75,18 +76,15 @@ mentioned above. You will still need to apply that extension to `Member` to get 
 ```php
 <?php
 class MyMemberExtension extends DataExtension {
-
 	private static $db = array(
 		// 'description' is a regular textual field and is written automatically.
 		'Description' => 'Varchar(50)',
 		...
 	);
-
 	private static $has_one = array(
 		// 'thumbnailphoto' writes to has_one Image automatically.
 		'Photo' => 'Image'
 	);
-
 	/**
 	 * 'othertelephone' is an array, needs manual processing.
 	 */
@@ -94,6 +92,5 @@ class MyMemberExtension extends DataExtension {
 		$serialised = implode(',', $array));
 		...
 	}
-
 }
 ```

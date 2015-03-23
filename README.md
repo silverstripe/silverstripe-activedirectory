@@ -82,7 +82,7 @@ You can choose which authenticators you would like to display on the login form.
 
 	// Show the SAML Login button on login form
 	Authenticator::register_authenticator('SAMLAuthenticator');
-	// Show the LDAP Login form  
+	// Show the LDAP Login form
 	Authenticator::register_authenticator('LDAPAuthenticator');
 
 You can unregister the default authenticator by adding this line
