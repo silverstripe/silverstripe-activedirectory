@@ -238,17 +238,6 @@ class LDAPService extends Object implements Flushable {
 		$member->IsImportedFromLDAP = true;
 
 		foreach($member->config()->ldap_field_mappings as $attribute => $field) {
-			if(!$member->hasField($field)) {
-				SS_Log::log(sprintf(
-					'Member field %s configured in Member.ldap_field_mappings, but there is no such field (GUID: %s, Member ID: %s)',
-					$field,
-					$data['objectguid'],
-					$member->ID
-				), SS_Log::WARN);
-
-				continue;
-			}
-
 			if(!isset($data[$attribute])) {
 				SS_Log::log(sprintf(
 					'Attribute %s configured in Member.ldap_field_mappings, but no available attribute in AD data (GUID: %s, Member ID: %s)',
@@ -262,7 +251,7 @@ class LDAPService extends Object implements Flushable {
 
 			if($attribute == 'thumbnailphoto') {
 				$imageClass = $member->getRelationClass($field);
-				if(!$imageClass instanceof Image) {
+				if($imageClass!=='Image' && !is_subclass_of($imageClass, 'Image')) {
 					SS_Log::log(sprintf(
 						'Member field %s configured for thumbnailphoto AD attribute, but it isn\'t a valid relation to an Image class',
 						$field
@@ -277,18 +266,19 @@ class LDAPService extends Object implements Flushable {
 				if(!file_exists($absPath)) {
 					Filesystem::makeFolder($absPath);
 				}
-				// The image data is provided in raw binary.
-				file_put_contents($absPath . '/' . $filename, $data[$attribute]);
-				$record = new $imageClass();
-				$record->Name = $filename;
-				$record->Filename = $path . '/' . $filename;
-				$record->write();
 
 				// remove existing record if it exists
 				$existingObj = $member->getComponent($field);
 				if($existingObj && $existingObj->exists()) {
 					$existingObj->delete();
 				}
+
+				// The image data is provided in raw binary.
+				file_put_contents($absPath . '/' . $filename, $data[$attribute]);
+				$record = new $imageClass();
+				$record->Name = $filename;
+				$record->Filename = $path . '/' . $filename;
+				$record->write();
 
 				$relationField = $field . 'ID';
 				$member->{$relationField} = $record->ID;
