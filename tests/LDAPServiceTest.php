@@ -18,6 +18,11 @@ class LDAPServiceTest extends SapphireTest {
 			'CN=Users,DC=playpen,DC=local',
 			'CN=Others,DC=playpen,DC=local'
 		));
+		Config::inst()->update('Member', 'ldap_field_mappings', array(
+			'givenname' => 'FirstName',
+			'sn' => 'Surname',
+			'mail' => 'Email'
+		));
 	}
 
 	public function tearDown() {
@@ -44,22 +49,48 @@ class LDAPServiceTest extends SapphireTest {
 	}
 
 	public function testUpdateMemberFromLDAP() {
-		Config::inst()->update('Member', 'ldap_field_mappings', array(
-			'givenname' => 'FirstName',
-			'sn' => 'Surname',
-			'mail' => 'Email'
-		));
-
 		$member = new Member();
 		$member->GUID = '123';
 
-		$this->service->updateMemberFromLDAP($member);
+		$result = $this->service->updateMemberFromLDAP($member);
+		$this->assertTrue($result, 'Sync was successful');
 
 		$this->assertTrue($member->ID > 0, 'updateMemberFromLDAP writes the member');
 		$this->assertEquals('123', $member->GUID, 'GUID remains the same');
 		$this->assertEquals('Joe', $member->FirstName, 'FirstName updated from LDAP');
 		$this->assertEquals('Bloggs', $member->Surname, 'Surname updated from LDAP');
 		$this->assertEquals('joe@bloggs.com', $member->Email, 'Email updated from LDAP');
+
+		$member->delete();
+	}
+
+	public function testUpdateMemberFromLDAPSkippedAlreadyImported() {
+		$now = SS_Datetime::now();
+
+		$member = new Member();
+		$member->GUID = '123';
+		$member->LastEditedLDAP = $now;
+		$member->write();
+
+		LDAPFakeGateway::$data['users']['123']['whenchanged'] = $now;
+
+		$result = $this->service->updateMemberFromLDAP($member);
+		$this->assertFalse($result, 'Sync was not run');
+
+		LDAPFakeGateway::$data['users']['123']['whenchanged'] = date('Y-m-d H:i:s', strtotime('+1 month'));
+
+		$result = $this->service->updateMemberFromLDAP($member);
+		$this->assertTrue($result, 'Sync was successful');
+
+		$member->LastEditedLDAP = '2014-01-01 00:00:00';
+		$member->write();
+
+		LDAPFakeGateway::$data['users']['123']['whenchanged'] = $now;
+
+		$result = $this->service->updateMemberFromLDAP($member);
+		$this->assertTrue($result, 'Sync was successful');
+
+		$member->delete();
 	}
 
 }
