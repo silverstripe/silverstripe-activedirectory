@@ -16,6 +16,14 @@ class SAMLMemberExtension extends DataExtension {
 	);
 
 	/**
+	 * @param FieldList $fields
+	 */
+	public function updateCMSFields(FieldList $fields) {
+		$fields->replaceField('GUID', new ReadonlyField('GUID'));
+		$fields->removeFieldFromTab("Root", "SAMLSessionIndex");
+	}
+
+	/**
 	 * Clear out SAML specific data
 	 *
 	 * @todo(stig): try to logout the user from the IdP if possible
