@@ -91,4 +91,19 @@ class LDAPUtil {
 		return $result;
 	}
 
+	/**
+	 * Convert a date in GeneralizedTime format (e.g. 20150323021359.0Z)
+	 * into Y-m-d H:i:s.
+	 *
+	 * We assume this will always be in UTC format and will never supply
+	 * tenths of a second.
+	 *
+	 * @param string $value
+	 * @return string
+	 */
+	public static function convert_date_to_ymd($value) {
+		$date = DateTime::createFromFormat('YmdHis.0Z', $value);
+		return date('Y-m-d H:i:s', $date->getTimestamp());
+	}
+
 }

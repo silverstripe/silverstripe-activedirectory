@@ -17,7 +17,7 @@ class LDAPMemberSyncTask extends BuildTask {
 		// this is useful to avoid holding onto too much data in memory
 		// especially in the case where getUser() would return a lot of users
 		$users = $this->ldapService->getUsers(array_merge(
-			array('objectguid', 'samaccountname', 'useraccountcontrol', 'memberof'),
+			array('objectguid', 'whenchanged', 'samaccountname', 'useraccountcontrol', 'memberof'),
 			array_keys(Config::inst()->get('Member', 'ldap_field_mappings'))
 		));
 
@@ -35,15 +35,7 @@ class LDAPMemberSyncTask extends BuildTask {
 				$member->write();
 
 				$this->log(sprintf(
-					'Creating new Member (ID: %s, GUID: %s, sAMAccountName: %s)',
-					$member->ID,
-					$data['objectguid'],
-					$data['samaccountname']
-				));
-			} else {
-				$this->log(sprintf(
-					'Updating existing Member "%s" (ID: %s, GUID: %s, sAMAccountName: %s)',
-					$member->getName(),
+					'[+] Creating new Member (ID: %s, GUID: %s, sAMAccountName: %s)',
 					$member->ID,
 					$data['objectguid'],
 					$data['samaccountname']
@@ -53,7 +45,24 @@ class LDAPMemberSyncTask extends BuildTask {
 			// sync attributes from LDAP to the Member record
 			// this is also responsible for putting the user into mapped groups
 			try {
-				$this->ldapService->updateMemberFromLDAP($member, $data);
+				$result = $this->ldapService->updateMemberFromLDAP($member, $data);
+				if($result) {
+					$this->log(sprintf(
+						'- Synced Member "%s" (ID: %s, GUID: %s, sAMAccountName: %s)',
+						$member->getName(),
+						$member->ID,
+						$data['objectguid'],
+						$data['samaccountname']
+					));
+				} else {
+					$this->log(sprintf(
+						'- Skipped Member "%s", as already up to date (GUID: %s, sAMAccountName: %s)',
+						$member->getName(),
+						$member->ID,
+						$data['objectguid'],
+						$data['samaccountname']
+					));
+				}
 			} catch(Exception $e) {
 				$this->log($e->getMessage());
 			}
@@ -72,7 +81,7 @@ class LDAPMemberSyncTask extends BuildTask {
 				$member->delete();
 
 				$this->log(sprintf(
-					'Removing Member "%s" (GUID: %s) that no longer exists in LDAP.',
+					'[-] Removing Member "%s" (GUID: %s) that no longer exists in LDAP.',
 					$member->getName(),
 					$member->GUID
 				));
