@@ -113,11 +113,8 @@ class LDAPService extends Object implements Flushable {
 	}
 
 	/**
-	 * Return all nested AD groups underneath a specific DN. Note that these get cached in-memory
-	 * per-request for performance to avoid re-querying for the same results.
-	 *
-	 * Note the recursion is done by the AD server, and the groups are provided as a flat list
-	 * (even though they are really a nested structure).
+	 * Return all member groups (and members of those, recursively) underneath a specific group DN.
+	 * Note that these get cached in-memory per-request for performance to avoid re-querying for the same results.
 	 *
 	 * @param string $dn
 	 * @param array $attributes List of specific AD attributes to return. Empty array means return everything.
