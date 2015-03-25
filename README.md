@@ -59,11 +59,11 @@ You need to ensure that ADFS 2.0 is setup correctly with certificates and proper
 
 Note that you will not be able to setup the IdP configuration until step 6 has been done
 
-[AD FS 2.0 setup and configuration](docs/en/saml_setup.md).
+[SAML 2.0 setup and configuration](docs/en/saml_setup.md).
 
 ### 6. Create SAML Relying Party in ADFS on the Microsoft server
 
-[AD FS 2.0 setup and configuration](docs/en/adfs_setup.md).
+[ADFS 2.0 setup and configuration](docs/en/adfs_setup.md).
 
 ### 7. Setup SilverStripe site SAML configuration with IdP info
  
