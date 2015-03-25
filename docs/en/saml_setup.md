@@ -2,20 +2,25 @@
 
 ## SSL Certificates
 
-You need to have SSL certificates for signing SAML requests. These certificates should not be checked into
-the source code and should be placed outside of the web document root for security reasons.
+You need to have an SSL certificate and private key for signing SAML requests.
+These should not be checked into the source code and should be placed outside of the
+web document root for security reasons.
 
 One way to generate self signed test certificates is by using the `openssl` command
- 
- 	openssl req -x509 -nodes -newkey rsa:2048 -keyout private.pem -out public.crt -days 1826
 
-## Examply YAML configuration
+	openssl req -x509 -nodes -newkey rsa:2048 -keyout private.pem -out public.crt -days 1826
+
+You also need to have access to the token-signing certificate from AD FS.
+You can get that by parsing `https://mydomain.com/FederationMetadata/2007-06/FederationMetadata.xml`
+or by exporting the certificate manually using AD FS console on Windows.
+
+## Example YAML configuration
 
 Example configuration for `mysite/_config/saml.yml`
 
 	---
 	Name: mysamlsettings
-	After: 
+	After:
 	  - "#samlsettings"
 	---
 	SAMLConfiguration:
@@ -26,27 +31,26 @@ Example configuration for `mysite/_config/saml.yml`
 	    privateKey: "../certs/saml.pem"
 	    x509cert: "../certs/saml.crt"
 	  IdP:
-	    entityId: "https://win-202nm9ood2h.playpen.pl/adfs/services/trust"
+	    entityId: "https://mydomain.com/adfs/services/trust"
 	    x509cert: "mysite/certs/adfs_certificate.pem"
-	    singleSignOnService: "https://win-202nm9ood2h.playpen.pl/adfs/ls/"
-	    
-### Service Provider (SP) 
+	    singleSignOnService: "https://mydomain.com/adfs/ls/"
 
-SAML configuration can be quite complicated and this example relies on that the IdP have been setup 
-according to [AD FS 2.0 setup and configuration](docs/en/adfs_setup.md). 
+SAML configuration can be quite complicated and this example relies on that the IdP have been setup
+according to [AD FS 2.0 setup and configuration](docs/en/adfs_setup.md).
 
- - `entityId`: this should normally be the base URL with https of the domain for the SP.
- - `privateKey`: This is the private key used for signing SAML requests.
- - `x509cert`: This is the public key that the IdP is using for verifying a signed request.
+### Service Provider (SP)
+
+ - `entityId`: This should be the base URL with https for the SP
+ - `privateKey`: The private key used for signing SAML request
+ - `x509cert`: The public key that the IdP is using for verifying a signed request
 
 ### Identity Provider (IdP)
 
 The IdP settings and public certificate should be provided by who set this up in the AD FS 2.0 server.
 
- - entityId: provided by the IdP, but for AD FS it's typically "https://test.com/adfs/services/trust"
- - x509cert: public key for the AD FS 
- - singleSignOnService: The endpoint for where to send the SAML login request.
- 
+ - `entityId`: Provided by the IdP, but for AD FS it's typically "https://domain.com/adfs/services/trust"
+ - `x509cert`: The token-signing certificate from AD FS in PEM format (base 64 encoded)
+ - `singleSignOnService`: The endpoint on AD FS for where to send the SAML login request
  
 ### Verifying that it works
 
@@ -58,7 +62,7 @@ To enable some very light weight debugging from the 3rd party library set the `d
 
 	SAMLConfiguration:
 	  debug: false
-	  
+
 In general it can be tricky to debug what is failing during the setup phase. The SAML protocol error
 message as quite hard to decipher.
 
@@ -78,18 +82,16 @@ Example:
 
 	---
 	Name: samlconfig
-	After: 
-	  - "#samlsettings"	
+	After:
+	  - "#samlsettings"
 	---
 	Injector:
-      SAMLConfService: MySAMLConfiguration
+	  SAMLConfService: MySAMLConfiguration
 
 and the MySAMLConfiguration.php:
 
 	<?php
-	
 	class MySAMLConfiguration extends Object {
-	
 		public function asArray() {
 			return array(
 				// add settings here;
@@ -99,7 +101,7 @@ and the MySAMLConfiguration.php:
 
 See the [advanced_settings_example.php](https://github.com/onelogin/php-saml/blob/master/advanced_settings_example.php)
 for the advanced settings.
-	    
-## Resources 
+
+## Resources
 
  - [ADFS Deep-Dive: Onboarding Applications](http://blogs.technet.com/b/askpfeplat/archive/2015/03/02/adfs-deep-dive-onboarding-applications.aspx)
