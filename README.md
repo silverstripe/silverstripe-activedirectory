@@ -78,11 +78,10 @@ With the information from step 6 you should be able to setup the IdP endpoint an
 To be able to use the SAML or the LDAP authenticator you will need to set them up in the
 `mysite/config.php`.
 
-You can choose which authenticators you would like to display on the login form.
+You can pick and choose between the SAML, LDAP and the default authenticator.
 
-	// Show the SAML Login button on login form
+	Authenticator::set_default_authenticator('SAMLAuthenticator');
 	Authenticator::register_authenticator('SAMLAuthenticator');
-	// Show the LDAP Login form
 	Authenticator::register_authenticator('LDAPAuthenticator');
 
 You can unregister the default authenticator by adding this line
@@ -91,17 +90,6 @@ You can unregister the default authenticator by adding this line
 
 But you shouldn't do that before you have mapped an LDAP group to the SilverStripe `Administrator`
 Security Group, since no user would have access to the SilverStripe Security admin.
-
-#### Enabling the SAML Auto login
-
-If you register the SAMLAuthenticator as the default authenticator, it will automatically send users
-to the AD FS login server when they are required to login.
-
-	Authenticator::set_default_authenticator('SAMLAuthenticator');
-	
-To bypass this and show the login form with all the configured Authenticators, go to this URL
-
-	/Security/Login?showloginform=1
 
 ## Usage
 

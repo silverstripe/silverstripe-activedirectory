@@ -10,10 +10,6 @@ Member:
   extensions:
     - SAMLMemberExtension
 
-Security:
-  extensions:
-    - SAMLSecurityExtension
-
 Injector:
   SAMLConfService: SAMLConfiguration
 
