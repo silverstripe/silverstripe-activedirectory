@@ -34,29 +34,29 @@ Here you can add any notes, for example who would be the technical contact for t
 
 ### Choose Issuance Authorization Rules
 
-@todo
-
 ## Setup claim rules
 
-Claim rules decides what information is shared with the Service Provider. In this case the SP want to have 
+Claim rules decides what information is shared with the Service Provider. In this case the SP want to have
 a couple of properties from the Active Directory.
 
-@todo image / doc on where to find the claims rule interface
-
+Right click the relying party and choose "Edit Claim Rules".
 
 ![](img/add_claims_rule.png)
 
-Use the "Send Claims Using a Custom Rule" to setup the following rules.
-
 ![](img/send_claims_using_a_custom_rule.png)
 
-5.1: Send LDAP Attributes
+### Rule 1: Send LDAP Attributes
+
+Click "Add Rule" and select "Send Claims Using a Custom Rule" from the dropdown.
+Add the following rule:
 
 	c:[Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/windowsaccountname", Issuer == "AD AUTHORITY"] => issue(store = "Active Directory", types = ("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn"), query = ";mail,givenName,sn,objectGuid;{0}", param = c.Value);
 	
 ![](img/send_ldap_attributes.png)
 
-5.2: Send objectId as nameidentifier
+### Rule 2: Send objectId as nameidentifier
+
+Repeat the same "Add Rule" as done above and select "Send Claims Using a Custom Rule" from the dropdown to add this rule:
 
 	c:[Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn"] => issue(Type = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier", Issuer = c.Issuer, OriginalIssuer = c.OriginalIssuer, Value = c.Value, ValueType = c.ValueType, Properties["http://schemas.xmlsoap.org/ws/2005/05/identity/claimproperties/format"] = "urn:oasis:names:tc:SAML:2.0:nameid-format:transient");
 
