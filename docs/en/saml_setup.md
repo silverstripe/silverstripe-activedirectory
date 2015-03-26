@@ -63,7 +63,7 @@ according to [AD FS 2.0 setup and configuration](docs/en/adfs_setup.md).
 The IdP settings and public certificate should be provided by who set this up in the AD FS server.
 
  - `entityId`: Provided by the IdP, but for AD FS it's typically "https://domain.com/adfs/services/trust"
- - `x509cert`: The token-signing certificate from AD FS in PEM format (base 64 encoded)
+ - `x509cert`: The token-signing certificate from AD FS (base 64 encoded)
  - `singleSignOnService`: The endpoint on AD FS for where to send the SAML login request
  
 ### Verifying that it works
