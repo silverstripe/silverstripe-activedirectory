@@ -39,11 +39,10 @@ class SAMLController extends Controller {
 		$auth = Injector::inst()->get('SAMLHelper')->getSAMLAuth();
 		$auth->processResponse();
 
-		$errors = $auth->getErrors();
-		if (!empty($errors)) {
-			$errorMessages = implode(', ', $errors);
-			SS_Log::log($errorMessages, SS_Log::ERR);
-			Form::messageForForm("SAMLLoginForm_LoginForm", "Authentication error: '{$errorMessages}'", 'bad');
+		$error = $auth->getLastErrorReason();
+		if (!empty($error)) {
+			SS_Log::log($error, SS_Log::ERR);
+			Form::messageForForm("SAMLLoginForm_LoginForm", "Authentication error: '{$error}'", 'bad');
 			Session::save();
 			return $this->getRedirect();
 		}
@@ -84,9 +83,14 @@ class SAMLController extends Controller {
 
 		// Availability of these is controlled by the "claim rules" on the IdP side. Not all data
 		// can be provided this way, so we rely on LDAP to fill in the blanks / overwrite fields later.
-		$member->Email = $attributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'][0];
 		$member->FirstName = $attributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname'][0];
 		$member->Surname = $attributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname'][0];
+
+		// sometimes a user doesn't have an email address, so ensure that it exists first.
+		if(isset($attributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'])) {
+			$member->Email = $attributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'][0];
+		}
+
 		$member->SAMLSessionIndex = $auth->getSessionIndex();
 
 		// This will throw an exception if there are two distinct GUIDs with the same email address.

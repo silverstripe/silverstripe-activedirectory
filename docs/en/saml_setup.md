@@ -49,6 +49,9 @@ Example configuration for `mysite/_config/saml.yml`
 	    x509cert: "mysite/certs/adfs_certificate.pem"
 	    singleSignOnService: "https://mydomain.com/adfs/ls/"
 
+Important: `entityId` must match *exactly* to the correct URL, including protocol, otherwise you will
+get errors like "Invalid issuer". In AD FS, you can find that by checking the "Federation Service Properties".
+
 SAML configuration can be quite complicated and this example relies on that the IdP have been setup
 according to [AD FS 2.0 setup and configuration](docs/en/adfs_setup.md).
 
