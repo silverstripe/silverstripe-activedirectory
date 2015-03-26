@@ -2,16 +2,12 @@
 
 ## Install AD FS 2.0
 
-This module is using AD FS 2.0 as an identity provider that issues SAML tokens for the identities it manages. 
-For that, a new relying party needs to be created. A relying party in AD FS 2.0 is a representation of an 
-application (a Web site or a Web service) and contains all the security-related information, such as 
+This module is using AD FS 2.0 as an identity provider that issues SAML tokens for the identities it manages.
+For that, a new relying party needs to be created. A relying party in AD FS 2.0 is a representation of an
+application (a Web site or a Web service) and contains all the security-related information, such as
 encryption certificate, claims transformation rules and so on.
 
 ## Configuration of the Identity Provider (IdP)
-
-### Open the AD FS Console
-
-@todo add image where to find the console
 
 ### Create a new relying party trust
 
@@ -21,7 +17,7 @@ and click "Start"
 
 ### Select Data Source
 
-"Federation metadata address (host name or URL):" should be the SilverStripe SAML metadata endpoint, e.g: 
+"Federation metadata address (host name or URL):" should be the SilverStripe SAML metadata endpoint, e.g:
 "https://77dd4125.ngrok.com/saml/metadata".
 
 ![](img/add_metadata_from_endpoint.png)
@@ -65,7 +61,7 @@ Repeat the same "Add Rule" as done above and select "Send Claims Using a Custom 
 You will also have to change the secure hash algorithm from SHA-256 to SHA-1
 
 1. Right click the relying party and choose properties.
-2. Choose the `Advanced` tab and select the `SHA-1` option in the dropdown and press OK.
+2. Choose the "Advanced" tab and select the "SHA-1" option in the dropdown and press OK.
 
 ![](img/1_set_encryption_to_sha1.png)
 

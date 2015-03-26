@@ -60,7 +60,7 @@ according to [AD FS 2.0 setup and configuration](docs/en/adfs_setup.md).
 
 ### Identity Provider (IdP)
 
-The IdP settings and public certificate should be provided by who set this up in the AD FS 2.0 server.
+The IdP settings and public certificate should be provided by who set this up in the AD FS server.
 
  - `entityId`: Provided by the IdP, but for AD FS it's typically "https://domain.com/adfs/services/trust"
  - `x509cert`: The token-signing certificate from AD FS in PEM format (base 64 encoded)
