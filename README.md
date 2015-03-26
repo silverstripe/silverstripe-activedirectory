@@ -19,13 +19,11 @@ The configuration and setup from beginning can look like this:
 
  1. Install a Microsoft AD server
  2. Install / Update AD FS to version 2.0 on the Microsoft server
- 3. Configure AD FS 2.0
- 4. Install SilverStripe active directory module
- 5. Setup SilverStripe site SAML configuration with SP info
- 6. Create SAML Relying Party in ADFS on the Microsoft server
- 7. Setup SilverStripe site SAML configuration with IdP info
- 8. Setup SilverStripe site LDAP configuration
- 9. Configure SilverStripe Authenticators
+ 3. Install SilverStripe active directory module
+ 4. Setup SilverStripe site SAML configuration with SP info
+ 5. Create SAML Relying Party in AD FS
+ 6. Setup SilverStripe site LDAP configuration
+ 7. Configure SilverStripe Authenticators
 
 ### 1. Install a Microsoft AD server
 
@@ -45,35 +43,25 @@ If you're exposing the SAML endpoint over HTTPS, you also need to make sure that
 
 The client browser will use this endpoint for SSO purposes e.g: https://adfs-server.test.com/adfs/ls/
 
-### 3. Configure AD FS 2.0
-
-You need to ensure that ADFS 2.0 is setup correctly with certificates and proper domain names for the endpoints.
-
-@todo fill out with more information if necessary
-
-### 4. Install SilverStripe active directory module
+### 3. Install SilverStripe active directory module
 
 	composer require "silverstripe/activedirectory:*"
 
-### 5. Setup SilverStripe site SAML configuration with SP info
+### 4. Setup SilverStripe site SAML configuration with SP info
 
-Note that you will not be able to setup the IdP configuration until step 6 has been done
+Note that you will not be able to setup the IdP configuration until step 5 has been done.
 
 [SAML 2.0 setup and configuration](docs/en/saml_setup.md).
 
-### 6. Create SAML Relying Party in ADFS on the Microsoft server
+### 5. Create SAML Relying Party in AD FS
 
 [ADFS 2.0 setup and configuration](docs/en/adfs_setup.md).
 
-### 7. Setup SilverStripe site SAML configuration with IdP info
- 
-With the information from step 6 you should be able to setup the IdP endpoint and certificate.
-
-### 8. Setup SilverStripe site LDAP configuration
+### 6. Setup SilverStripe site LDAP configuration
 
 [LDAP Setup](docs/en/ldap_setup.md)
 
-### 9. Configure SilverStripe Authenticators
+### 7. Configure SilverStripe Authenticators
 
 To be able to use the SAML or the LDAP authenticator you will need to set them up in the
 `mysite/config.php`.
@@ -91,9 +79,9 @@ You can unregister the default authenticator by adding this line
 But you shouldn't do that before you have mapped an LDAP group to the SilverStripe `Administrator`
 Security Group, since no user would have access to the SilverStripe Security admin.
 
-## Usage
+## Using this module
 
-How to use the module to import users and map them to SilverStripe groups, etc.
+Documentation on how to use the module to import users and map them to SilverStripe groups, etc.
 
 [Usage docs](docs/en/usage.md)
 
