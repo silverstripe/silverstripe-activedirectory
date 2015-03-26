@@ -84,6 +84,30 @@ class LDAPService extends Object implements Flushable {
 	}
 
 	/**
+	 * Return all nodes (organizational units, containers, and domains) within the current base DN.
+	 *
+	 * @param boolean $cached Cache the results from AD, so that subsequent calls are faster. Enabled by default.
+	 * @param array $attributes List of specific AD attributes to return. Empty array means return everything.
+	 * @return array
+	 */
+	public function getNodes($cached = true, $attributes = array()) {
+		$cache = self::get_cache();
+		$results = $cache->load('nodes' . md5(implode('', $attributes)));
+
+		if(!$results || !$cached) {
+			$results = array();
+			$records = $this->gateway->getNodes(null, Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes);
+			foreach($records as $record) {
+				$results[$record['dn']] = $record;
+			}
+
+			$cache->save($results);
+		}
+
+		return $results;
+	}
+
+	/**
 	 * Return all AD groups in configured search locations, including all nested groups.
 	 * Uses search_locations if defined, otherwise falls back to NULL, which tells LDAPGateway
 	 * to use the default baseDn defined in the connection.

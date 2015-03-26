@@ -72,6 +72,19 @@ class LDAPGateway extends Object {
 	}
 
 	/**
+	 * Query for LDAP nodes (organizational units, containers, and domains).
+	 *
+	 * @param null|string $baseDn The DN to search from. Default is the baseDn option in the connection if not given
+	 * @param int $scope The scope to perform the search. Zend_Ldap::SEARCH_SCOPE_ONE, Zend_LDAP::SEARCH_SCOPE_BASE. Default is Zend_Ldap::SEARCH_SCOPE_SUB
+	 * @param array $attributes Restrict to specific AD attributes. An empty array will return all attributes
+	 * @param string $sort Sort results by this attribute if given
+	 * @return array
+	 */
+	public function getNodes($baseDn = null, $scope = Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes = array(), $sort = '') {
+		return $this->search('(|(objectClass=organizationalUnit)(objectClass=container)(objectClass=domain))', $baseDn, $scope, $attributes, $sort);
+	}
+
+	/**
 	 * Query for LDAP groups.
 	 *
 	 * @param null|string $baseDn The DN to search from. Default is the baseDn option in the connection if not given

@@ -35,6 +35,9 @@ class LDAPFakeGateway extends LDAPGateway {
 	public function authenticate($username, $password) {
 	}
 
+	public function getNodes($baseDn = null, $scope = Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes = array(), $sort = '') {
+	}
+
 	public function getGroups($baseDn = null, $scope = Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes = array(), $sort = '') {
 		if(isset($baseDn)) {
 			return self::$data['groups'][$baseDn];

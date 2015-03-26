@@ -45,6 +45,17 @@ class LDAPDebugController extends Controller {
 		return $list;
 	}
 
+	public function Nodes() {
+		$groups = $this->ldapService->getNodes(false);
+		$list = new ArrayList();
+		foreach($groups as $record) {
+			$list->push(new ArrayData(array(
+				'DN' => $record['dn']
+			)));
+		}
+		return $list;
+	}
+
 	public function Groups() {
 		$groups = $this->ldapService->getGroups(false);
 		$list = new ArrayList();
