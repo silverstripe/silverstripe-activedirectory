@@ -8,11 +8,25 @@ web document root for security reasons.
 
 One way to generate self signed test certificates is by using the `openssl` command
 
-	openssl req -x509 -nodes -newkey rsa:2048 -keyout private.pem -out public.crt -days 1826
+	openssl req -x509 -nodes -newkey rsa:2048 -keyout saml.pem -out saml.crt -days 1826
 
-You also need to have access to the token-signing certificate from AD FS.
-You can get that by parsing `https://mydomain.com/FederationMetadata/2007-06/FederationMetadata.xml`
+### Exporting the token-signing certificate from AD FS
+
+You need to get the token-signing certificate from AD FS and put that somewhere on the SP.
+
+You can get it by either parsing it out from the endpoint `https://mydomain.com/FederationMetadata/2007-06/FederationMetadata.xml`
 or by exporting the certificate manually using AD FS console on Windows.
+In this documentation we're going to manually extract the certificate.
+
+![](img/certificate_copy_to_file.png)
+
+In the AD FS console, go to Services > Certificates and right click the "Token-signing" certificate.
+Click the "Details" tab and click "Copy to file".
+
+![](img/certificate_base64.png)
+
+A wizard opens, click "Next" and then choose "Base-64 encoded X.509 (.CER)".
+Click "Next" and choose a place to export the certificate. Click "Next" to finish the process.
 
 ## Example YAML configuration
 
