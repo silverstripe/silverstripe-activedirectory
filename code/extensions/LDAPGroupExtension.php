@@ -34,6 +34,9 @@ class LDAPGroupExtension extends DataExtension {
 			$this->owner->LDAPGroupMappings()
 		);
 		$config = GridFieldConfig_RecordEditor::create();
+		$config->getComponentByType('GridFieldAddNewButton')
+			->setButtonName(_t('LDAPGroupExtension.ADDMAPPEDGROUP', 'Add LDAP group mapping'));
+
 		$field->setConfig($config);
 		$fields->addFieldToTab('Root.Members', $field);
 	}
