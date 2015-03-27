@@ -55,11 +55,11 @@ class SAMLController extends Controller {
 
 		$decodedNameId = base64_decode($auth->getNameId());
 		// check that the NameID is a binary string (which signals that it is a guid
-		if(ctype_print($decodedNameId)){
+		if(ctype_print($decodedNameId)) {
 			Form::messageForForm("SAMLLoginForm_LoginForm", "Name ID provided by IdP is not a binary GUID.", 'bad');
 			Session::save();
 			return $this->getRedirect();
-		};
+		}
 
 		// transform the NameId to guid
 		$guid = LDAPUtil::bin_to_str_guid($decodedNameId);
@@ -135,7 +135,7 @@ class SAMLController extends Controller {
 	 */
 	protected function getRedirect() {
 		// Absolute redirection URLs may cause spoofing
-		if(Session::get('BackURL') && Director::is_site_url(Session::get('BackURL')) ) {
+		if(Session::get('BackURL') && Director::is_site_url(Session::get('BackURL'))) {
 			return $this->redirect(Session::get('BackURL'));
 		}
 
@@ -145,7 +145,7 @@ class SAMLController extends Controller {
 		}
 
 		// If a default login dest has been set, redirect to that.
-		if (Security::config()->default_login_dest) {
+		if(Security::config()->default_login_dest) {
 			return $this->redirect(Director::absoluteBaseURL() . Security::config()->default_login_dest);
 		}
 
