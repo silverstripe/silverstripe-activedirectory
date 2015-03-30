@@ -9,7 +9,6 @@ class LDAPMemberExtension extends DataExtension {
 		'GUID' => 'Varchar(50)',
 		'IsImportedFromLDAP' => 'Boolean',
 		'IsExpired' => 'Boolean',
-		'LastEditedLDAP' => 'SS_Datetime', // This date/time comes from LDAP in UTC, not local time.
 		'LastSynced' => 'SS_Datetime'
 	);
 
@@ -45,7 +44,6 @@ class LDAPMemberExtension extends DataExtension {
 		$fields->replaceField('GUID', new ReadonlyField('GUID'));
 		$fields->replaceField('IsImportedFromLDAP', new ReadonlyField('IsImportedFromLDAP', 'Is user imported from LDAP/AD?'));
 		$fields->replaceField('IsExpired', new ReadonlyField('IsExpired', _t('Member.ISEXPIRED', 'Has user\'s LDAP/AD login expired?')));
-		$fields->replaceField('LastEditedLDAP', new ReadonlyField('LastEditedLDAP', _t('Member.LASTEDITEDLDAP', 'Date/time last edited in LDAP (UTC timezone)')));
 		$fields->replaceField('LastSynced', new ReadonlyField('LastSynced', _t('Member.LASTSYNCED', 'Last synced')));
 	}
 

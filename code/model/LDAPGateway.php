@@ -46,9 +46,6 @@ class LDAPGateway extends Object {
 				if($attribute == 'objectsid') {
 					$value = LDAPUtil::bin_to_str_sid($value);
 				}
-				if($attribute == 'whenchanged') {
-					$value = LDAPUtil::convert_date_to_ymd($value);
-				}
 
 				$record[$attribute] = $value;
 			}

@@ -5,7 +5,7 @@ class LDAPFakeGateway extends LDAPGateway {
 		// do nothing
 	}
 
-	public static $data = array(
+	private static $data = array(
 		'groups' => array(
 			'CN=Users,DC=playpen,DC=local' => array(
 				array('dn' => 'CN=Group1,CN=Users,DC=playpen,DC=local'),
@@ -26,8 +26,7 @@ class LDAPFakeGateway extends LDAPGateway {
 				'useraccountcontrol' => '1',
 				'givenname' => 'Joe',
 				'sn' => 'Bloggs',
-				'mail' => 'joe@bloggs.com',
-				'whenchanged' => '2015-02-01 01:00:00'
+				'mail' => 'joe@bloggs.com'
 			)
 		)
 	);

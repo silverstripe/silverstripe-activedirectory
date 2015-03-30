@@ -254,13 +254,7 @@ class LDAPService extends Object implements Flushable {
 			}
 		}
 
-		// if we already imported this user, and they haven't been modified since the last time, skip.
-		if(strtotime($data['whenchanged']) <= strtotime($member->LastEditedLDAP)) {
-			return false;
-		}
-
 		$member->IsExpired = ($data['useraccountcontrol'] & 2) == 2;
-		$member->LastEditedLDAP = $data['whenchanged'];
 		$member->LastSynced = SS_Datetime::now();
 		$member->IsImportedFromLDAP = true;
 
@@ -373,8 +367,6 @@ class LDAPService extends Object implements Flushable {
 		// This will throw an exception if there are two distinct GUIDs with the same email address.
 		// We are happy with a raw 500 here at this stage.
 		$member->write();
-
-		return true;
 	}
 
 }
