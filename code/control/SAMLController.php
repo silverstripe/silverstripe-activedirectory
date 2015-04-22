@@ -83,10 +83,12 @@ class SAMLController extends Controller {
 
 		// Availability of these is controlled by the "claim rules" on the IdP side. Not all data
 		// can be provided this way, so we rely on LDAP to fill in the blanks / overwrite fields later.
-		$member->FirstName = $attributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname'][0];
-		$member->Surname = $attributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname'][0];
-
-		// sometimes a user doesn't have an email address, so ensure that it exists first.
+		if(isset($attributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname'][0])) {
+			$member->FirstName = $attributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname'][0];
+		}
+		if(isset($attributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname'][0])) {
+			$member->Surname = $attributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname'][0];
+		}
 		if(isset($attributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'])) {
 			$member->Email = $attributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'][0];
 		}
