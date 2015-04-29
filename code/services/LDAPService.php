@@ -241,6 +241,11 @@ class LDAPService extends Object implements Flushable {
 	 *			If not given, the data will be looked up by the user's GUID.
 	 */
 	public function updateMemberFromLDAP($member, $data = null) {
+		// don't attempt to do this if there's no LDAP configured
+		if (!Config::inst()->get('LDAPGateway', 'options')) {
+			return false;
+		}
+
 		if (!$member->GUID) {
 			SS_Log::log(sprintf('Cannot update Member ID %s, GUID not set', $member->ID), SS_Log::WARN);
 			return false;
