@@ -78,12 +78,12 @@ The IdP settings and public certificate should be provided by who set this up in
 To enable some very light weight debugging from the 3rd party library set the `debug` to true
 
 	SAMLConfiguration:
-	  debug: false
+	  debug: true
 
 In general it can be tricky to debug what is failing during the setup phase. The SAML protocol error
 message as quite hard to decipher.
 
-In most cases it's configuration issues that can debugged by using the AD FS 2.0 Event log, see the 
+In most cases it's configuration issues that can debugged by using the AD FS 2.0 Event log, see the
 [Diagnostics in AD FS 2.0](http://blogs.msdn.com/b/card/archive/2010/01/21/diagnostics-in-ad-fs-2-0.aspx)
 for more information.
 
@@ -91,9 +91,9 @@ Also ensure that all protocols are matching. SAML is very sensitive to differenc
 
 ### Advanced configuration
 
-It is possible to customize all the settings provided by the 3rd party SAML code. 
+It is possible to customize all the settings provided by the 3rd party SAML code.
  
-This can be done by registering your own `SAMLConfiguration` object via mysite/_config/saml.yml:
+This can be done by registering your own `SAMLConfiguration` object via `mysite/_config/saml.yml`:
  
 Example:
 
