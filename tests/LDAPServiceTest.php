@@ -14,6 +14,7 @@ class LDAPServiceTest extends SapphireTest {
 		$this->service = $service;
 
 		Config::inst()->nest();
+		Config::inst()->update('LDAPGateway', 'options', array('host' => '1.2.3.4'));
 		Config::inst()->update('LDAPService', 'search_locations', array(
 			'CN=Users,DC=playpen,DC=local',
 			'CN=Others,DC=playpen,DC=local'
