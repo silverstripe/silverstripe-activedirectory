@@ -28,6 +28,9 @@ You can initiate a sync by going into the CMS "Jobs" section and creating a new 
 using the "Create job of type" dropdown. Once the job shows up in the table after you create it, you can
 manually trigger the job by clicking the blue right arrow on the table row.
 
+If you don't see the "Create job of type" dropdown, please ensure you are using the latest
+version of the queuedjobs module.
+
 Note that these built-in Windows accounts will not be synced:
 
  * "computer" account types, e.g. domain controller accounts
