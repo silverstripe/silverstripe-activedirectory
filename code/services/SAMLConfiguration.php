@@ -96,7 +96,7 @@ class SAMLConfiguration extends Object {
 			// Set true or don't present thi parameter and you will get an AuthContext 'exact' 'urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport'
 			// Set an array with the possible auth context values: array ('urn:oasis:names:tc:SAML:2.0:ac:classes:Password', 'urn:oasis:names:tc:SAML:2.0:ac:classes:X509'),
 			'requestedAuthnContext' => array(
-				// 'urn:federation:authentication:windows',
+				'urn:federation:authentication:windows',
 				'urn:oasis:names:tc:SAML:2.0:ac:classes:Password',
 				'urn:oasis:names:tc:SAML:2.0:ac:classes:X509',
 			),
