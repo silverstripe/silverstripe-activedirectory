@@ -29,8 +29,8 @@ class LDAPDebugController extends Controller {
 		return $list;
 	}
 
-	public function SearchLocations() {
-		$locations = Config::inst()->get('LDAPService', 'search_locations');
+	public function UsersSearchLocations() {
+		$locations = Config::inst()->get('LDAPService', 'users_search_locations');
 		$list = new ArrayList();
 		if($locations) {
 			foreach($locations as $location) {
@@ -43,6 +43,43 @@ class LDAPDebugController extends Controller {
 		}
 
 		return $list;
+	}
+
+	public function GroupsSearchLocations() {
+		$locations = Config::inst()->get('LDAPService', 'groups_search_locations');
+		$list = new ArrayList();
+		if($locations) {
+			foreach($locations as $location) {
+				$list->push(new ArrayData(array(
+					'Value' => $location
+				)));
+			}
+		} else {
+			$list->push($this->Options()->find('Name', 'baseDn'));
+		}
+
+		return $list;
+	}
+
+	public function DefaultGroup() {
+		$code = Config::inst()->get('LDAPService', 'default_group');
+		if($code) {
+			$group = Group::get()->filter('Code', $code)->limit(1)->first();
+			if(!($group && $group->exists())) {
+				return sprintf(
+					'WARNING: LDAPService.default_group configured with \'%s\' but there is no Group with that Code in the database!',
+					$code
+				);
+			} else{
+				return sprintf('%s (Code: %s)', $group->Title, $group->Code);
+			}
+		}
+
+		return null;
+	}
+
+	public function MappedGroups() {
+		return LDAPGroupMapping::get();
 	}
 
 	public function Nodes() {

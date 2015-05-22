@@ -20,9 +20,11 @@ You can then set specific locations to search your directory. Note that these lo
 you have specified above:
 
 	LDAPService:
-	  search_locations:
+	  users_search_locations:
 	    - 'CN=Users,DC=mydomain,DC=local'
 	    - 'CN=Others,DC=mydomain,DC=local'
+	  groups_search_locations:
+	    - 'CN=Somewhere,DC=mydomain,DC=local'
 
 Note that these search locations should only be tree nodes (e.g. containers, organisational units, domains) within your Active Directory.
 Specifying groups will not work. [More information](http://stackoverflow.com/questions/9945518/can-ldap-matching-rule-in-chain-return-subtree-search-results-with-attributes) is available on the distinction between a node and a group.
@@ -35,6 +37,14 @@ There are several more LDAP options you can configure. For more information, ple
 
 You can visit a controller called `/LDAPDebugController` to check that the connection is working. This will output
 a page listing the connection options used, as well as all AD groups that can be found.
+
+## Putting imported Member into a default group
+
+You can configure the module so everyone imported goes into a default group. The group must already exist before
+you can use this setting. The value of this setting should be the "Code" field from the Group.
+
+	LDAPService:
+	  default_group: "content-authors"
 
 ## Mapping AD attributes to Member fields
 

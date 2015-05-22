@@ -7,10 +7,37 @@
 	</ul>
 <% end_if %>
 
-<% if $SearchLocations %>
-	<h2>Search locations</h2>
+<h2>Default group</h2>
+<% if $DefaultGroup %>
+	$DefaultGroup
+<% else %>
+	<p>Users will not be added to any default groups. Set LDAPService.default_group to configure this.</p>
+<% end_if %>
+
+<h2>Mapped groups</h2>
+<% if $MappedGroups %>
 	<ul>
-	<% loop $SearchLocations %>
+	<% loop $MappedGroups %>
+		<li>$DN -> $Group.Title (Code: $Group.Code), Scope: $Scope</li>
+	<% end_loop %>
+	</ul>
+<% else %>
+	<p>There are no mapped groups. You can add some by going into the Security -> Groups section of the CMS.</p>
+<% end_if %>
+
+<% if $UsersSearchLocations %>
+	<h2>Users search locations</h2>
+	<ul>
+	<% loop $UsersSearchLocations %>
+		<li>$Value</li>
+	<% end_loop %>
+	</ul>
+<% end_if %>
+
+<% if $GroupsSearchLocations %>
+	<h2>Groups search locations</h2>
+	<ul>
+	<% loop $GroupsSearchLocations %>
 		<li>$Value</li>
 	<% end_loop %>
 	</ul>

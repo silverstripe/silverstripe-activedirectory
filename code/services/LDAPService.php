@@ -17,12 +17,26 @@ class LDAPService extends Object implements Flushable {
 	);
 
 	/**
-	 * If configured, only objects within these locations will be exposed to this service.
+	 * If configured, only user objects within these locations will be exposed to this service.
 	 * @config
 	 */
-	private static $search_locations = array();
+	private static $users_search_locations = array();
+
+	/**
+	 * If configured, only group objects within these locations will be exposed to this service.
+	 * @config
+	 */
+	private static $groups_search_locations = array();
 
 	private static $_cache_nested_groups = array();
+
+	/**
+	 * If this is configured to a "Code" value of a {@link Group} in SilverStripe, the user will always
+	 * be added to this group's membership when imported, regardless of any sort of group mappings.
+	 *
+	 * @config
+	 */
+	private static $default_group;
 
 	/**
 	 * Get the cache objecgt used for LDAP results. Note that the default lifetime set here
@@ -109,7 +123,7 @@ class LDAPService extends Object implements Flushable {
 
 	/**
 	 * Return all AD groups in configured search locations, including all nested groups.
-	 * Uses search_locations if defined, otherwise falls back to NULL, which tells LDAPGateway
+	 * Uses groups_search_locations if defined, otherwise falls back to NULL, which tells LDAPGateway
 	 * to use the default baseDn defined in the connection.
 	 *
 	 * @param boolean $cached Cache the results from AD, so that subsequent calls are faster. Enabled by default.
@@ -117,7 +131,7 @@ class LDAPService extends Object implements Flushable {
 	 * @return array
 	 */
 	public function getGroups($cached = true, $attributes = array()) {
-		$searchLocations = $this->config()->search_locations ?: array(null);
+		$searchLocations = $this->config()->groups_search_locations ?: array(null);
 		$cache = self::get_cache();
 		$results = $cache->load('groups' . md5(implode('', array_merge($searchLocations, $attributes))));
 
@@ -149,7 +163,7 @@ class LDAPService extends Object implements Flushable {
 			return self::$_cache_nested_groups[$dn];
 		}
 
-		$searchLocations = $this->config()->search_locations ?: array(null);
+		$searchLocations = $this->config()->groups_search_locations ?: array(null);
 		$results = array();
 		foreach($searchLocations as $searchLocation) {
 			$records = $this->gateway->getNestedGroups($dn, $searchLocation, Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes);
@@ -170,7 +184,7 @@ class LDAPService extends Object implements Flushable {
 	 * @return array
 	 */
 	public function getGroupByGUID($guid, $attributes = array()) {
-		$searchLocations = $this->config()->search_locations ?: array(null);
+		$searchLocations = $this->config()->groups_search_locations ?: array(null);
 		foreach($searchLocations as $searchLocation) {
 			$records = $this->gateway->getGroupByGUID($guid, $searchLocation, Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes);
 			if($records) return $records[0];
@@ -179,14 +193,14 @@ class LDAPService extends Object implements Flushable {
 
 	/**
 	 * Return all AD users in configured search locations, including all users in nested groups.
-	 * Uses search_locations if defined, otherwise falls back to NULL, which tells LDAPGateway
+	 * Uses users_search_locations if defined, otherwise falls back to NULL, which tells LDAPGateway
 	 * to use the default baseDn defined in the connection.
 	 *
 	 * @param array $attributes List of specific AD attributes to return. Empty array means return everything.
 	 * @return array
 	 */
 	public function getUsers($attributes = array()) {
-		$searchLocations = $this->config()->search_locations ?: array(null);
+		$searchLocations = $this->config()->users_search_locations ?: array(null);
 		$results = array();
 
 		foreach($searchLocations as $searchLocation) {
@@ -207,7 +221,7 @@ class LDAPService extends Object implements Flushable {
 	 * @return array
 	 */
 	public function getUserByGUID($guid, $attributes = array()) {
-		$searchLocations = $this->config()->search_locations ?: array(null);
+		$searchLocations = $this->config()->users_search_locations ?: array(null);
 		foreach($searchLocations as $searchLocation) {
 			$records = $this->gateway->getUserByGUID($guid, $searchLocation, Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes);
 			if($records) return $records[0];
@@ -222,7 +236,7 @@ class LDAPService extends Object implements Flushable {
 	 * @return array
 	 */
 	public function getUserByUsername($username, $attributes = array()) {
-		$searchLocations = $this->config()->search_locations ?: array(null);
+		$searchLocations = $this->config()->users_search_locations ?: array(null);
 		foreach($searchLocations as $searchLocation) {
 			$records = $this->gateway->getUserByUsername($username, $searchLocation, Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes);
 			if($records) return $records[0];
@@ -310,6 +324,24 @@ class LDAPService extends Object implements Flushable {
 				$member->{$relationField} = $record->ID;
 			} else {
 				$member->$field = $data[$attribute];
+			}
+		}
+
+		// if a default group was configured, ensure the user is in that group
+		if($this->config()->default_group) {
+			$group = Group::get()->filter('Code', $this->config()->default_group)->limit(1)->first();
+			if(!($group && $group->exists())) {
+				SS_Log::log(
+					sprintf(
+						'LDAPService.default_group misconfiguration! There is no such group with Code = \'%s\'',
+						$this->config()->default_group
+					),
+					SS_Log::WARN
+				);
+			} else {
+				$group->Members()->add($member, array(
+					'IsImportedFromLDAP' => '1'
+				));
 			}
 		}
 
