@@ -4,35 +4,40 @@
 
 ## Introduction
 
-This module allows you to use single sign-on on your SilverStripe site using SAML 2.0.
-It also allows you to import Active Directory users and groups to SilverStripe.
+This SilverStripe module provides Active Directory integration. It comes with three major components:
+
+* Single sign-on authentication capability using SAML 2.0
+* Synchronisation of Active Directory users and group memberships via LDAP
+* Active Directory authentication via LDAP binding
+
+These components may be used in any combination, also alongside the default SilverStripe authentication scheme.
 
 ## Requirements
 
  * PHP 5.3.3+ with extensions: ldap, openssl, dom, and mcrypt
  * SilverStripe 3.1+
- * Active Directory and ADFS 2.0 (Active Directory Federation Services)
+ * Active Directory on Windows Server 2008 R2
+ * Active Directory Federation Services FS 2.0 (ADFS)
+
+While this module was only tested with Windows Server 2008 R2 and ADFS 2.0, it should also work with newer versions of Windows Server and ADFS.
+
+We have not tested this module against non-Microsoft products such as OpenLDAP.
  
-## Installation & Configuration
+## Example installation steps
 
-The configuration and setup from beginning can look like this:
+In this section we'll step through a possible list of set-up tasks for this module. Your specific configuration will vary depending on your requirements.
 
- 1. Install a Microsoft AD server
- 2. Install / Update AD FS to version 2.0 on the Microsoft server
- 3. Install SilverStripe active directory module
- 4. Setup SilverStripe site SAML configuration
- 5. Create SAML Relying Party in AD FS
- 6. Setup SilverStripe site LDAP configuration
- 7. Configure SilverStripe Authenticators
+ 1. Update ADFS on your Windows Server
+ 1. Install *silverstripe-activedirectory* module
+ 1. Configure SilverStripe as SAML Service Provider
+ 1. Configure ADFS as SAML Identity Provider
+ 1. Configure SilverStripe Authenticators
+ 1. Set LDAP synchronisation up
+ 1. Configuring for browsers
 
-### 1. Install a Microsoft AD server
+### 1. Update ADFS on your Windows Server
 
-This module has only been tested using Active Directory on Windows Server 2008 R2.
-
-Providing instructions on how to install an AD server is out of scope for this module,
-but there are many resources to be found via Google.
-
-### 2. Install / Update AD FS to version 2.0 on the Microsoft server
+We assume you have installed Active Directory on Windows Server 2008 R2.
 
 To be able to use the SAML Single Sign On functionality you need to have ADFS 2.0.
 In some cases ADFS 1.0 is installed, but you can upgrade for free with [an update from Microsoft](http://www.microsoft.com/en-us/download/details.aspx?id=10909).
@@ -43,26 +48,25 @@ If you're exposing the SAML endpoint over HTTPS, you also need to make sure that
 
 The client browser will use this endpoint for SSO purposes e.g: https://domain.com/adfs/ls/
 
-### 3. Install SilverStripe active directory module
+### 2. Install *silverstripe-activedirectory* module
+
+Pull the module into your SilverStripe project. You can use composer:
 
 	composer require "silverstripe/activedirectory:*"
 
-### 4. Setup SilverStripe site SAML configuration
+### 3. Configure SilverStripe as SAML Service Provider
 
-[SAML 2.0 setup and configuration](docs/en/saml_setup.md).
+Follow the [SAML Service Provider (SP) Setup](docs/en/saml_setup.md) for setting up the SilverStripe side of SAML.
 
-### 5. Create SAML Relying Party in AD FS
+### 4. Configure ADFS as SAML Identity Provider
 
-[ADFS 2.0 setup and configuration](docs/en/adfs_setup.md).
+Follow the [ADFS 2.0 setup and configuration](docs/en/adfs_setup.md) for setting up the ADFS side of SAML.
 
-### 6. Setup SilverStripe site LDAP configuration
+### 5. Configure SilverStripe Authenticators
 
-[LDAP Setup](docs/en/ldap_setup.md)
+We have now established the bi-directional trust between the IdP and SP, and can now configure SilverStripe authentication.
 
-### 7. Configure SilverStripe Authenticators
-
-To be able to use the SAML or the LDAP authenticator you will need to set them up in the
-`mysite/config.php`.
+To be able to use the SAML or the LDAP authenticator you will need to set them up in the `mysite/config.php`.
 
 You can choose which authenticators you would like to display on the login form.
 
@@ -81,7 +85,7 @@ Security Group, since no user would have access to the SilverStripe Security adm
 #### Enabling the SAML Auto login
 
 If you register the SAMLAuthenticator as the default authenticator, it will automatically send users
-to the AD FS login server when they are required to login.
+to the ADFS login server when they are required to login.
 
 	Authenticator::set_default_authenticator('SAMLAuthenticator');
 	
@@ -91,7 +95,15 @@ To bypass this and show the login form with all the configured Authenticators, g
 	
 For more information see the [SAMLSecurityExtension.php](code/authenticators/SAMLSecurityExtension.php). 
 
-## Using this module
+### 6. Set LDAP synchronisation up
+
+If you need to perform authorisation based on AD groups, or need additional fields synchronised other than already provided by ADFS claim rules, follow the [LDAP Setup](docs/en/ldap_setup.md) to configure LDAP synchronisation.
+
+### 7. Configuring for browsers
+
+Read [Configuring for browsers](docs/en/saml_browsers.md) to find out about browser peculiarities regarding SAML single sign-on.
+
+## Administering synchronised users and groups
 
 Documentation on how to use the module to import users and map them to SilverStripe groups, etc.
 
@@ -103,57 +115,3 @@ There are certain parts of his module that have debugging messages logged. You c
 these via email, for example. In your `mysite/_config.php`:
 
 	SS_Log::add_writer(new SS_LogEmailWriter('my@email.com'), SS_Log::DEBUG, '<=');
-
-## Technical notes
-
-### Interface between SAML and LDAP
-
-The SAML and LDAP parts of this module interact only through the following two locations:
-
-* `GUID` field on `Member`, added by both `SAMLMemberExtension` and `LDAPMemberExtension`.
-* `LDAPMemberExtension::memberLoggedIn` login hook, triggered after any login (including after
-`SAMLAuthenticator::authenticate`)
-
-### SAML+LDAP sequence
-
-Normal sequence, involving single sign-on and LDAP synchronisation:
-
-1. User requests a secured resource, and is redirected to `SAMLLoginForm`
-1. User clicks the only button on the form
-1. `SAMLAuthenticator::authenticate` is called
-1. User is redirected to an Identity Provider (IdP), by utilising the `SAMLHelper` (and the contained library)
-1. User performs the authentication off-site
-1. User is sent back to `SAMLController::acs`, with an appropriate authentication token
-1. If `Member` record is not found, stub is created with some basic fields (i.e. GUID, name, surname, email), but no group
-mapping.
-1. User is logged into SilverStripe as that member, considered authenticated. GUID is used to uniquely identify that
-user.
-1. A login hook is triggered at `LDAPMemberExtension::memberLoggedIn`
-1. LDAP synchronisation is performed by looking up the GUID. All `Member` fields are overwritten with the data obtained
-from LDAP, and LDAP group mappings are added.
-1. User is now authorised, since the group mappings are in place.
-
-### LDAP only sequence
-
-LDAP-only sequence:
-
-1. User requests a secured resource, and is redirected to `LDAPLoginForm`
-1. User fills in the credentials
-1. `LDAPAuthenticator::authenticate` is called
-1. Authentication against LDAP is performed by SilverStripe's backend.
-1. If `Member` record is not found, stub is created with some basic fields (i.e. GUID), but no group mapping.
-1. A login hook is triggered at `LDAPMemberExtension::memberLoggedIn`
-1. LDAP synchronisation is performed by looking up the GUID. All `Member` fields are overwritten with the data obtained
-from LDAP, and LDAP group mappings are added.
-1. User is logged into SilverStripe as that member, considered authenticated and authorised (since the group mappings
-are in place)
-
-### Member record manipulation
-
-`Member` records are manipulated from multiple locations in this module. Members are identified by GUIDs by both LDAP
-and SAML components.
-
-* `SAMLAuthenticator::authenticate`: creates stub `Member` after authorisation (if non-existent).
-* `LDAPAuthenticator::authenticate`: creates stub `Member` after authorisation (if non-existent).
-* `LDAPMemberExtension::memberLoggedIn`: triggers LDAP synchronisation, rewriting all `Member` fields.
-* `LDAPMemberSyncTask::run`: pulls all LDAP records and creates relevant `Members`.

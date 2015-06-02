@@ -1,13 +1,17 @@
-# AD FS 2.0 setup and configuration
+# ADFS 2.0 setup and configuration
 
-## Install AD FS 2.0
+This guide explains how to configure ADFS for acting as an Identity Provider (IdP) for this module.
 
-This module is using AD FS 2.0 as an identity provider that issues SAML tokens for the identities it manages.
-For that, a new relying party needs to be created. A relying party in AD FS 2.0 is a representation of an
+## Install ADFS 2.0
+
+This module is using ADFS 2.0 as an identity provider that issues SAML tokens for the identities it manages.
+For that, a new relying party needs to be created. A relying party in ADFS 2.0 is a representation of an
 application (a Web site or a Web service) and contains all the security-related information, such as
 encryption certificate, claims transformation rules and so on.
 
 ## Configuration of the Identity Provider (IdP)
+
+As part of this we will establish the trust between this IdP and the SilverStripe's Service Provider. ADFS will download the public certificate we have generated in the "SAML Service Provider (SP) Setup" guide.
 
 ### Create a new relying party trust
 
@@ -28,12 +32,9 @@ Here you can add any notes, for example who would be the technical contact for t
 
 ![](img/add_notes.png)
 
-### Choose Issuance Authorization Rules
-
 ## Setup claim rules
 
-Claim rules decides what information is shared with the Service Provider. In this case the SP want to have
-a couple of properties from the Active Directory.
+Claim rules decide what information is shared with the Service Provider. Here, we make some Active Directory fields already available to the *silverstripe-activedirectory* module so that authentication can be performed. Other fields may be synchronised later by using the LDAP synchronisation feature of this module.
 
 Right click the relying party and choose "Edit Claim Rules".
 
@@ -66,23 +67,3 @@ You will also have to change the secure hash algorithm from SHA-256 to SHA-1
 ![](img/1_set_encryption_to_sha1.png)
 
 ![](img/2_set_encryption_to_sha1.png)
-
-## AD FS Windows authentication "auto-login"
-
-### AD FS 3.0 and Chrome authentication
-
-AD FS 3.0, such as the kind found on Windows Server 2012 requires some extra configuration for Chrome to authenticate.
-
-Run these commands on the AD FS server using Powershell:
-
-	Set-ADFSProperties –ExtendedProtectionTokenCheck None
-	Set-ADFSProperties -WIASupportedUserAgents @("MSIE 6.0", "MSIE 7.0", "MSIE 8.0", "MSIE 9.0", "MSIE 10.0", "Trident/7.0", "MSIPC", "Windows Rights Management Client", "Mozilla/5.0")
-
-You will then need to restart the Active Directory service in Windows.
-
-### Intranet level security settings
-
-Internet Explorer running on your Windows machine must have the AD FS URL, e.g. https://adfs.mydomain.com set with "intranet" security
-settings, otherwise the browser will not attempt Windows authentication with the AD FS server, as the default is "internet" security settings.
-
-More [detailed information](https://sysadminspot.com/windows/google-chrome-and-ntlm-auto-logon-using-windows-authentication/) can be found on this subject.
