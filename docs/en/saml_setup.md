@@ -6,14 +6,17 @@ This guide will step you through the configuration steps for configuring SilverS
 
 SAML uses pre-shared certificates for establishing trust between the SP (here, SilverStripe) the Identity Provider (IdP) side (here, ADFS). Both SP and IdP need a certificate, and both need to have the public key of their counterparty.
 
+Here we will generate the SP certificate and key, and install the IdP certificate.
+
 ### Service Provider certificate
 
-You need to create an SSL certificate and private key for signing SAML requests. One way to generate self signed test certificates is by using the `openssl` command
+You need to obtain an SSL certificate and private key for the SilverStripe site to be able to sign SAML requests. This certificate's "Common Name" needs to match the site endpoint that the ADFS will be using.
+
+You can generate self-signed certificates by using the `openssl` command:
 
 	openssl req -x509 -nodes -newkey rsa:2048 -keyout saml.pem -out saml.crt -days 1826
 
-These should not be checked into the source code and should be placed outside of the
-web document root for security reasons. Store the path to the certificate and the private key for the configuration step that follows.
+These should not be checked into the source code and should be placed outside of the web document root for security reasons. Write down the path to the certificate and the private key for the configuration step that follows.
 
 ### Exporting the token-signing certificate from ADFS
 
@@ -39,7 +42,7 @@ Copy the certificate to your SilverStripe machine, and record the path for the f
 
 Now we need to make the *silverstripe-activedirectory* module aware of where the certificates can be found. 
 
-Note that this configuration relies on a particular IdP setup as documented in [ADFS 2.0 setup and configuration](docs/en/adfs_setup.md). 
+Note that this configuration relies on a particular IdP configuration. For an example compatbile IdP configuration see [ADFS 2.0 setup and configuration](docs/en/adfs_setup.md).
 
 Add the following configuration to `mysite/_config/saml.yml` (make sure to replace paths to the certificates and keys):
 

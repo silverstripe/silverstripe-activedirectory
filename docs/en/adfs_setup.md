@@ -1,6 +1,17 @@
-# ADFS 2.0 setup and configuration
+# ADFS setup and configuration
 
-This guide explains how to configure ADFS for acting as an Identity Provider (IdP) for this module.
+This guide provides an example of how to configure ADFS for acting as an Identity Provider (IdP) for this module. We assume you have already followed the [SAML Service Provider (SP) Setup](docs/en/saml_setup.md) guide.
+
+This is not an exhaustive guide, and it only covers one operating system (Windows Server 2008 RC2) and one specific version of ADFS (2.0).
+
+As an implementor of the IdP, you will need to ensure the following have been set up:
+
+* Establishing bi-directional trust between SP and IdP
+* Adding a claim rule to send LDAP attributes
+* Adding a claim rule to use objectId as nameidentifier
+* Ensuring compatible hash algorithm is used
+
+This guide will hopefully give you enough context to do so.
 
 ## Install ADFS 2.0
 
@@ -34,7 +45,9 @@ Here you can add any notes, for example who would be the technical contact for t
 
 ## Setup claim rules
 
-Claim rules decide what information is shared with the Service Provider. Here, we make some Active Directory fields already available to the *silverstripe-activedirectory* module so that authentication can be performed. Other fields may be synchronised later by using the LDAP synchronisation feature of this module.
+Claim rules decide what fields are used for performing authentication, and what is provided to the Service Provider as a context.
+
+Two claim rules are absolutely required for this module to work. We will set these up now.
 
 Right click the relying party and choose "Edit Claim Rules".
 
@@ -43,6 +56,8 @@ Right click the relying party and choose "Edit Claim Rules".
 ![](img/send_claims_using_a_custom_rule.png)
 
 ### Rule 1: Send LDAP Attributes
+
+This rule makes arbitrary LDAP Attributes available for SAML authentication. We surface such parameters as "mail" for use as login, "givenName" and "sn" for identifying the person and "objectGuid" so that we can establish uniqueness of records.
 
 Click "Add Rule" and select "Send Claims Using a Custom Rule" from the dropdown.
 Add the following rule:
@@ -53,13 +68,15 @@ Add the following rule:
 
 ### Rule 2: Send objectId as nameidentifier
 
+This rule makes use of the previous one. SAML requires a unique identifier to perform the authentication. "objectId" AD Attribute is such a unique token, and we direct ADFS to use it for this purpose.
+
 Repeat the same "Add Rule" as done above and select "Send Claims Using a Custom Rule" from the dropdown to add this rule:
 
 	c:[Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/privatepersonalidentifier"] => issue(Type = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier", Issuer = c.Issuer, OriginalIssuer = c.OriginalIssuer, Value = c.Value, ValueType = c.ValueType, Properties["http://schemas.xmlsoap.org/ws/2005/05/identity/claimproperties/format"] = "urn:oasis:names:tc:SAML:2.0:nameid-format:transient");
 
 ## Set the secure hash algorithm
 
-You will also have to change the secure hash algorithm from SHA-256 to SHA-1
+By default ADFS 2.0 uses a hash algorithm incompatible with *silverstripe-activedirectory* SAML implementation. You will need to change it from SHA-256 to SHA-1.
 
 1. Right click the relying party and choose properties.
 2. Choose the "Advanced" tab and select the "SHA-1" option in the dropdown and press OK.
