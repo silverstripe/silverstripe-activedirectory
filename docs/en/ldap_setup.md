@@ -1,5 +1,7 @@
 # LDAP Setup
 
+This guide will step you through configuring synchronisation between LDAP and SilverStripe *Members* and *Groups*.
+
 ## Configuring the connection
 
 Example configuration for `mysite/_config/ldap.yml`:

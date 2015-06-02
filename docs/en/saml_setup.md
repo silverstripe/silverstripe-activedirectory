@@ -1,26 +1,31 @@
 # SAML Service Provider (SP) Setup
 
+This guide will step you through the configuration steps for configuring SilverStripe as a SAML Service Provider (SP).
+
 ## SSL Certificates
 
-You need to have an SSL certificate and private key for signing SAML requests.
-These should not be checked into the source code and should be placed outside of the
-web document root for security reasons.
+SAML uses pre-shared certificates for establishing trust between the SP (here, SilverStripe) the Identity Provider (IdP) side (here, ADFS). Both SP and IdP need a certificate, and both need to have the public key of their counterparty.
 
-One way to generate self signed test certificates is by using the `openssl` command
+### Service Provider certificate
+
+You need to create an SSL certificate and private key for signing SAML requests. One way to generate self signed test certificates is by using the `openssl` command
 
 	openssl req -x509 -nodes -newkey rsa:2048 -keyout saml.pem -out saml.crt -days 1826
 
-### Exporting the token-signing certificate from AD FS
+These should not be checked into the source code and should be placed outside of the
+web document root for security reasons. Store the path to the certificate and the private key for the configuration step that follows.
 
-You need to get the token-signing certificate from AD FS and put that somewhere on the SP.
+### Exporting the token-signing certificate from ADFS
+
+You need to get the token-signing certificate from the ADFS (acting as IdP) and copy it somewhere where it can be reached by your SilverStripe site (acting as an SP).
 
 You can get it by either parsing it out from the endpoint `https://mydomain.com/FederationMetadata/2007-06/FederationMetadata.xml`
-or by exporting the certificate manually using AD FS console on Windows.
+or by exporting the certificate manually using ADFS console on Windows.
 In this documentation we're going to manually extract the certificate.
 
 ![](img/certificate_copy_to_file.png)
 
-In the AD FS console, go to Services > Certificates and right click the "Token-signing" certificate.
+In the ADFS console, go to Services > Certificates and right click the "Token-signing" certificate.
 Click the "Details" tab and click "Copy to file".
 
 ![](img/certificate_base64.png)
@@ -28,9 +33,15 @@ Click the "Details" tab and click "Copy to file".
 A wizard opens, click "Next" and then choose "Base-64 encoded X.509 (.CER)".
 Click "Next" and choose a place to export the certificate. Click "Next" to finish the process.
 
-## Example YAML configuration
+Copy the certificate to your SilverStripe machine, and record the path for the following configuration step.
 
-Example configuration for `mysite/_config/saml.yml`
+## YAML configuration
+
+Now we need to make the *silverstripe-activedirectory* module aware of where the certificates can be found. 
+
+Note that this configuration relies on a particular IdP setup as documented in [ADFS 2.0 setup and configuration](docs/en/adfs_setup.md). 
+
+Add the following configuration to `mysite/_config/saml.yml` (make sure to replace paths to the certificates and keys):
 
 	---
 	Name: mysamlsettings
@@ -42,18 +53,15 @@ Example configuration for `mysite/_config/saml.yml`
 	  debug: false
 	  SP:
 	    entityId: "https://25b5994c.ngrok.com"
-	    privateKey: "../certs/saml.pem"
-	    x509cert: "../certs/saml.crt"
+	    privateKey: "<path-to-silverstripe-private-key>/saml.pem"
+	    x509cert: "<path-to-silverstripe-cert>/saml.crt"
 	  IdP:
 	    entityId: "https://mydomain.com/adfs/services/trust"
-	    x509cert: "mysite/certs/adfs_certificate.pem"
+	    x509cert: "<path-to-adfs-cert>/adfs_certificate.pem"
 	    singleSignOnService: "https://mydomain.com/adfs/ls/"
 
 Important: `entityId` must match *exactly* to the correct URL, including protocol, otherwise you will
-get errors like "Invalid issuer". In AD FS, you can find that by checking the "Federation Service Properties".
-
-SAML configuration can be quite complicated and this example relies on that the IdP have been setup
-according to [AD FS 2.0 setup and configuration](docs/en/adfs_setup.md).
+get errors like "Invalid issuer". In ADFS, you can find that by checking the "Federation Service Properties".
 
 ### Service Provider (SP)
 
@@ -63,15 +71,9 @@ according to [AD FS 2.0 setup and configuration](docs/en/adfs_setup.md).
 
 ### Identity Provider (IdP)
 
-The IdP settings and public certificate should be provided by who set this up in the AD FS server.
-
- - `entityId`: Provided by the IdP, but for AD FS it's typically "https://domain.com/adfs/services/trust"
- - `x509cert`: The token-signing certificate from AD FS (base 64 encoded)
- - `singleSignOnService`: The endpoint on AD FS for where to send the SAML login request
- 
-### Verifying that it works
-
-@todo
+ - `entityId`: Provided by the IdP, but for ADFS it's typically "https://domain.com/adfs/services/trust"
+ - `x509cert`: The token-signing certificate from ADFS (base 64 encoded)
+ - `singleSignOnService`: The endpoint on ADFS for where to send the SAML login request
  
 ## Debugging
 
@@ -83,13 +85,13 @@ To enable some very light weight debugging from the 3rd party library set the `d
 In general it can be tricky to debug what is failing during the setup phase. The SAML protocol error
 message as quite hard to decipher.
 
-In most cases it's configuration issues that can debugged by using the AD FS 2.0 Event log, see the
-[Diagnostics in AD FS 2.0](http://blogs.msdn.com/b/card/archive/2010/01/21/diagnostics-in-ad-fs-2-0.aspx)
+In most cases it's configuration issues that can debugged by using the ADFS 2.0 Event log, see the
+[Diagnostics in ADFS 2.0](http://blogs.msdn.com/b/card/archive/2010/01/21/diagnostics-in-ad-fs-2-0.aspx)
 for more information.
 
 Also ensure that all protocols are matching. SAML is very sensitive to differences in http and https in URIs.
 
-### Advanced configuration
+## Advanced configuration
 
 It is possible to customize all the settings provided by the 3rd party SAML code.
  
