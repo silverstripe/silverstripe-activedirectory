@@ -1,6 +1,8 @@
 # Configuring for browsers
 
-Different browsers have varying requirements regarding how and when a SAML single sign-on is permitted, and when the Windows domain identity can be used for authentication.
+The ability of browsers to reuse your ambient domain identity during the SAML authentication ("auto-login") depends on your specific browser and domain configuration. 
+
+This configuration can vary wildly, but in this document we try to provide a few hints on how to make this work.
 
 ## ADFS Windows authentication "auto-login"
 

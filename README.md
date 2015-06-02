@@ -60,7 +60,7 @@ Follow the [SAML Service Provider (SP) Setup](docs/en/saml_setup.md) for setting
 
 ### 4. Configure ADFS as SAML Identity Provider
 
-Follow the [ADFS 2.0 setup and configuration](docs/en/adfs_setup.md) for setting up the ADFS side of SAML.
+Follow the [ADFS setup and configuration](docs/en/adfs_setup.md) for setting up the ADFS side of SAML.
 
 ### 5. Configure SilverStripe Authenticators
 
@@ -101,7 +101,7 @@ If you need to perform authorisation based on AD groups, or need additional fiel
 
 ### 7. Configuring for browsers
 
-Read [Configuring for browsers](docs/en/saml_browsers.md) to find out about browser peculiarities regarding SAML single sign-on.
+We also provide some tips on [Configuring for browsers](docs/en/saml_browsers.md), which may help solving some issues with "auto-login" (logins using ambient domain credentials on Windows).
 
 ## Administering synchronised users and groups
 
