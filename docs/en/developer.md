@@ -6,6 +6,38 @@ As a SilverStripe developer after reading this guide, you should be able to corr
 
 We assume ADFS 2.0 is used as an IdP.
 
+## Table of contents
+
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+- [Install the module](#install-the-module)
+- [Make x509 certificates available](#make-x509-certificates-available)
+  - [SP certificate and key](#sp-certificate-and-key)
+  - [IdP certificate](#idp-certificate)
+- [YAML configuration](#yaml-configuration)
+  - [Service Provider (SP)](#service-provider-sp)
+  - [Identity Provider (IdP)](#identity-provider-idp)
+- [Establish trust](#establish-trust)
+- [Configure SilverStripe Authenticators](#configure-silverstripe-authenticators)
+  - [Bypass auto login](#bypass-auto-login)
+- [Test the connection](#test-the-connection)
+- [Configure LDAP synchronisation](#configure-ldap-synchronisation)
+  - [Connect with LDAP](#connect-with-ldap)
+  - [Configure LDAP search query](#configure-ldap-search-query)
+  - [Verify LDAP connectivity](#verify-ldap-connectivity)
+  - [Put imported Member into a default group](#put-imported-member-into-a-default-group)
+  - [Map AD attributes to Member fields](#map-ad-attributes-to-member-fields)
+    - [Example](#example)
+  - [Syncing AD users on a schedule](#syncing-ad-users-on-a-schedule)
+- [Debugging](#debugging)
+  - [SAML debugging](#saml-debugging)
+  - [LDAP debugging](#ldap-debugging)
+- [Advanced SAML configuration](#advanced-saml-configuration)
+- [Resources](#resources)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ## Install the module
 
 First step is to add this module into your SilverStripe project. You can use composer for this:
@@ -160,7 +192,9 @@ You can then set specific locations to search your directory. Note that these lo
 Note that these search locations should only be tree nodes (e.g. containers, organisational units, domains) within your Active Directory.
 Specifying groups will not work. [More information](http://stackoverflow.com/questions/9945518/can-ldap-matching-rule-in-chain-return-subtree-search-results-with-attributes) is available on the distinction between a node and a group.
 
-If you are managing AD yourself, on Windows there is a utility called `ldp.exe` which is useful for exploring your directory to find which DN to use.
+If you are experiencing problems with getting the right nodes, run the search query directly via LDAP and see what is returned. For that you can either use Windows' `ldp.exe` tool, or Unix/Linux equivalent `ldapsearch`.
+
+See "LDAP debugging" section below for more information.
 
 ### Verify LDAP connectivity
 
@@ -267,6 +301,21 @@ In most cases it's configuration issues that can debugged by using the ADFS 2.0 
 for more information.
 
 Also ensure that all protocols are matching. SAML is very sensitive to differences in http and https in URIs.
+
+### LDAP debugging
+
+LDAP is a plain-text protocol for interacting with user directories. You can debug LDAP responses by querying directly. For that you can use Windows' `ldp.exe` tool, or Unix/Linux equivalent `ldapsearch`.
+
+Here is an example of `ldapsearch` usage. You will need to bind to the directory using an administrator account (specified via `-D`). The base of your query is specified via `-b`, and the search query follows.
+
+```bash
+ldapsearch \
+	-W \
+	-H ldaps://<ldap-url>:<ldap-port> \
+	-D "CN=<administrative-user>,DC=yourldap,DC=co,DC=nz" \
+	-b "DC=yourldap,DC=co,DC=nz" \
+	"(name=*)"
+```
 
 ## Advanced SAML configuration
 

@@ -4,6 +4,20 @@ This guide will step you through the configuration steps needed to integrate wit
 
 As an ADFS administrator, after reading this guide, you should be able to provide federated authentication service to a SilverStripe site using *silverstripe-activedirectory* module.
 
+## Table of contents
+
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+- [Overview](#overview)
+- [Make IdP certificate available](#make-idp-certificate-available)
+- [Setup claim rules](#setup-claim-rules)
+  - [Rule 1: Send LDAP Attributes](#rule-1-send-ldap-attributes)
+  - [Rule 2: Send objectId as nameidentifier](#rule-2-send-objectid-as-nameidentifier)
+- [Set the secure hash algorithm](#set-the-secure-hash-algorithm)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ## Overview
 
 This is not an exhaustive guide, and it only covers one operating system (Windows Server 2008 RC2) and one specific version of ADFS (2.0).
