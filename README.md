@@ -28,6 +28,9 @@ We have not tested this module against non-Microsoft products such as OpenLDAP.
 
 ## Overview
 
+![](docs/en/img/saml_ad_integration.png)
+*(Image) Typical authentication and authorisation flow for this module*
+
 [Security Assertion Markup Language (SAML)](http://en.wikipedia.org/wiki/Security_Assertion_Markup_Language) is an XML-based, open-standard data format for exchanging authentication and authorization data between parties. The single most important requirement that SAML addresses is web browser single sign-on (SSO).
 
 With this module, SilverStripe site is able to act as a SAML 2.0 Service Provider (SP) entity, and thus allows users to perform a single sign-on against a centralised user directory (an Identity Provider - IdP).
