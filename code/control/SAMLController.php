@@ -81,16 +81,19 @@ class SAMLController extends Controller {
 
 		$attributes = $auth->getAttributes();
 
-		// Availability of these is controlled by the "claim rules" on the IdP side. Not all data
-		// can be provided this way, so we rely on LDAP to fill in the blanks / overwrite fields later.
-		if(isset($attributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname'][0])) {
-			$member->FirstName = $attributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname'][0];
-		}
-		if(isset($attributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname'][0])) {
-			$member->Surname = $attributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname'][0];
-		}
-		if(isset($attributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'])) {
-			$member->Email = $attributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'][0];
+		foreach($member->config()->claims_field_mappings as $claim => $field) {
+			if(!isset($attributes[$claim][0])) {
+				SS_Log::log(
+					sprintf(
+						'Claim rule \'%s\' configured in LDAPMember.claims_field_mappings, but wasn\'t passed through. Please check IdP claim rules.',
+						$claim
+					), SS_Log::WARN
+				);
+
+				continue;
+			}
+
+			$member->$field = $attributes[$claim][0];
 		}
 
 		$member->SAMLSessionIndex = $auth->getSessionIndex();
