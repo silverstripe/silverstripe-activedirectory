@@ -16,12 +16,27 @@ class LDAPMemberExtension extends DataExtension {
 	 * These fields are used by {@link LDAPMemberSync} to map specific AD attributes
 	 * to {@link Member} fields.
 	 *
+	 * @var array
 	 * @config
 	 */
 	private static $ldap_field_mappings = array(
 		'givenname' => 'FirstName',
 		'sn' => 'Surname',
 		'mail' => 'Email'
+	);
+
+	/**
+	 * These are used by {@link SAMLController} to map specific IdP claim rules
+	 * to {@link Member} fields. Availability of these claim rules are defined
+	 * on the IdP.
+	 *
+	 * @var array
+	 * @config
+	 */
+	private static $claims_field_mappings = array(
+		'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname' => 'FirstName',
+		'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname' => 'Surname',
+		'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress' => 'Email'
 	);
 
 	/**
