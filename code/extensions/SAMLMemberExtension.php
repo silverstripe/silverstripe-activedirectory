@@ -36,16 +36,4 @@ class SAMLMemberExtension extends DataExtension {
 		$fields->removeFieldFromTab("Root", "SAMLSessionIndex");
 	}
 
-	/**
-	 * Clear out SAML specific data
-	 *
-	 * @todo(stig): try to logout the user from the IdP if possible
-	 */
-	public function beforeMemberLoggedOut() {
-		if(!$this->owner->SAMLSessionIndex) {
-			return;
-		}
-		$this->owner->SAMLSessionIndex = null;
-	}
-
 }
