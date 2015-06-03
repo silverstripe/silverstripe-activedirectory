@@ -14,13 +14,13 @@ First step is to add this module into your SilverStripe project. You can use com
 	
 Commit the changes.
 
-## Make SSL Certificates available
+## Make x509 certificates available
 
 SAML uses pre-shared certificates for establishing trust between the Service Provider (SP - here, SilverStripe) the Identity Provider (IdP - here, ADFS). 
 
 ### SP certificate and key
 
-You need to make the SP SSL certificate and private key available to the SilverStripe site to be able to sign SAML requests. The certificate's "Common Name" needs to match the site endpoint that the ADFS will be using.
+You need to make the SP x509 certificate and private key available to the SilverStripe site to be able to sign SAML requests. The certificate's "Common Name" needs to match the site endpoint that the ADFS will be using.
 
 For testing purposes, you can generate this yourself by using the `openssl` command:
 
@@ -32,7 +32,7 @@ Contact your system administrator if you are not sure how to install these.
 
 You also need to make the certificate for your ADFS endpoint available to the SilverStripe site. Talk with your ADFS administrator to find out how to obtain this.
 
-If you are managing ADFS yourself, consult the [ADFS administrator guide](docs/en/adfs.md).
+If you are managing ADFS yourself, consult the [ADFS administrator guide](adfs.md).
 
 You may also be able to extract the certificate yourself from the IdP endpoint if it has already been configured: `https://<idp-domain>/FederationMetadata/2007-06/FederationMetadata.xml`.
 
@@ -61,6 +61,8 @@ Add the following configuration to `mysite/_config/saml.yml` (make sure to repla
 
 If you don't use absolute paths, the certificate paths will be relative to the `BASE_PATH` (your site web root).
 
+All IdP and SP endpoints must use HTTPS scheme with SSL certificates matching the domain names used.
+
 ### Service Provider (SP)
 
  - `entityId`: This should be the base URL with https for the SP
@@ -69,7 +71,7 @@ If you don't use absolute paths, the certificate paths will be relative to the `
 
 ### Identity Provider (IdP)
 
- - `entityId`: Provided by the IdP, but for ADFS it's typically "https://domain.com/adfs/services/trust"
+ - `entityId`: Provided by the IdP, but for ADFS it's typically "https://<idp-domain>/adfs/services/trust"
  - `x509cert`: The token-signing certificate from ADFS (base 64 encoded)
  - `singleSignOnService`: The endpoint on ADFS for where to send the SAML login request
 
@@ -79,7 +81,7 @@ At this stage the SilverStripe site trusts the ADFS, but the ADFS does not have 
 
 ADFS should now be configured to extract the SP certificate from SilverStripe's SP endpoint. Once this is completed, bi-directional trust has been established and the authentication should be possible.
 
-*silverstripe-activedirectory* has some specific requirements on how ADFS is configured. If you are managing ADFS yourself, or you are assisting an ADFS administrator, consult the [ADFS administrator guide](docs/en/adfs.md)](docs/en/adfs.md).
+*silverstripe-activedirectory* has some specific requirements on how ADFS is configured. If you are managing ADFS yourself, or you are assisting an ADFS administrator, consult the [ADFS administrator guide](adfs.md).
 
 ## Configure SilverStripe Authenticators
 
@@ -96,7 +98,7 @@ You can unregister the default authenticator by adding this line
 
 	Authenticator::unregister('MemberAuthenticator');
 
-To prevent locking yourself out, before you remove the "MemberAuthenticator" make sure you map at least one LDAP group to the SilverStripe `Administrator` Security Group. Consult [CMS usage docs](docs/en/usage.md) for how to do it.
+To prevent locking yourself out, before you remove the "MemberAuthenticator" make sure you map at least one LDAP group to the SilverStripe `Administrator` Security Group. Consult [CMS usage docs](usage.md) for how to do it.
 
 ### Bypass auto login
 
@@ -108,13 +110,13 @@ Should you need to access the login form with all the configured Authenticators,
 
 	/Security/login?showloginform=1
 	
-For more information see the [SAMLSecurityExtension.php](code/authenticators/SAMLSecurityExtension.php). 
+For more information see the [SAMLSecurityExtension.php](../../code/authenticators/SAMLSecurityExtension.php). 
 
 ## Test the connection
 
-At this stage you should be able to authenticate. If you cannot, you should double check the claims rules and hashing algorithm used by ADFS. Consult [Configuring ADFS Identity Provider](docs/en/adfs.md) to assist the ADFS administrator.
+At this stage you should be able to authenticate. If you cannot, you should double check the claims rules and hashing algorithm used by ADFS. Consult [ADFS administrator guide](adfs.md) to assist the ADFS administrator.
 
-You can also review the [troubleshooting](docs/en/troubleshooting.md) guide if you are experiencing problems.
+You can also review the [troubleshooting](troubleshooting.md) guide if you are experiencing problems.
 
 ## Configure LDAP synchronisation
 
@@ -124,7 +126,7 @@ There are the following reasons for setting LDAP synchronisation up:
 * You can pull in additional personal details about your users that may not be available from the IdP directly - either because of claim rules, or inherent limitations such as binary data transfers.
 * The data is only synchronised upon modification, so it helps to keep SAML payloads small.
 
-### Configuring the connection
+### Connect with LDAP
 
 Example configuration for `mysite/_config/ldap.yml`:
 
@@ -136,12 +138,17 @@ Example configuration for `mysite/_config/ldap.yml`:
 	    'accountDomainName': 'mydomain.local'
 	    'baseDn': 'DC=mydomain,DC=local'
 	    'networkTimeout': 10
+	    'useSsl': 'TRUE'
 
-The `baseDn` option defines the initial scope of the directory where the connector can perform queries.
-This should be set to the root base DN, e.g. DC=mydomain,DC=local
+The `baseDn` option defines the initial scope of the directory where the connector can perform queries. This should be set to the root base DN, e.g. DC=mydomain,DC=local
 
-You can then set specific locations to search your directory. Note that these locations must be within the `baseDn`
-you have specified above:
+The `useSsl` option enables encrypted transport for LDAP communication. This should be mandatory for production systems to prevent eavesdropping. A certificate trusted by the webserver must be installed on the AD server. StartTLS can alternatively be used (`useStartTls` option).
+
+For more information about available LDAP options, please [see the Zend\Ldap documentation](http://framework.zend.com/manual/2.2/en/modules/zend.ldap.introduction.html) and [API overview documentation](http://framework.zend.com/manual/2.2/en/modules/zend.ldap.api.html).
+
+### Configure LDAP search query
+
+You can then set specific locations to search your directory. Note that these locations must be within the `baseDn` you have specified above:
 
 	LDAPService:
 	  users_search_locations:
@@ -153,7 +160,7 @@ you have specified above:
 Note that these search locations should only be tree nodes (e.g. containers, organisational units, domains) within your Active Directory.
 Specifying groups will not work. [More information](http://stackoverflow.com/questions/9945518/can-ldap-matching-rule-in-chain-return-subtree-search-results-with-attributes) is available on the distinction between a node and a group.
 
-If you are managing AD yourself, on Windows there is a utility called `ldp.exe` which is useful for exploring your directory to find which DN to use. Also there are several more LDAP options you can configure. For more information, please [see the Zend\Ldap documentation](http://framework.zend.com/manual/2.2/en/modules/zend.ldap.introduction.html) and [API overview documentation](http://framework.zend.com/manual/2.2/en/modules/zend.ldap.api.html).
+If you are managing AD yourself, on Windows there is a utility called `ldp.exe` which is useful for exploring your directory to find which DN to use.
 
 ### Verify LDAP connectivity
 
@@ -226,6 +233,19 @@ class MyMemberExtension extends DataExtension {
 }
 ```
 
+### Syncing AD users on a schedule
+
+You can schedule a job to run, then have it re-schedule itself so it runs again in the future, but some configuration needs to be set to have it work.
+
+To configure when the job should re-run itself, set the `LDAPMemberSyncJob.regenerate.time` configuration.
+In this example, this configures the job to run every 8 hours:
+
+	LDAPMemberSyncJob:
+	  regenerate_time: 28800
+
+Once the job runs, it will enqueue itself again, so it's effectively run on a schedule. Keep in mind that you'll need to have `queuedjobs` setup on a cron so that it can automatically run those queued jobs.
+See the [module docs](https://github.com/silverstripe-australia/silverstripe-queuedjobs) on how to configure that.
+
 ## Debugging
 
 There are certain parts of his module that have debugging messages logged. You can configure logging to receive these via email, for example. In your `mysite/_config.php`:
@@ -275,7 +295,7 @@ and the MySAMLConfiguration.php:
 		}
 	}
 
-See the [advanced_settings_example.php](https://github.com/onelogin/php-saml/blob/master/advanced_settings_example.php)
+See the [advanced\_settings\_example.php](https://github.com/onelogin/php-saml/blob/master/advanced_settings_example.php)
 for the advanced settings.
 
 ## Resources

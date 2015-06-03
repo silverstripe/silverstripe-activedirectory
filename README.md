@@ -18,6 +18,9 @@ These components may be used in any combination, also alongside the default Silv
  * SilverStripe 3.1+
  * Active Directory on Windows Server 2008 R2
  * Active Directory Federation Services FS 2.0 (ADFS)
+ * HTTPS endpoint on SilverStripe site
+ * HTTPS endpoint on ADFS
+ * SSL/StartTLS encrypted LDAP endpoint on AD
 
 While this module was only tested with Windows Server 2008 R2 and ADFS 2.0, it should also work with newer versions of Windows Server and ADFS.
 
@@ -25,18 +28,34 @@ We have not tested this module against non-Microsoft products such as OpenLDAP.
 
 ## Overview
 
-With this module, SilverStripe site is able to act as a SAML 2.0 Service Provider entity, and thus allows users to perform a single sign-on against a centralised user directory.
+![](docs/en/img/saml_ad_integration.png)
+*(Image) Typical authentication and authorisation flow for this module*
 
-The intended counterparty to this authentication scheme is the Active Directory Federation Services (ADFS). We rely on an ADFS mechanism called "claim rules" to provide a data set compatible with this module.
+[Security Assertion Markup Language (SAML)](http://en.wikipedia.org/wiki/Security_Assertion_Markup_Language) is an XML-based, open-standard data format for exchanging authentication and authorization data between parties. The single most important requirement that SAML addresses is web browser single sign-on (SSO).
 
-During SAML authentication some basic personal details are automatically synchronised into the default SilverStripe Member fields: Email, FirstName and the Surname.
+With this module, SilverStripe site is able to act as a SAML 2.0 Service Provider (SP) entity, and thus allows users to perform a single sign-on against a centralised user directory (an Identity Provider - IdP).
 
-To synchronise further personal details, LDAP synchronisation can be used (included in this module). This allows arbitrary fields to be synchronised - including binary fields such as photos. If relevant mappings have been configured in the CMS the module will also automatically maintain SilverStripe group memberships, which opens the way for an AD-centric authorisation.
+The intended counterparty for this module is the [Active Directory Federation Services (ADFS)](http://en.wikipedia.org/wiki/Active_Directory_Federation_Services). ADFS is a software component developed by Microsoft that can be installed on Windows Server operating systems to provide users with single sign-on access to systems and applications located across organizational boundaries.
+
+ADFS uses a claims-based access control authorization model to maintain application security and implement federated identity. We rely on this mechanism for authentication, and for automated synchronisation of some basic personal details into SilverStripe.
+
+To synchronise further personal details, LDAP synchronisation feature can be used, also included in this module. This allows arbitrary fields to be synchronised - including binary fields such as photos. If relevant mappings have been configured in the CMS the module will also automatically maintain SilverStripe group memberships, which opens the way for an AD-centric authorisation.
 
 If SAML authentication cannot be used, this module also provides an LDAP authenticator as an alternative.
+
+## Security
+
+With appropriate configuration, this module provides a secure means of authentication and authorisation.
+
+For secure communication over the internet during the SAML authentication process, users must communicate with SilverStripe and ADFS using HTTPS. Similarly, for AD authentication to be secure users must access the SilverStripe site using HTTPS.
+
+SilverStripe trusts ADFS responses based on pre-shared x509 certificates. These certificates are exchanged between the Identity Provider (ADFS) and the Service Provider (SilverStripe site) during the initial configuration phase.
+
+AD user synchronisation and authentication is hidden behind the backend (server to server communication), but must still use encrypted LDAP communication to prevent eavesdropping (either StartTLS or SSL - this is configurable). If the webserver and the AD server are hosted in different locations, a VPN could also be used to further encapsulate the traffic going over the public internet.
 
 ## In-depth guides
 
 * [Developer guide](docs/en/developer.md) - configure your SilverStripe site
 * [ADFS administrator guide](docs/en/adfs.md) - prepare the Identity Provider
-* [CMS usage docs](docs/en/usage.md) - manage LDAP group mappings
+* [CMS usage guide](docs/en/usage.md) - manage LDAP group mappings
+* [Troubleshooting](docs/en/troubleshooting.md) - common problems
