@@ -14,13 +14,13 @@ First step is to add this module into your SilverStripe project. You can use com
 	
 Commit the changes.
 
-## Make SSL Certificates available
+## Make x509 certificates available
 
 SAML uses pre-shared certificates for establishing trust between the Service Provider (SP - here, SilverStripe) the Identity Provider (IdP - here, ADFS). 
 
 ### SP certificate and key
 
-You need to make the SP SSL certificate and private key available to the SilverStripe site to be able to sign SAML requests. The certificate's "Common Name" needs to match the site endpoint that the ADFS will be using.
+You need to make the SP x509 certificate and private key available to the SilverStripe site to be able to sign SAML requests. The certificate's "Common Name" needs to match the site endpoint that the ADFS will be using.
 
 For testing purposes, you can generate this yourself by using the `openssl` command:
 
@@ -32,7 +32,7 @@ Contact your system administrator if you are not sure how to install these.
 
 You also need to make the certificate for your ADFS endpoint available to the SilverStripe site. Talk with your ADFS administrator to find out how to obtain this.
 
-If you are managing ADFS yourself, consult the [ADFS administrator guide](docs/en/adfs.md).
+If you are managing ADFS yourself, consult the [ADFS administrator guide](adfs.md).
 
 You may also be able to extract the certificate yourself from the IdP endpoint if it has already been configured: `https://<idp-domain>/FederationMetadata/2007-06/FederationMetadata.xml`.
 
@@ -69,7 +69,7 @@ If you don't use absolute paths, the certificate paths will be relative to the `
 
 ### Identity Provider (IdP)
 
- - `entityId`: Provided by the IdP, but for ADFS it's typically "https://domain.com/adfs/services/trust"
+ - `entityId`: Provided by the IdP, but for ADFS it's typically "https://<idp-domain>/adfs/services/trust"
  - `x509cert`: The token-signing certificate from ADFS (base 64 encoded)
  - `singleSignOnService`: The endpoint on ADFS for where to send the SAML login request
 
@@ -79,7 +79,7 @@ At this stage the SilverStripe site trusts the ADFS, but the ADFS does not have 
 
 ADFS should now be configured to extract the SP certificate from SilverStripe's SP endpoint. Once this is completed, bi-directional trust has been established and the authentication should be possible.
 
-*silverstripe-activedirectory* has some specific requirements on how ADFS is configured. If you are managing ADFS yourself, or you are assisting an ADFS administrator, consult the [ADFS administrator guide](docs/en/adfs.md)](docs/en/adfs.md).
+*silverstripe-activedirectory* has some specific requirements on how ADFS is configured. If you are managing ADFS yourself, or you are assisting an ADFS administrator, consult the [ADFS administrator guide](adfs.md).
 
 ## Configure SilverStripe Authenticators
 
@@ -96,7 +96,7 @@ You can unregister the default authenticator by adding this line
 
 	Authenticator::unregister('MemberAuthenticator');
 
-To prevent locking yourself out, before you remove the "MemberAuthenticator" make sure you map at least one LDAP group to the SilverStripe `Administrator` Security Group. Consult [CMS usage docs](docs/en/usage.md) for how to do it.
+To prevent locking yourself out, before you remove the "MemberAuthenticator" make sure you map at least one LDAP group to the SilverStripe `Administrator` Security Group. Consult [CMS usage docs](usage.md) for how to do it.
 
 ### Bypass auto login
 
@@ -108,13 +108,13 @@ Should you need to access the login form with all the configured Authenticators,
 
 	/Security/login?showloginform=1
 	
-For more information see the [SAMLSecurityExtension.php](code/authenticators/SAMLSecurityExtension.php). 
+For more information see the [SAMLSecurityExtension.php](../../code/authenticators/SAMLSecurityExtension.php). 
 
 ## Test the connection
 
-At this stage you should be able to authenticate. If you cannot, you should double check the claims rules and hashing algorithm used by ADFS. Consult [Configuring ADFS Identity Provider](docs/en/adfs.md) to assist the ADFS administrator.
+At this stage you should be able to authenticate. If you cannot, you should double check the claims rules and hashing algorithm used by ADFS. Consult [ADFS administrator guide](adfs.md) to assist the ADFS administrator.
 
-You can also review the [troubleshooting](docs/en/troubleshooting.md) guide if you are experiencing problems.
+You can also review the [troubleshooting](troubleshooting.md) guide if you are experiencing problems.
 
 ## Configure LDAP synchronisation
 
@@ -226,6 +226,19 @@ class MyMemberExtension extends DataExtension {
 }
 ```
 
+### Syncing AD users on a schedule
+
+You can schedule a job to run, then have it re-schedule itself so it runs again in the future, but some configuration needs to be set to have it work.
+
+To configure when the job should re-run itself, set the `LDAPMemberSyncJob.regenerate.time` configuration.
+In this example, this configures the job to run every 8 hours:
+
+	LDAPMemberSyncJob:
+	  regenerate_time: 28800
+
+Once the job runs, it will enqueue itself again, so it's effectively run on a schedule. Keep in mind that you'll need to have `queuedjobs` setup on a cron so that it can automatically run those queued jobs.
+See the [module docs](https://github.com/silverstripe-australia/silverstripe-queuedjobs) on how to configure that.
+
 ## Debugging
 
 There are certain parts of his module that have debugging messages logged. You can configure logging to receive these via email, for example. In your `mysite/_config.php`:
@@ -275,7 +288,7 @@ and the MySAMLConfiguration.php:
 		}
 	}
 
-See the [advanced_settings_example.php](https://github.com/onelogin/php-saml/blob/master/advanced_settings_example.php)
+See the [advanced\_settings\_example.php](https://github.com/onelogin/php-saml/blob/master/advanced_settings_example.php)
 for the advanced settings.
 
 ## Resources
