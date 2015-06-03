@@ -1,22 +1,36 @@
 <?php
 /**
+ * Class LDAPGroupMapping
+ *
  * An individual mapping of an LDAP group to a SilverStripe {@link Group}
  */
 class LDAPGroupMapping extends DataObject {
 
+	/**
+	 * @var array
+	 */
 	private static $db = array(
 		'DN' => 'Text', // the DN value of the LDAP object in AD, e.g. CN=Users,DN=playpen,DN=local
 		'Scope' => 'Enum("Subtree,OneLevel","Subtree")' // the scope of the mapping
 	);
 
+	/**
+	 * @var array
+	 */
 	private static $has_one = array(
 		'Group' => 'Group'
 	);
 
+	/**
+	 * @var array
+	 */
 	private static $summary_fields = array(
 		'DN'
 	);
 
+	/**
+	 * @var array
+	 */
 	private static $dependencies = array(
 		'ldapService' => '%$LDAPService'
 	);

@@ -1,6 +1,8 @@
 <?php
 /**
  * Class SAMLMemberExtension
+ *
+ * Adds mappings from IdP claim rules to SilverStripe {@link Member} fields.
  */
 class SAMLMemberExtension extends DataExtension {
 
@@ -33,7 +35,7 @@ class SAMLMemberExtension extends DataExtension {
 	 */
 	public function updateCMSFields(FieldList $fields) {
 		$fields->replaceField('GUID', new ReadonlyField('GUID'));
-		$fields->removeFieldFromTab("Root", "SAMLSessionIndex");
+		$fields->removeFieldFromTab('Root', 'SAMLSessionIndex');
 	}
 
 	/**

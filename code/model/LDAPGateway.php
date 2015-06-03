@@ -1,15 +1,21 @@
 <?php
 /**
- * LDAPGateway works within the LDAP domain model to provide basic operations.
+ * Class LDAPGateway
+ *
+ * Works within the LDAP domain model to provide basic operations.
  * These are exclusively used in LDAPService for constructing more complex operations.
  */
 class LDAPGateway extends Object {
 
 	/**
+	 * @var array
 	 * @config
 	 */
 	private static $options = array();
 
+	/**
+	 * @var Zend\Ldap\Ldap
+	 */
 	private $ldap;
 
 	public function __construct() {

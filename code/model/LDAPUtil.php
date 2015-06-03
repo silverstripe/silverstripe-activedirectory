@@ -1,10 +1,10 @@
 <?php
-
 /**
  * Class LDAPUtil
+ *
+ * Provides some commonly used functions for LDAP and SAML.
  */
 class LDAPUtil {
-
 
 	/**
 	 * Checks if the string is a valid guid in the format of A98C5A1E-A742-4808-96FA-6F409E799937
