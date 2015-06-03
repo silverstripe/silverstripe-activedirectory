@@ -1,5 +1,9 @@
 <?php
-
+/**
+ * Class SAMLSecurityExtension
+ *
+ * Extensions to the {@link Security} controller to support {@link SAMLAuthenticator}
+ */
 class SAMLSecurityExtension extends Extension {
 
 	/**
@@ -13,7 +17,6 @@ class SAMLSecurityExtension extends Extension {
 	 * @return void
 	 */
 	public function onBeforeSecurityLogin() {
-
 		if(Authenticator::get_default_authenticator() != 'SAMLAuthenticator') {
 			return;
 		}

@@ -1,8 +1,8 @@
 <?php
-
 /**
  * Class SAMLLoginForm
- * SAMLLoginForm is not very interesting: it's pretty much a boiler-plate code to access authenticator.
+ *
+ * This not very interesting in itself. It's pretty much boiler-plate code to access the authenticator.
  */
 class SAMLLoginForm extends LoginForm {
 

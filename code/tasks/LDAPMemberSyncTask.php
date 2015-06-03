@@ -1,6 +1,8 @@
 <?php
 /**
- * Sync all users from AD.
+ * Class LDAPMemberSyncTask
+ *
+ * A task to sync all users to the site using LDAP.
  */
 class LDAPMemberSyncTask extends BuildTask {
 

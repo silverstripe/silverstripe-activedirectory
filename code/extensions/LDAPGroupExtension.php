@@ -1,5 +1,7 @@
 <?php
 /**
+ * Class LDAPGroupExtension
+ *
  * Adds a field to map an LDAP group to a SilverStripe {@link Group}
  */
 class LDAPGroupExtension extends DataExtension {

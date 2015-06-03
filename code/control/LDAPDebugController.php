@@ -1,13 +1,21 @@
 <?php
 /**
- * This controller will ping AD with a simple operation to see if the connection is working.
+ * Class LDAPDebugController
+ *
+ * This controller is used to debug the LDAP connection.
  */
 class LDAPDebugController extends Controller {
 
+	/**
+	 * @var array
+	 */
 	private static $dependencies = array(
 		'ldapService' => '%$LDAPService'
 	);
 
+	/**
+	 * @var LDAPService
+	 */
 	public $ldapService;
 
 	public function init() {

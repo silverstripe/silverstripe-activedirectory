@@ -1,6 +1,9 @@
 <?php
 /**
- * Job to sync all users from AD.
+ * Class LDAPMemberSyncJob
+ *
+ * A {@link QueuedJob} job to sync all users to the site using LDAP.
+ * This doesn't do the actual sync work, but rather just triggers {@link LDAPMemberSyncTask}
  */
 class LDAPMemberSyncJob extends AbstractQueuedJob {
 
@@ -9,6 +12,7 @@ class LDAPMemberSyncJob extends AbstractQueuedJob {
 	 * x seconds ahead of time.
 	 *
 	 * @var mixed
+	 * @config
 	 */
 	private static $regenerate_time = null;
 
