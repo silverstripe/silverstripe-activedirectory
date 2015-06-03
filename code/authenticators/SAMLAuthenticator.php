@@ -1,8 +1,10 @@
 <?php
-
 /**
- * SAMLAuthenticator can authenticate the user against SAML IdP via a single sign-on process.
- * It will create a Member stub record with rudimentary fields (see SAMLController::acs), if Member not found.
+ * Class SAMLAuthenticator
+ *
+ * Authenticates the user against a SAML IdP via a single sign-on process.
+ * It will create a {@link Member} stub record with rudimentary fields (see {@link SAMLController::acs()})
+ * if the Member record was not found.
  *
  * You can either use:
  * - just SAMLAuthenticator (which will trigger LDAP sync anyway, via LDAPMemberExtension::memberLoggedIn)
@@ -10,15 +12,13 @@
  * - both, so people have multiple tabbed options in the login form.
  *
  * Both authenticators understand and collaborate through the GUID field on the Member.
- *
- * Class SAMLAuthenticator
  */
 class SAMLAuthenticator extends Authenticator {
 
 	/**
 	 * @var string
 	 */
-	private $name= "SAML";
+	private $name = 'SAML';
 
 	/**
 	 * @return string

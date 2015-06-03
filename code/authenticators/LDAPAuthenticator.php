@@ -1,6 +1,8 @@
 <?php
 /**
- * LDAPAuthenticator can authenticate the user against LDAP, without the single sign-on component.
+ * Class LDAPAuthenticator
+ *
+ * Authenticate a user against LDAP, without the single sign-on component.
  *
  * See SAMLAuthenticator for further information.
  */
@@ -9,7 +11,7 @@ class LDAPAuthenticator extends Authenticator {
 	/**
 	 * @var string
 	 */
-	private $name= "LDAP";
+	private $name = 'LDAP';
 
 	/**
 	 * @return string

@@ -1,7 +1,9 @@
 <?php
 /**
- * LDAPService provides operations expressed in terms of the SilverStripe domain. All other modules should access
- * LDAP through this class.
+ * Class LDAPService
+ *
+ * Provides LDAP operations expressed in terms of the SilverStripe domain.
+ * All other modules should access LDAP through this class.
  *
  * This class builds on top of LDAPGateway's detailed code by adding:
  * - caching
@@ -12,28 +14,39 @@
  */
 class LDAPService extends Object implements Flushable {
 
+	/**
+	 * @var array
+	 */
 	private static $dependencies = array(
 		'gateway' => '%$LDAPGateway'
 	);
 
 	/**
 	 * If configured, only user objects within these locations will be exposed to this service.
+	 *
+	 * @var array
 	 * @config
 	 */
 	private static $users_search_locations = array();
 
 	/**
 	 * If configured, only group objects within these locations will be exposed to this service.
+	 * @var array
+	 *
 	 * @config
 	 */
 	private static $groups_search_locations = array();
 
+	/**
+	 * @var array
+	 */
 	private static $_cache_nested_groups = array();
 
 	/**
 	 * If this is configured to a "Code" value of a {@link Group} in SilverStripe, the user will always
 	 * be added to this group's membership when imported, regardless of any sort of group mappings.
 	 *
+	 * @var string
 	 * @config
 	 */
 	private static $default_group;

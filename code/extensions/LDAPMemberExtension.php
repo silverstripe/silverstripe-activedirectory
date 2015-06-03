@@ -33,6 +33,7 @@ class LDAPMemberExtension extends DataExtension {
 	/**
 	 * The location (relative to /assets) where to save thumbnailphoto data.
 	 * @var string
+	 * @config
 	 */
 	private static $ldap_thumbnail_path = 'Uploads';
 

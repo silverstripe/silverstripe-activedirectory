@@ -1,6 +1,8 @@
 <?php
 /**
- * LDAPLoginForm is not very interesting: it's pretty much a boiler-plate code to access authenticator.
+ * Class LDAPLoginForm
+ *
+ * This not very interesting in itself. It's pretty much boiler-plate code to access the authenticator.
  */
 class LDAPLoginForm extends MemberLoginForm {
 
@@ -10,6 +12,9 @@ class LDAPLoginForm extends MemberLoginForm {
 	 */
 	public $loggedInAsField = 'FirstName';
 
+	/**
+	 * @var string
+	 */
 	protected $authenticator_class = 'LDAPAuthenticator';
 
 	/**
