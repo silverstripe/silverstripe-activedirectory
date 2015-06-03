@@ -61,6 +61,8 @@ Add the following configuration to `mysite/_config/saml.yml` (make sure to repla
 
 If you don't use absolute paths, the certificate paths will be relative to the `BASE_PATH` (your site web root).
 
+All IdP and SP endpoints must use HTTPS scheme with SSL certificates matching the domain names used.
+
 ### Service Provider (SP)
 
  - `entityId`: This should be the base URL with https for the SP
@@ -124,7 +126,7 @@ There are the following reasons for setting LDAP synchronisation up:
 * You can pull in additional personal details about your users that may not be available from the IdP directly - either because of claim rules, or inherent limitations such as binary data transfers.
 * The data is only synchronised upon modification, so it helps to keep SAML payloads small.
 
-### Configuring the connection
+### Connect with LDAP
 
 Example configuration for `mysite/_config/ldap.yml`:
 
@@ -136,12 +138,17 @@ Example configuration for `mysite/_config/ldap.yml`:
 	    'accountDomainName': 'mydomain.local'
 	    'baseDn': 'DC=mydomain,DC=local'
 	    'networkTimeout': 10
+	    'useSsl': 'TRUE'
 
-The `baseDn` option defines the initial scope of the directory where the connector can perform queries.
-This should be set to the root base DN, e.g. DC=mydomain,DC=local
+The `baseDn` option defines the initial scope of the directory where the connector can perform queries. This should be set to the root base DN, e.g. DC=mydomain,DC=local
 
-You can then set specific locations to search your directory. Note that these locations must be within the `baseDn`
-you have specified above:
+The `useSsl` option enables encrypted transport for LDAP communication. This should be mandatory for production systems to prevent eavesdropping. A certificate trusted by the webserver must be installed on the AD server. StartTLS can alternatively be used (`useStartTls` option).
+
+For more information about available LDAP options, please [see the Zend\Ldap documentation](http://framework.zend.com/manual/2.2/en/modules/zend.ldap.introduction.html) and [API overview documentation](http://framework.zend.com/manual/2.2/en/modules/zend.ldap.api.html).
+
+### Configure LDAP search query
+
+You can then set specific locations to search your directory. Note that these locations must be within the `baseDn` you have specified above:
 
 	LDAPService:
 	  users_search_locations:
@@ -153,7 +160,7 @@ you have specified above:
 Note that these search locations should only be tree nodes (e.g. containers, organisational units, domains) within your Active Directory.
 Specifying groups will not work. [More information](http://stackoverflow.com/questions/9945518/can-ldap-matching-rule-in-chain-return-subtree-search-results-with-attributes) is available on the distinction between a node and a group.
 
-If you are managing AD yourself, on Windows there is a utility called `ldp.exe` which is useful for exploring your directory to find which DN to use. Also there are several more LDAP options you can configure. For more information, please [see the Zend\Ldap documentation](http://framework.zend.com/manual/2.2/en/modules/zend.ldap.introduction.html) and [API overview documentation](http://framework.zend.com/manual/2.2/en/modules/zend.ldap.api.html).
+If you are managing AD yourself, on Windows there is a utility called `ldp.exe` which is useful for exploring your directory to find which DN to use.
 
 ### Verify LDAP connectivity
 

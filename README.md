@@ -18,6 +18,9 @@ These components may be used in any combination, also alongside the default Silv
  * SilverStripe 3.1+
  * Active Directory on Windows Server 2008 R2
  * Active Directory Federation Services FS 2.0 (ADFS)
+ * HTTPS endpoint on SilverStripe site
+ * HTTPS endpoint on ADFS
+ * SSL/StartTLS encrypted LDAP endpoint on AD
 
 While this module was only tested with Windows Server 2008 R2 and ADFS 2.0, it should also work with newer versions of Windows Server and ADFS.
 
@@ -36,6 +39,16 @@ ADFS uses a claims-based access control authorization model to maintain applicat
 To synchronise further personal details, LDAP synchronisation feature can be used, also included in this module. This allows arbitrary fields to be synchronised - including binary fields such as photos. If relevant mappings have been configured in the CMS the module will also automatically maintain SilverStripe group memberships, which opens the way for an AD-centric authorisation.
 
 If SAML authentication cannot be used, this module also provides an LDAP authenticator as an alternative.
+
+## Security
+
+With appropriate configuration, this module provides a secure means of authentication and authorisation.
+
+For secure communication over the internet during the SAML authentication process, users must communicate with SilverStripe and ADFS using HTTPS. Similarly, for AD authentication to be secure users must access the SilverStripe site using HTTPS.
+
+SilverStripe trusts ADFS responses based on pre-shared x509 certificates. These certificates are exchanged between the Identity Provider (ADFS) and the Service Provider (SilverStripe site) during the initial configuration phase.
+
+AD user synchronisation and authentication is hidden behind the backend (server to server communication), but must still use encrypted LDAP communication to prevent eavesdropping (either StartTLS or SSL - this is configurable). If the webserver and the AD server are hosted in different locations, a VPN could also be used to further encapsulate the traffic going over the public internet.
 
 ## In-depth guides
 
