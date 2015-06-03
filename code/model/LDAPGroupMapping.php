@@ -25,7 +25,6 @@ class LDAPGroupMapping extends DataObject {
 		$fields = parent::getCMSFields();
 		$fields->removeByName('DN');
 
-		// @todo This might be better represented as a field showing the directory nesting levels etc
 		$field = new DropdownField('DN', _t('LDAPGroupMapping.LDAPGROUP', 'LDAP Group'));
 		$field->setEmptyString(_t('LDAPGroupMapping.SELECTONE', 'Select one'));
 		$groups = $this->ldapService->getGroups(true, array('dn', 'name'));
