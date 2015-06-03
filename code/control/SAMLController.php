@@ -3,7 +3,8 @@
 /**
  * Class SAMLController
  *
- * @todo(stig) check if sessions from the SAML lib interferes with the Silverstripe ones
+ * This controller handles serving metadata requests for the IdP, as well as handling
+ * creating new users and logging them into SilverStripe after being authenticated at the IdP.
  */
 class SAMLController extends Controller {
 
@@ -16,7 +17,7 @@ class SAMLController extends Controller {
 		'logout',
 		'acs',
 		'sls',
-		'metadata',
+		'metadata'
 	);
 
 	/**
@@ -32,22 +33,18 @@ class SAMLController extends Controller {
 	 * @throws OneLogin_Saml2_Error
 	 */
 	public function acs() {
-		/**
-		 * @var OneLogin_Saml2_Auth
-		 */
-
 		$auth = Injector::inst()->get('SAMLHelper')->getSAMLAuth();
 		$auth->processResponse();
 
 		$error = $auth->getLastErrorReason();
-		if (!empty($error)) {
+		if(!empty($error)) {
 			SS_Log::log($error, SS_Log::ERR);
 			Form::messageForForm("SAMLLoginForm_LoginForm", "Authentication error: '{$error}'", 'bad');
 			Session::save();
 			return $this->getRedirect();
 		}
 
-		if (!$auth->isAuthenticated()) {
+		if(!$auth->isAuthenticated()) {
 			Form::messageForForm("SAMLLoginForm_LoginForm", _t('Member.ERRORWRONGCRED'), 'bad');
 			Session::save();
 			return $this->getRedirect();
@@ -74,7 +71,7 @@ class SAMLController extends Controller {
 		// Write a rudimentary member with basic fields on every login, so that we at least have something
 		// if LDAP synchronisation fails.
 		$member = Member::get()->filter('GUID', $guid)->limit(1)->first();
-		if(!$member) {
+		if(!($member && $member->exists())) {
 			$member = new Member();
 			$member->GUID = $guid;
 		}
