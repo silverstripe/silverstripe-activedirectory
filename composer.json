@@ -16,7 +16,7 @@
 	],
 	"require": {
 		"silverstripe/framework": "~3.1",
-		"silverstripe/queuedjobs": "~2.3@stable",
+		"silverstripe/queuedjobs": "~2.6@stable",
 		"zendframework/zend-ldap": "2.2.9",
 		"zendframework/zend-authentication": "2.2.9",
 		"zendframework/zend-session": "2.2.9",
