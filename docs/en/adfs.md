@@ -11,6 +11,7 @@ As an ADFS administrator, after reading this guide, you should be able to provid
 
 - [Overview](#overview)
 - [Make IdP certificate available](#make-idp-certificate-available)
+- [Create a new relying party trust](#create-a-new-relying-party-trust)
 - [Setup claim rules](#setup-claim-rules)
   - [Rule 1: Send LDAP Attributes](#rule-1-send-ldap-attributes)
   - [Rule 2: Send objectId as nameidentifier](#rule-2-send-objectid-as-nameidentifier)
@@ -49,6 +50,26 @@ Click the "Details" tab and click "Copy to file".
 ![](img/certificate_base64.png)
 
 A wizard opens, click "Next" and then choose "Base-64 encoded X.509 (.CER)". Click "Next" and choose a place to export the certificate. Click "Next" to finish the process.
+
+## Create a new relying party trust
+
+We'll now set up the trust relationship between the SilverStripe site and the IdP.
+
+![](img/create_relying_party.png)
+
+Right click "Relying Party Trusts" and click "Add Relying Party Trust...". Click "Start" when the dialog appears.
+
+### Select Data Source
+
+Enter the SilverStripe site SAML metadata endpoint: `https://<sp-domain>/saml/metadata` and press "Next".
+
+![](img/add_metadata_from_endpoint.png)
+
+### Specify Display Name
+
+Here you can add any notes, for example who would be the technical contact for the SP.
+
+![](img/add_notes.png)
 
 ## Setup claim rules
 
