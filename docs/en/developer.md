@@ -103,7 +103,7 @@ All IdP and SP endpoints must use HTTPS scheme with SSL certificates matching th
 
 ### Identity Provider (IdP)
 
- - `entityId`: Provided by the IdP, but for ADFS it's typically "https://<idp-domain>/adfs/services/trust"
+ - `entityId`: Provided by the IdP, but for ADFS it's typically `https://<idp-domain>/adfs/services/trust`
  - `x509cert`: The token-signing certificate from ADFS (base 64 encoded)
  - `singleSignOnService`: The endpoint on ADFS for where to send the SAML login request
 
@@ -123,7 +123,7 @@ You can choose which authenticators you would like to display on the login form.
 
 	// Show the SAML Login button on login form
 	Authenticator::register_authenticator('SAMLAuthenticator');
-	// Show the LDAP Login form  
+	// Show the LDAP Login form
 	Authenticator::register_authenticator('LDAPAuthenticator');
 
 You can unregister the default authenticator by adding this line
