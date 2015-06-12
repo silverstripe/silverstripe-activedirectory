@@ -67,6 +67,7 @@ class LDAPGateway extends Object {
 	 *
 	 * @param string $username
 	 * @param string $password
+	 * @return \Zend\Authentication\Result
 	 */
 	public function authenticate($username, $password) {
 		$auth = new Zend\Authentication\AuthenticationService();
@@ -178,27 +179,45 @@ class LDAPGateway extends Object {
 	 * @param int $scope The scope to perform the search. Zend_Ldap::SEARCH_SCOPE_ONE, Zend_LDAP::SEARCH_SCOPE_BASE. Default is Zend_Ldap::SEARCH_SCOPE_SUB
 	 * @param array $attributes Restrict to specific AD attributes. An empty array will return all attributes
 	 * @return array
+	 * @throws Exception
 	 */
 	public function getUserByUsername($username, $baseDn = null, $scope = Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes = array()) {
 		$options = $this->config()->options;
 		$option = isset($options['accountCanonicalForm']) ? $options['accountCanonicalForm'] : null;
 
+		// will translate the username to username@foo.bar, username or foo\user depending on the
+		// $options['accountCanonicalForm']
+		$username = $this->ldap->getCanonicalAccountName($username);
 		switch($option) {
-			case 2: // traditional style usernames, e.g. alice
+			case Zend\Ldap\Ldap::ACCTNAME_FORM_USERNAME: // traditional style usernames, e.g. alice
 				$filter = sprintf('(&(objectClass=user)(samaccountname=%s))', Zend\Ldap\Filter\AbstractFilter::escapeValue($username));
 				break;
-			case 3: // backslash style usernames, e.g. FOO\alice
+			case Zend\Ldap\Ldap::ACCTNAME_FORM_BACKSLASH: // backslash style usernames, e.g. FOO\alice
 				// @todo Not supported yet!
 				throw new Exception('Backslash style not supported in LDAPGateway::getUserByUsername()!');
 				break;
-			case 4: // principal style usernames, e.g. alice@foo.com
+			case Zend\Ldap\Ldap::ACCTNAME_FORM_PRINCIPAL: // principal style usernames, e.g. alice@foo.com
 				$filter = sprintf('(&(objectClass=user)(userprincipalname=%s))', Zend\Ldap\Filter\AbstractFilter::escapeValue($username));
 				break;
 			default: // default to principal style
 				$filter = sprintf('(&(objectClass=user)(userprincipalname=%s))', Zend\Ldap\Filter\AbstractFilter::escapeValue($username));
 		}
-
 		return $this->search($filter, $baseDn, $scope, $attributes);
+	}
+
+	/**
+	 * Updates attributes for an object. For this work you might need that LDAP connection
+	 * is bind:ed with a user with enough permissions to change attributes and that the LDAP
+	 * connection is using SSL/TLS. It depends on the server setup.
+	 *
+	 * If there are some errors, the underlying LDAP library should throw an Exception
+	 *
+	 * @param string $username - the users distinguishedname
+	 * @param array $attributes - an array attributename => value to change
+	 * @throws \Zend\Ldap\Exception\LdapException
+	 */
+	public function changeObjectAttribute($username, array $attributes) {
+		$this->ldap->update($username, $attributes);
 	}
 
 }
