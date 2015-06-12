@@ -15,9 +15,9 @@ These components may be used in any combination, also alongside the default Silv
 ## Requirements
 
  * PHP 5.3.3+ with extensions: ldap, openssl, dom, and mcrypt
- * SilverStripe 3.1+
- * Active Directory on Windows Server 2008 R2 or greater
- * Active Directory Federation Services 2.0+ (ADFS)
+ * SilverStripe 3.1
+ * Active Directory on Windows Server 2008 R2 or greater (AD)
+ * Active Directory Federation Services 2.0 or greater (ADFS)
  * HTTPS endpoint on SilverStripe site
  * HTTPS endpoint on ADFS
  * SSL/StartTLS encrypted LDAP endpoint on Active Directory
