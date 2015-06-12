@@ -4,7 +4,7 @@ This guide will step you through configuring your SilverStripe project to functi
 
 As a SilverStripe developer after reading this guide, you should be able to correctly configure your site to integrate with the Identity Provider (IdP). You will also be able to authorise users based on their AD group memberships, and synchronise their personal details.
 
-We assume ADFS 2.0 is used as an IdP.
+We assume ADFS 2.0 or greater is used as an IdP.
 
 ## Table of contents
 
@@ -48,7 +48,7 @@ Commit the changes.
 
 ## Make x509 certificates available
 
-SAML uses pre-shared certificates for establishing trust between the Service Provider (SP - here, SilverStripe) the Identity Provider (IdP - here, ADFS). 
+SAML uses pre-shared certificates for establishing trust between the Service Provider (SP - here, SilverStripe) the Identity Provider (IdP - here, ADFS).
 
 ### SP certificate and key
 
@@ -296,7 +296,7 @@ To enable some very light weight debugging from the 3rd party library set the `d
 In general it can be tricky to debug what is failing during the setup phase. The SAML protocol error
 message as quite hard to decipher.
 
-In most cases it's configuration issues that can debugged by using the ADFS 2.0 Event log, see the
+In most cases it's configuration issues that can debugged by using the ADFS Event log, see the
 [Diagnostics in ADFS 2.0](http://blogs.msdn.com/b/card/archive/2010/01/21/diagnostics-in-ad-fs-2-0.aspx)
 for more information.
 

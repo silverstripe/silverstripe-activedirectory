@@ -1,6 +1,6 @@
 # ADFS administrator guide
 
-This guide will step you through the configuration steps needed to integrate with a SilverStripe site by getting ADFS to act as a SAML 2.0 Identity Provider (IdP).
+This guide will step you through the configuration steps needed to integrate with a SilverStripe site by getting ADFS to act as a SAML Identity Provider (IdP).
 
 As an ADFS administrator, after reading this guide, you should be able to provide federated authentication service to a SilverStripe site using *silverstripe-activedirectory* module.
 
@@ -21,7 +21,7 @@ As an ADFS administrator, after reading this guide, you should be able to provid
 
 ## Overview
 
-This is not an exhaustive guide, and it only covers one operating system (Windows Server 2008 RC2) and one specific version of ADFS (2.0).
+This is not an exhaustive guide, and it only covers one operating system (Windows Server 2008 R2) and one specific version of ADFS (2.0).
 
 As an implementor of the IdP, you will need to ensure the following have been set up:
 
@@ -107,7 +107,7 @@ Repeat the same "Add Rule" as done above and select "Send Claims Using a Custom 
 
 ## Set the secure hash algorithm
 
-By default ADFS 2.0 uses a hash algorithm incompatible with *silverstripe-activedirectory* SAML implementation. You will need to change it from SHA-256 to SHA-1.
+By default ADFS uses a hash algorithm incompatible with *silverstripe-activedirectory* SAML implementation. You will need to change it from SHA-256 to SHA-1.
 
 1. Right click the relying party and choose properties.
 2. Choose the "Advanced" tab and select the "SHA-1" option in the dropdown and press OK.

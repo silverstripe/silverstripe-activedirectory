@@ -12,7 +12,7 @@ This guide contains a list of solutions to problems we have encountered in pract
 - [AD fields are not synchronised into SilverStripe](#ad-fields-are-not-synchronised-into-silverstripe)
 - [Problem finding names for field mappings](#problem-finding-names-for-field-mappings)
 - ["Invalid issuer" error in SilverStripe](#invalid-issuer-error-in-silverstripe)
-- [Updating ADFS to 2.0](#updating-adfs-to-20)
+- [Updating ADFS from 1.0 to 2.0](#updating-adfs-to-20)
 - [ADFS 3.0 and Chrome authentication](#adfs-30-and-chrome-authentication)
 - [Intranet level security settings](#intranet-level-security-settings)
 - [Stale AD groups in the CMS](#stale-ad-groups-in-the-cms)
@@ -65,9 +65,10 @@ In your SAML configuration file for SilverStripe, `entityId` must match *exactly
 
 The correct URL can be extracted from ADFS by checking the "Federation Service Properties".
 
-## Updating ADFS to 2.0
+## Updating ADFS from 1.0 to 2.0
 
-To be able to use the SAML Single Sign On functionality you need to have ADFS 2.0. In some cases ADFS 1.0 is installed, but you can upgrade for free with [an update from Microsoft](http://www.microsoft.com/en-us/download/details.aspx?id=10909).
+To be able to use the SAML Single Sign On functionality you need to have ADFS 2.0 or greater.
+In some cases ADFS 1.0 is installed, but you can upgrade for free with [an update from Microsoft](http://www.microsoft.com/en-us/download/details.aspx?id=10909).
 
 [Installing Active Directory Federation Services (ADFS) 2.0](http://pipe2text.com/?page_id=285) information is available.
 

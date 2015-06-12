@@ -6,7 +6,7 @@
 
 This SilverStripe module provides Active Directory integration. It comes with three major components:
 
-* Single sign-on authentication with SAML 2.0
+* Single sign-on authentication with SAML
 * Synchronisation of Active Directory users and group memberships via LDAP
 * Active Directory authentication via LDAP binding
 
@@ -17,14 +17,17 @@ These components may be used in any combination, also alongside the default Silv
  * PHP 5.3.3+ with extensions: ldap, openssl, dom, and mcrypt
  * SilverStripe 3.1+
  * Active Directory on Windows Server 2008 R2
- * Active Directory Federation Services FS 2.0 (ADFS)
+ * Active Directory Federation Services FS 2.0+ (ADFS)
  * HTTPS endpoint on SilverStripe site
  * HTTPS endpoint on ADFS
- * SSL/StartTLS encrypted LDAP endpoint on AD
+ * SSL/StartTLS encrypted LDAP endpoint on Active Directory
 
-While this module was only tested with Windows Server 2008 R2 and ADFS 2.0, it should also work with newer versions of Windows Server and ADFS.
+This module has been tested on the following configurations:
 
-We have not tested this module against non-Microsoft products such as OpenLDAP.
+ * Windows Server 2008 R2 with ADFS 2.0
+ * Windows Server 2012 R2 with ADFS 3.0
+
+This module has not been tested on non-Microsoft directory products, such as OpenLDAP and Samba.
 
 ## Overview
 
@@ -33,7 +36,7 @@ We have not tested this module against non-Microsoft products such as OpenLDAP.
 
 [Security Assertion Markup Language (SAML)](http://en.wikipedia.org/wiki/Security_Assertion_Markup_Language) is an XML-based, open-standard data format for exchanging authentication and authorization data between parties. The single most important requirement that SAML addresses is web browser single sign-on (SSO).
 
-With this module, SilverStripe site is able to act as a SAML 2.0 Service Provider (SP) entity, and thus allows users to perform a single sign-on against a centralised user directory (an Identity Provider - IdP).
+With this module, SilverStripe site is able to act as a SAML Service Provider (SP) entity, and thus allows users to perform a single sign-on against a centralised user directory (an Identity Provider - IdP).
 
 The intended counterparty for this module is the [Active Directory Federation Services (ADFS)](http://en.wikipedia.org/wiki/Active_Directory_Federation_Services). ADFS is a software component developed by Microsoft that can be installed on Windows Server operating systems to provide users with single sign-on access to systems and applications located across organizational boundaries.
 
