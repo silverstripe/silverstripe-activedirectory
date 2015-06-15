@@ -128,7 +128,7 @@ You can choose which authenticators you would like to display on the login form.
 	// Show the LDAP Login form
 	Authenticator::register_authenticator('LDAPAuthenticator');
 
-You can unregister the default authenticator by adding this line
+You can unregister the default authenticator by adding this line:
 
 	Authenticator::unregister('MemberAuthenticator');
 
@@ -139,12 +139,12 @@ To prevent locking yourself out, before you remove the "MemberAuthenticator" mak
 If you register the SAMLAuthenticator as the default authenticator, it will automatically send users to the ADFS login server when they are required to login.
 
 	Authenticator::set_default_authenticator('SAMLAuthenticator');
-	
+
 Should you need to access the login form with all the configured Authenticators, go to:
 
 	/Security/login?showloginform=1
-	
-For more information see the [SAMLSecurityExtension.php](../../code/authenticators/SAMLSecurityExtension.php). 
+
+For more information see the [SAMLSecurityExtension.php](../../code/authenticators/SAMLSecurityExtension.php).
 
 ## Test the connection
 
