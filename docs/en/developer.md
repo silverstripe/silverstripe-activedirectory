@@ -34,6 +34,8 @@ We assume ADFS 2.0 or greater is used as an IdP.
   - [SAML debugging](#saml-debugging)
   - [LDAP debugging](#ldap-debugging)
 - [Advanced SAML configuration](#advanced-saml-configuration)
+- [Advanced features](#advanced-features)
+  - [Allowing users to update their AD password through SilverStripe](#allowing-users-to-update-their-ad-password-through-silverstripe)
 - [Resources](#resources)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -346,6 +348,27 @@ and the MySAMLConfiguration.php:
 
 See the [advanced\_settings\_example.php](https://github.com/onelogin/php-saml/blob/master/advanced_settings_example.php)
 for the advanced settings.
+
+## Advanced features
+
+### Allowing users to update their AD password
+
+If the LDAP bind user that is configured under 'Connect with LDAP' section has permission to write attributes to the AD, it's possible to allow users to update their password via the internet site.
+
+Word of caution, you will potentially open a security hole by exposing an AD user that can write passwords. Normally you would only bind to LDAP via a read-only user. Windows AD stores passwords in a hashed format that is very hard to brute-force. A user with write access can take over an accounts, create objects, delete and have access to all systems that authenticate with AD.
+
+If you still need this feature, we recommend that you use a combination of encryption, scheduled password rotation and limit permission for the bind user to minimum required permissions.
+
+This feature only works if you have the `LDAPAuthenticator` enabled (see "Configure SilverStripe Authenticators" section).
+
+This feature has only been tested on Microsoft AD compatible servers.
+
+Example configuration in `mysite/_config/ldap.yml'
+
+```yaml
+LDAPService:
+  allow_password_change: true
+```
 
 ## Resources
 

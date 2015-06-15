@@ -1,6 +1,10 @@
 ---
 Name: ldapconfig
 ---
+Director:
+  rules:
+    'ADSecurity': LDAPSecurityController
+
 Group:
   extensions:
     - LDAPGroupExtension
@@ -10,3 +14,6 @@ Member:
 
 LDAPAuthenticator:
   name: "LDAP"
+
+LDAPService:
+  allow_password_change: false

@@ -265,7 +265,8 @@ class LDAPService extends Object implements Flushable {
 	 *
 	 * @param Member
 	 * @param array|null $data If passed, this is pre-existing AD attribute data to update the Member with.
-	 *			If not given, the data will be looked up by the user's GUID.
+	 *            If not given, the data will be looked up by the user's GUID.
+	 * @return bool
 	 */
 	public function updateMemberFromLDAP($member, $data = null) {
 		// don't attempt to do this if there's no LDAP configured
@@ -413,10 +414,53 @@ class LDAPService extends Object implements Flushable {
 				Group::get()->byId($groupRecord['GroupID'])->Members()->remove($member);
 			}
 		}
-
 		// This will throw an exception if there are two distinct GUIDs with the same email address.
 		// We are happy with a raw 500 here at this stage.
 		$member->write();
+	}
+
+
+	/**
+	 * Change a members password on the AD. Works with ActiveDirectory compatible services that saves the
+	 * password in the `unicodePwd` attribute.
+	 *
+	 * Ensure that the LDAP bind:ed user can change passwords and that the connection is secure.
+	 *
+	 * @param Member $member
+	 * @param string $password
+	 * @return ValidationResult
+	 * @throws Exception
+	 */
+	public function setPassword(Member $member, $password) {
+		$validationResult = ValidationResult::create(true);
+		if (!$member->GUID) {
+			SS_Log::log(sprintf('Cannot update Member ID %s, GUID not set', $member->ID), SS_Log::WARN);
+			$validationResult->error(_t('LDAPAuthenticator.NOUSER', 'Your account hasn\'t been setup properly, please contact an administrator.'));
+			return $validationResult;
+		}
+
+		$userData = $this->getUserByGUID($member->GUID);
+		if(empty($userData['distinguishedname'])) {
+			$validationResult->error(_t('LDAPAuthenticator.NOUSER', 'Your account hasn\'t been setup properly, please contact an administrator.'));
+			return;
+		}
+		$properties["unicodePwd"] = iconv("UTF-8", "UTF-16LE", '"' . $password . '"');
+
+		try {
+			$this->gateway->changeObjectAttribute($userData['distinguishedname'], $properties);
+		} catch(Exception $e) {
+			SS_Log::log(sprintf('Can\'t change password for Member.ID "%s": %s', $member->ID, $e->getMessage()), SS_Log::WARN);
+			// Try to parse the exception to get the error message to display to user, eg:
+			// Can't change password for Member.ID "13": 0x13 (Constraint violation; 0000052D: Constraint violation - check_password_restrictions: the password does not meet the complexity criteria!): updating: CN=User Name,OU=Users,DC=foo,DC=company,DC=com
+			$pattern = '/^([^\s])*\s([^\;]*);\s([^\:]*):\s([^\:]*):\s([^\)]*)/i';
+			if(preg_match($pattern, $e->getMessage(), $matches) && !empty($matches[5])) {
+				$validationResult->error($matches[5]);
+			} else {
+				// Unparsable exception, an administrator should check the logs
+				$validationResult->error(_t('LDAPAuthenticator.CANTCHANGEPASSWORD', 'We couldn\'t change your password, please contact an administrator.'));
+			}
+		}
+		return $validationResult;
 	}
 
 }
