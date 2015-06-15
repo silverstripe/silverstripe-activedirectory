@@ -144,7 +144,6 @@ echo sprintf(
 exit(0);
 
 function generatePassword($length = 24) {
-
 	$passwordData = null;
 
 	if(function_exists('mcrypt_create_iv')) {
@@ -152,13 +151,13 @@ function generatePassword($length = 24) {
 		if($e !== false) $passwordData = $e;
 	}
 
-	if (function_exists('openssl_random_pseudo_bytes')) {
+	if(empty($passwordData) && function_exists('openssl_random_pseudo_bytes')) {
 		$e = openssl_random_pseudo_bytes(64, $strong);
 		// Only return if strong algorithm was used
 		if($strong) $passwordData = $e;
 	}
 
-	if (empty($passwordData)) {
+	if(empty($passwordData)) {
 		echo "Cannot generate passwords - PRNG functions missing? Try installing mcrypt.";
 		exit(1);
 	}
