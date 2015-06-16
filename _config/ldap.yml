@@ -3,7 +3,7 @@ Name: ldapconfig
 ---
 Director:
   rules:
-    'ADSecurity': LDAPSecurityController
+    'LDAPSecurity': LDAPSecurityController
 
 Group:
   extensions:

@@ -60,7 +60,7 @@ class LDAPSecurityController extends Security {
 	 * @return String
 	 */
 	public function Link($action = null) {
-		return Controller::join_links(Director::baseURL(), 'ADSecurity', $action);
+		return Controller::join_links(Director::baseURL(), 'LDAPSecurity', $action);
 	}
 
 	/**
