@@ -3,6 +3,36 @@
 class LDAPChangePasswordForm extends ChangePasswordForm {
 
 	/**
+	 * The sole purpose for overriding the constructor is surfacing the username to the user.
+	 */
+	public function __construct($controller, $name, $fields = null, $actions = null) {
+		parent::__construct($controller, $name, $fields, $actions);
+
+		// Obtain the Member object. If the user got this far, they must have already been synced.
+		$member = Member::currentUser();
+		if(!$member) {
+			if(Session::get('AutoLoginHash')) {
+				$member = Member::member_from_autologinhash(Session::get('AutoLoginHash'));
+			}
+
+			// The user is not logged in and no valid auto login hash is available
+			if(!$member) {
+				Session::clear('AutoLoginHash');
+				return $this->controller->redirect($this->controller->Link('login'));
+			}
+		}
+
+		// Get the username.
+		$ldap = Injector::inst()->get('LDAPService')->getUserByGUID($member->GUID, array('samaccountname'));
+
+		if (!empty($ldap['samaccountname'])) {
+			$usernameField = new TextField('Username', 'Username', $ldap['samaccountname']);
+			$usernameField = $usernameField->performDisabledTransformation();
+			$this->Fields()->unshift($usernameField);
+		}
+	}
+
+	/**
 	 * Change the password
 	 *
 	 * @param array $data The user submitted data
