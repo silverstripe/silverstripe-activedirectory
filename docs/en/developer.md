@@ -144,6 +144,20 @@ Should you need to access the login form with all the configured Authenticators,
 
 	/Security/login?showloginform=1
 
+Note that if you have unregistered the `MemberAuthenticator`, and you wish to use that method during `showloginform=1`, you
+will need to set a cookie so it can be used temporarily.
+
+This will set a cookie to show `MemberAuthenticator` if `showloginform=1` is requested:
+
+	Authenticator::unregister('MemberAuthenticator');
+	
+	if(!empty($_GET['showloginform'])) {
+		Cookie::set('showloginform', true, 1);
+	}
+	if(Cookie::get('showloginform')) {
+		Authenticator::register_authenticator('MemberAuthenticator');
+	}
+
 For more information see the [SAMLSecurityExtension.php](../../code/authenticators/SAMLSecurityExtension.php).
 
 ## Test the connection
