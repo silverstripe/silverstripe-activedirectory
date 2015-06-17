@@ -30,6 +30,7 @@ We assume ADFS 2.0 or greater is used as an IdP.
   - [Map AD attributes to Member fields](#map-ad-attributes-to-member-fields)
     - [Example](#example)
   - [Syncing AD users on a schedule](#syncing-ad-users-on-a-schedule)
+  - [Migrating existing users](#migrating-existing-users)
 - [Debugging](#debugging)
   - [SAML debugging](#saml-debugging)
   - [LDAP debugging](#ldap-debugging)
@@ -295,6 +296,15 @@ In this example, this configures the job to run every 8 hours:
 
 Once the job runs, it will enqueue itself again, so it's effectively run on a schedule. Keep in mind that you'll need to have `queuedjobs` setup on a cron so that it can automatically run those queued jobs.
 See the [module docs](https://github.com/silverstripe-australia/silverstripe-queuedjobs) on how to configure that.
+
+### Migrating existing users
+
+If you have existing Member records on your site that have matching email addresses to users in the directory,
+you can migrate those by running the task `LDAPMigrateExistingMembersTask`. For example, visting
+`http://mysite.com/dev/tasks/LDAPMigrateExistingMembersTask` will run the migration.
+
+This essentially just updates those existing records with the matching directory user's `GUID` and sets the flag `IsImportedFromLDAP`
+so they will be synced from now on.
 
 ## Debugging
 
