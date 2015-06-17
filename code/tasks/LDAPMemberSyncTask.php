@@ -10,6 +10,15 @@ class LDAPMemberSyncTask extends BuildTask {
 		'ldapService' => '%$LDAPService'
 	);
 
+	/**
+	 * Setting this to true causes the sync to delete any local Member
+	 * records that were previously imported, but no longer existing in LDAP.
+	 *
+	 * @config
+	 * @var bool
+	 */
+	private static $destructive = false;
+
 	public function getTitle() {
 		return _t('LDAPMemberSyncJob.SYNCTITLE', 'Sync all users from Active Directory');
 	}
@@ -68,19 +77,21 @@ class LDAPMemberSyncTask extends BuildTask {
 
 		// remove Member records that were previously imported, but no longer exist in the directory
 		// NOTE: DB::query() here is used for performance and so we don't run out of memory
-		foreach(DB::query('SELECT "ID", "GUID" FROM "Member" WHERE "IsImportedFromLDAP" = 1') as $record) {
-			if(!isset($users[$record['GUID']])) {
-				$member = Member::get()->byId($record['ID']);
-				$member->delete();
+		if($this->config()->destructive) {
+			foreach(DB::query('SELECT "ID", "GUID" FROM "Member" WHERE "IsImportedFromLDAP" = 1') as $record) {
+				if(!isset($users[$record['GUID']])) {
+					$member = Member::get()->byId($record['ID']);
+					$member->delete();
 
-				$this->log(sprintf(
-					'Removing Member "%s" (GUID: %s) that no longer exists in LDAP.',
-					$member->getName(),
-					$member->GUID
-				));
+					$this->log(sprintf(
+						'Removing Member "%s" (GUID: %s) that no longer exists in LDAP.',
+						$member->getName(),
+						$member->GUID
+					));
 
-				// cleanup object from memory
-				$member->destroy();
+					// cleanup object from memory
+					$member->destroy();
+				}
 			}
 		}
 

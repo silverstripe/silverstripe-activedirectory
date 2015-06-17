@@ -287,6 +287,12 @@ class MyMemberExtension extends DataExtension {
 
 You can schedule a job to run, then have it re-schedule itself so it runs again in the future, but some configuration needs to be set to have it work.
 
+If you want, you can set the behaviour of the sync to be destructive, which means any previously imported users who no
+longer exist in the directory get deleted:
+
+	LDAPMemberSyncTask:
+	  destructive: true
+
 To configure when the job should re-run itself, set the `LDAPMemberSyncJob.regenerate.time` configuration.
 In this example, this configures the job to run every 8 hours:
 
