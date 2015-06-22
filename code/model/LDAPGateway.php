@@ -220,4 +220,17 @@ class LDAPGateway extends Object {
 		$this->ldap->update($username, $attributes);
 	}
 
+	/**
+	 * A simple proxy to LDAP add operation.
+	 *
+	 * @param string $dn Location to add the entry at.
+	 * @param array $definition A simple associative array of attributes.
+	 */
+	public function add($dn, $definition) {
+		$entry = array();
+		foreach ($definition as $key => $value) {
+			Zend\Ldap\Attribute::setAttribute($entry, $key, $value);
+		}
+		$this->ldap->add($dn, $entry);
+	}
 }

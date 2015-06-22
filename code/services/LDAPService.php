@@ -463,4 +463,14 @@ class LDAPService extends Object implements Flushable {
 		return $validationResult;
 	}
 
+	/**
+	 * A simple proxy to LDAP add operation.
+	 *
+	 * @param string $dn Location to add the entry at.
+	 * @param array $definition A simple associative array of attributes.
+	 */
+	public function add($dn, $definition) {
+		$this->gateway->add($dn, $definition);
+	}
+
 }
