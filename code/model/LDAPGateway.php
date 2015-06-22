@@ -206,32 +206,35 @@ class LDAPGateway extends Object {
 	}
 
 	/**
-	 * Updates attributes for an object. For this work you might need that LDAP connection
-	 * is bind:ed with a user with enough permissions to change attributes and that the LDAP
-	 * connection is using SSL/TLS. It depends on the server setup.
+	 * Updates an LDAP object.
+	 *
+	 * For this work you might need that LDAP connection is bind:ed with a user with
+	 * enough permissions to change attributes and that the LDAP connection is using
+	 * SSL/TLS. It depends on the server setup.
 	 *
 	 * If there are some errors, the underlying LDAP library should throw an Exception
 	 *
-	 * @param string $username - the users distinguishedname
-	 * @param array $attributes - an array attributename => value to change
+	 * @param string $dn Location to update the entry at.
+	 * @param array $attributes An associative array of attributes.
 	 * @throws \Zend\Ldap\Exception\LdapException
 	 */
-	public function changeObjectAttribute($username, array $attributes) {
-		$this->ldap->update($username, $attributes);
+	public function update($dn, array $attributes) {
+		$this->ldap->update($dn, $attributes);
 	}
 
 	/**
-	 * A simple proxy to LDAP add operation.
+	 * Add an LDAP object.
+	 *
+	 * For this work you might need that LDAP connection is bind:ed with a user with
+	 * enough permissions to change attributes and that the LDAP connection is using
+	 * SSL/TLS. It depends on the server setup.
 	 *
 	 * @param string $dn Location to add the entry at.
-	 * @param array $attributes A simple associative array of attributes.
+	 * @param array $attributes An associative array of attributes.
+	 * @throws \Zend\Ldap\Exception\LdapException
 	 */
-	public function add($dn, $attributes) {
-		$entry = array();
-		foreach($attributes as $key => $value) {
-			Zend\Ldap\Attribute::setAttribute($entry, $key, $value);
-		}
-		$this->ldap->add($dn, $entry);
+	public function add($dn, array $attributes) {
+		$this->ldap->add($dn, $attributes);
 	}
 
 }
