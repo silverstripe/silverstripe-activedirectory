@@ -424,6 +424,9 @@ class LDAPService extends Object implements Flushable {
 	 * Change a members password on the AD. Works with ActiveDirectory compatible services that saves the
 	 * password in the `unicodePwd` attribute.
 	 *
+	 * @todo Use the Zend\Ldap\Attribute::setPassword functionality to create a password in
+	 * an abstract way, so it works on other LDAP directories, not just Active Directory.
+	 *
 	 * Ensure that the LDAP bind:ed user can change passwords and that the connection is secure.
 	 *
 	 * @param Member $member
@@ -446,7 +449,7 @@ class LDAPService extends Object implements Flushable {
 		}
 
 		try {
-			$this->gateway->changeObjectAttribute(
+			$this->update(
 				$userData['distinguishedname'],
 				array('unicodePwd' => iconv('UTF-8', 'UTF-16LE', sprintf('"%s"', $password)))
 			);
@@ -467,12 +470,22 @@ class LDAPService extends Object implements Flushable {
 	}
 
 	/**
+	 * A simple proxy to LDAP update operation.
+	 *
+	 * @param string $dn Location to add the entry at.
+	 * @param array $attributes A simple associative array of attributes.
+	 */
+	public function update($dn, array $attributes) {
+		$this->gateway->update($dn, $attributes);
+	}
+
+	/**
 	 * A simple proxy to LDAP add operation.
 	 *
 	 * @param string $dn Location to add the entry at.
 	 * @param array $attributes A simple associative array of attributes.
 	 */
-	public function add($dn, $attributes) {
+	public function add($dn, array $attributes) {
 		$this->gateway->add($dn, $attributes);
 	}
 
