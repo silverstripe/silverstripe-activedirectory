@@ -78,7 +78,7 @@ class LDAPService extends Object implements Flushable {
 	public $gateway;
 
 	/**
-	 * Setter for getter property. Useful for overriding the gateway with a fake for testing.
+	 * Setter for gateway. Useful for overriding the gateway with a fake for testing.
 	 * @var LDAPGateway
 	 */
 	public function setGateway($gateway) {
