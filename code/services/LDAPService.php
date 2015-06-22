@@ -442,12 +442,14 @@ class LDAPService extends Object implements Flushable {
 		$userData = $this->getUserByGUID($member->GUID);
 		if(empty($userData['distinguishedname'])) {
 			$validationResult->error(_t('LDAPAuthenticator.NOUSER', 'Your account hasn\'t been setup properly, please contact an administrator.'));
-			return;
+			return false;
 		}
-		$properties["unicodePwd"] = iconv("UTF-8", "UTF-16LE", '"' . $password . '"');
 
 		try {
-			$this->gateway->changeObjectAttribute($userData['distinguishedname'], $properties);
+			$this->gateway->changeObjectAttribute(
+				$userData['distinguishedname'],
+				array('unicodePwd' => iconv('UTF-8', 'UTF-16LE', sprintf('"%s"', $password)))
+			);
 		} catch(Exception $e) {
 			SS_Log::log(sprintf('Can\'t change password for Member.ID "%s": %s', $member->ID, $e->getMessage()), SS_Log::WARN);
 			// Try to parse the exception to get the error message to display to user, eg:
@@ -460,6 +462,7 @@ class LDAPService extends Object implements Flushable {
 				$validationResult->error(_t('LDAPAuthenticator.CANTCHANGEPASSWORD', 'We couldn\'t change your password, please contact an administrator.'));
 			}
 		}
+
 		return $validationResult;
 	}
 
