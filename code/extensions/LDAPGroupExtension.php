@@ -7,6 +7,16 @@
 class LDAPGroupExtension extends DataExtension {
 
 	/**
+	 * @var array
+	 */
+	private static $db = array(
+		// Unique user identifier, same field is used by SAMLMemberExtension
+		'GUID' => 'Varchar(50)',
+		'IsImportedFromLDAP' => 'Boolean',
+		'LastSynced' => 'SS_Datetime'
+	);
+
+	/**
 	 * A SilverStripe group can have several mappings to LDAP groups.
 	 * @var array
 	 */
@@ -30,6 +40,18 @@ class LDAPGroupExtension extends DataExtension {
 	);
 
 	public function updateCMSFields(FieldList $fields) {
+		$fields->addFieldToTab('Root.Members', new ReadonlyField('GUID'));
+		$fields->addFieldToTab('Root.Members', new ReadonlyField('IsImportedFromLDAP', 'Is group imported from LDAP/AD?'));
+		$fields->addFieldToTab('Root.Members', new ReadonlyField('LastSynced', _t('Group.LASTSYNCED', 'Last synced')));
+
+		if ($this->owner->IsImportedFromLDAP) {
+			$fields->addFieldToTab('Root.Members', new LiteralField(
+				'Caution',
+				'<p class="message warning">Caution: LDAP group mapping is maintained automatically on this group. ' .
+					'Your modifications will be removed as soon as the sync task runs.</p>'
+			));
+		}
+
 		$field = GridField::create(
 			'LDAPGroupMappings',
 			_t('LDAPGroupExtension.MAPPEDGROUPS', 'Mapped LDAP Groups'),
