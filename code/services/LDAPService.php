@@ -141,9 +141,10 @@ class LDAPService extends Object implements Flushable {
 	 *
 	 * @param boolean $cached Cache the results from AD, so that subsequent calls are faster. Enabled by default.
 	 * @param array $attributes List of specific AD attributes to return. Empty array means return everything.
-	 * @return array
+	 * @param string $indexBy Attribute to use as an index.
+	 * @return associative array
 	 */
-	public function getGroups($cached = true, $attributes = array()) {
+	public function getGroups($cached = true, $attributes = array(), $indexBy = 'dn') {
 		$searchLocations = $this->config()->groups_search_locations ?: array(null);
 		$cache = self::get_cache();
 		$results = $cache->load('groups' . md5(implode('', array_merge($searchLocations, $attributes))));
@@ -153,7 +154,7 @@ class LDAPService extends Object implements Flushable {
 			foreach($searchLocations as $searchLocation) {
 				$records = $this->gateway->getGroups($searchLocation, Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes);
 				foreach($records as $record) {
-					$results[$record['dn']] = $record;
+					$results[$record[$indexBy]] = $record;
 				}
 			}
 
@@ -411,7 +412,9 @@ class LDAPService extends Object implements Flushable {
 		$groupRecords = DB::query(sprintf('SELECT "GroupID" FROM "Group_Members" WHERE "IsImportedFromLDAP" = 1 AND "MemberID" = %s', $member->ID));
 		foreach($groupRecords as $groupRecord) {
 			if(!in_array($groupRecord['GroupID'], $mappedGroupIDs)) {
-				Group::get()->byId($groupRecord['GroupID'])->Members()->remove($member);
+				$group = Group::get()->byId($groupRecord['GroupID']);
+				// Some groups may no longer exist. SilverStripe does not clean up join tables.
+				if ($group) $group->Members()->remove($member);
 			}
 		}
 		// This will throw an exception if there are two distinct GUIDs with the same email address.

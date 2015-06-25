@@ -30,13 +30,15 @@ We assume ADFS 2.0 or greater is used as an IdP.
   - [Map AD attributes to Member fields](#map-ad-attributes-to-member-fields)
     - [Example](#example)
   - [Syncing AD users on a schedule](#syncing-ad-users-on-a-schedule)
+  - [Syncing AD groups and users on a schedule](#syncing-ad-groups-and-users-on-a-schedule)
   - [Migrating existing users](#migrating-existing-users)
 - [Debugging](#debugging)
   - [SAML debugging](#saml-debugging)
-  - [LDAP debugging](#ldap-debugging)
+  - [Debugging LDAP from SilverStripe](#debugging-ldap-from-silverstripe)
+  - [Debugging LDAP directly](#debugging-ldap-directly)
 - [Advanced SAML configuration](#advanced-saml-configuration)
 - [Advanced features](#advanced-features)
-  - [Allowing users to update their AD password through SilverStripe](#allowing-users-to-update-their-ad-password-through-silverstripe)
+  - [Allowing users to update their AD password](#allowing-users-to-update-their-ad-password)
 - [Resources](#resources)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -303,6 +305,29 @@ In this example, this configures the job to run every 8 hours:
 Once the job runs, it will enqueue itself again, so it's effectively run on a schedule. Keep in mind that you'll need to have `queuedjobs` setup on a cron so that it can automatically run those queued jobs.
 See the [module docs](https://github.com/silverstripe-australia/silverstripe-queuedjobs) on how to configure that.
 
+If you don't want to run a queued job, you can set a cronjob yourself by calling:
+
+	/usr/bin/php framework/cli-script.php dev/tasks/LDAPMemberSyncTask
+
+### Syncing AD groups and users on a schedule
+
+Similarly to syncing AD users, you can also schedule a full group and user sync. Group mappings will be added automatically, resulting in Members being added to relevant Groups.
+
+As with the user sync, you can separately set the group sync to be destructive:
+
+	LDAPGroupSyncTask:
+	  destructive: true
+
+And here is how you make the job reschedule itself after completion:
+
+	LDAPAllSyncJob:
+	  regenerate_time: 28800
+
+If you don't want to run a queued job, you can set a cronjob yourself by calling the two sync tasks (order is important, otherwise your group memberships might not get updated):
+
+	/usr/bin/php framework/cli-script.php dev/tasks/LDAPGroupSyncTask
+	/usr/bin/php framework/cli-script.php dev/tasks/LDAPMemberSyncTask
+
 ### Migrating existing users
 
 If you have existing Member records on your site that have matching email addresses to users in the directory,
@@ -334,7 +359,13 @@ for more information.
 
 Also ensure that all protocols are matching. SAML is very sensitive to differences in http and https in URIs.
 
-### LDAP debugging
+### Debugging LDAP from SilverStripe
+
+For debugging what information SilverStripe is getting from LDAP, you can visit the `<site-root>/LDAPDebugController` from your browser. Assuming you are an ADMIN, this will give you a breakdown of visible information.
+
+To see debug information on the sync tasks, run them directly from your browser. The tasks are at `<site-root>/dev/tasks/LDAPGroupSyncTask` and `dev/tasks/LDAPMemberSyncTask`.
+
+### Debugging LDAP directly
 
 LDAP is a plain-text protocol for interacting with user directories. You can debug LDAP responses by querying directly. For that you can use Windows' `ldp.exe` tool, or Unix/Linux equivalent `ldapsearch`.
 

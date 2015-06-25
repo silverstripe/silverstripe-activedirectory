@@ -12,7 +12,7 @@ This guide contains a list of solutions to problems we have encountered in pract
 - [AD fields are not synchronised into SilverStripe](#ad-fields-are-not-synchronised-into-silverstripe)
 - [Problem finding names for field mappings](#problem-finding-names-for-field-mappings)
 - ["Invalid issuer" error in SilverStripe](#invalid-issuer-error-in-silverstripe)
-- [Updating ADFS from 1.0 to 2.0](#updating-adfs-to-20)
+- [Updating ADFS from 1.0 to 2.0](#updating-adfs-from-10-to-20)
 - [ADFS 3.0 and Chrome authentication](#adfs-30-and-chrome-authentication)
 - [Intranet level security settings](#intranet-level-security-settings)
 - [Stale AD groups in the CMS](#stale-ad-groups-in-the-cms)
