@@ -289,7 +289,7 @@ class LDAPService extends Object implements Flushable {
 		}
 
 		$member->IsExpired = ($data['useraccountcontrol'] & 2) == 2;
-		$member->LastSynced = SS_Datetime::now();
+		$member->LastSynced = (string)SS_Datetime::now();
 		$member->IsImportedFromLDAP = true;
 
 		foreach($member->config()->ldap_field_mappings as $attribute => $field) {
