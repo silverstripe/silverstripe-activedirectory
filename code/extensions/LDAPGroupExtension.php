@@ -41,30 +41,56 @@ class LDAPGroupExtension extends DataExtension {
 	);
 
 	public function updateCMSFields(FieldList $fields) {
-		$fields->addFieldToTab('Root.Members', new ReadonlyField('GUID'));
-		$fields->addFieldToTab('Root.Members', new ReadonlyField('DN'));
-		$fields->addFieldToTab('Root.Members', new ReadonlyField('IsImportedFromLDAP', 'Is group imported from LDAP/AD?'));
-		$fields->addFieldToTab('Root.Members', new ReadonlyField('LastSynced', _t('Group.LASTSYNCED', 'Last synced')));
+		// Add read-only LDAP metadata fields.
+		$fields->replaceField('IsImportedFromLDAP', $readOnly[] = new ReadonlyField(
+			'IsImportedFromLDAP',
+			_t('LDAPGroupExtension.ISIMPORTEDFROMLDAP', 'Is group imported from LDAP/AD?')
+		));
+		$fields->addFieldToTab('Root.LDAP', new ReadonlyField('GUID'));
+		$fields->addFieldToTab('Root.LDAP', new ReadonlyField('DN'));
+		$fields->addFieldToTab('Root.LDAP', new ReadonlyField(
+			'LastSynced',
+			_t('LDAPGroupExtension.LASTSYNCED', 'Last synced'))
+		);
 
 		if ($this->owner->IsImportedFromLDAP) {
-			$fields->addFieldToTab('Root.Members', new LiteralField(
-				'Caution',
-				'<p class="message warning">Caution: LDAP group mapping is maintained automatically on this group. ' .
-					'Your modifications will be removed as soon as the sync task runs.</p>'
+			$fields->replaceField('Title', new ReadonlyField('Title'));
+			$fields->replaceField('Description', new ReadonlyField('Description'));
+			// Surface the code which is normally hidden from the CMS user.
+			$fields->addFieldToTab('Root.Members', new ReadonlyField('Code'), 'Members');
+
+			$message = _t(
+				'LDAPGroupExtension.INFOIMPORTED',
+				'This group is automatically imported from LDAP.'
+			);
+			$fields->addFieldToTab(
+				'Root.Members',
+				new LiteralField(
+					'Info',
+					sprintf('<p class="message warning">%s</p>', $message)
+				),
+				'Title'
+			);
+
+			$fields->addFieldToTab('Root.LDAP', new ReadonlyField(
+				'LDAPGroupMappingsRO',
+				_t('LDAPGroupExtension.AUTOMAPPEDGROUPS', 'Automatically mapped LDAP Groups'),
+				implode('; ', $this->owner->LDAPGroupMappings()->column('DN'))
 			));
+
+		} else {
+			$field = GridField::create(
+				'LDAPGroupMappings',
+				_t('LDAPGroupExtension.MAPPEDGROUPS', 'Mapped LDAP Groups'),
+				$this->owner->LDAPGroupMappings()
+			);
+			$config = GridFieldConfig_RecordEditor::create();
+			$config->getComponentByType('GridFieldAddNewButton')
+				->setButtonName(_t('LDAPGroupExtension.ADDMAPPEDGROUP', 'Add LDAP group mapping'));
+
+			$field->setConfig($config);
+			$fields->addFieldToTab('Root.LDAP', $field);
 		}
-
-		$field = GridField::create(
-			'LDAPGroupMappings',
-			_t('LDAPGroupExtension.MAPPEDGROUPS', 'Mapped LDAP Groups'),
-			$this->owner->LDAPGroupMappings()
-		);
-		$config = GridFieldConfig_RecordEditor::create();
-		$config->getComponentByType('GridFieldAddNewButton')
-			->setButtonName(_t('LDAPGroupExtension.ADDMAPPEDGROUP', 'Add LDAP group mapping'));
-
-		$field->setConfig($config);
-		$fields->addFieldToTab('Root.Members', $field);
 	}
 
 }

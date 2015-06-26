@@ -48,10 +48,51 @@ class LDAPMemberExtension extends DataExtension {
 	 * @param FieldList $fields
 	 */
 	public function updateCMSFields(FieldList $fields) {
-		$fields->replaceField('GUID', new ReadonlyField('GUID'));
-		$fields->replaceField('IsImportedFromLDAP', new ReadonlyField('IsImportedFromLDAP', 'Is user imported from LDAP/AD?'));
-		$fields->replaceField('IsExpired', new ReadonlyField('IsExpired', _t('Member.ISEXPIRED', 'Has user\'s LDAP/AD login expired?')));
-		$fields->replaceField('LastSynced', new ReadonlyField('LastSynced', _t('Member.LASTSYNCED', 'Last synced')));
+		// Redo LDAP metadata fields as read-only and move to LDAP tab.
+		$ldapMetadata = array();
+		$fields->replaceField('IsImportedFromLDAP', $ldapMetadata[] = new ReadonlyField(
+			'IsImportedFromLDAP',
+			_t('LDAPMemberExtension.ISIMPORTEDFROMLDAP', 'Is user imported from LDAP/AD?')
+		));
+		$fields->replaceField('GUID', $ldapMetadata[] = new ReadonlyField('GUID'));
+		$fields->replaceField('IsExpired', $ldapMetadata[] = new ReadonlyField(
+			'IsExpired',
+			_t('LDAPMemberExtension.ISEXPIRED', 'Has user\'s LDAP/AD login expired?'))
+		);
+		$fields->replaceField('LastSynced', $ldapMetadata[] = new ReadonlyField(
+			'LastSynced',
+			_t('LDAPMemberExtension.LASTSYNCED', 'Last synced'))
+		);
+		$fields->addFieldsToTab('Root.LDAP', $ldapMetadata);
+
+		if ($this->owner->IsImportedFromLDAP) {
+			// Transform the automatically mapped fields into read-only.
+			$mappings = Config::inst()->get('Member', 'ldap_field_mappings');
+			foreach ($mappings as $ldap=>$ss) {
+				$field = $fields->dataFieldByName($ss);
+				if (!empty($field)) {
+					// This messes up the Member_Validator, preventing the record from saving :-(
+					// $field->setReadonly(true);
+					$field->setTitle($field->Title() . _t('LDAPMemberExtension.IMPORTEDFIELD', ' (imported)'));
+				}
+			}
+
+			// Display alert message at the top.
+			$message = _t(
+				'LDAPMemberExtension.INFOIMPORTED',
+				'This user is automatically imported from LDAP. ' .
+					'Manual changes to imported fields will be removed upon sync.'
+			);
+			$fields->addFieldToTab(
+				'Root.Main',
+				new LiteralField(
+					'Info',
+					sprintf('<p class="message warning">%s</p>', $message)
+				),
+				'FirstName'
+			);
+		}
+
 	}
 
 	/**
