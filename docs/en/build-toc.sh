@@ -6,6 +6,6 @@ if [ "$?" -ne "0" ]; then
 	exit 2
 fi
 
-for file in adfs.md developer.md troubleshooting.md; do
+for file in usage.md adfs.md developer.md troubleshooting.md; do
 	doctoc $file && sed -i "" "/Table of Contents.*generated with/d" $file
 done

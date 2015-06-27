@@ -12,6 +12,8 @@ As an ADFS administrator, after reading this guide, you should be able to provid
 - [Overview](#overview)
 - [Make IdP certificate available](#make-idp-certificate-available)
 - [Create a new relying party trust](#create-a-new-relying-party-trust)
+  - [Select Data Source](#select-data-source)
+  - [Specify Display Name](#specify-display-name)
 - [Setup claim rules](#setup-claim-rules)
   - [Rule 1: Send LDAP Attributes](#rule-1-send-ldap-attributes)
   - [Rule 2: Send objectId as nameidentifier](#rule-2-send-objectid-as-nameidentifier)
