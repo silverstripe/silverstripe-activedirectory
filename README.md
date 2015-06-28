@@ -27,7 +27,7 @@ This module has been tested on the following configurations:
  * Windows Server 2008 R2 with ADFS 2.0
  * Windows Server 2012 R2 with ADFS 3.0
 
-This module has not been tested on non-Microsoft directory products, such as OpenLDAP and Samba.
+This module has not been tested on non-Microsoft directory products, such as OpenLDAP.
 
 ## Overview
 
