@@ -15,40 +15,42 @@ error_reporting(E_ALL | E_STRICT);
  * Copy this script into /usr/local/bin/rotate_ldap_password
  *
  * Command synax:
- * rotate_ldap_password <env-file-path> <ldap-hostname-const> <ldap-username-const> <ldap-password-const>
+ * rotate_ldap_password <ss_env_file> <c_hostname> <c_privileged_dn> <c_privileged_password> [<c_target_dn> <c_target_password>]
  *
  * Example:
  * Assuming you have this configuration in your /sites/_ss_environment.php file:
  * <code>
  * define('LDAP_HOSTNAME', 'ldap://myldap.hostname:636');
- * define('LDAP_USERNAME', 'CN=MyUser,DC=platform,DC=silverstripe,DC=com');
- * define('LDAP_PASSWORD', 'somesupersecretpassword');
+ * define('PRIVILEGED_DN', 'CN=PrivilegedUser,DC=platform,DC=silverstripe,DC=com');
+ * define('PRIVILEGED_PASSWORD', 'somesupersecretpassword');
+ * define('TARGET_DN', 'CN=MyUser,DC=platform,DC=silverstripe,DC=com');
+ * define('TARGET_PASSWORD', 'somesupersecretpassword');
  * </code>
  * The password can be rotated by running:
- * rotate_ldap_password /sites/_ss_environment.php LDAP_HOSTNAME LDAP_USERNAME LDAP_PASSWORD
+ * rotate_ldap_password /sites/_ss_environment.php LDAP_HOSTNAME PRIVILEGED_DN PRIVILEGED_PASSWORD TARGET_DN TARGET_PASSWORD
  */
 
-if(empty($_SERVER['argv'][1])) {
-	echo "Missing first argument: _ss_environment.php file path\n";
-	exit(1);
-}
-if(empty($_SERVER['argv'][2])) {
-	echo "Missing second argument: LDAP hostname constant\n";
-	exit(1);
-}
-if(empty($_SERVER['argv'][3])) {
-	echo "Missing third argument: LDAP username constant\n";
-	exit(1);
-}
-if(empty($_SERVER['argv'][4])) {
-	echo "Missing fourth argument: LDAP password constant\n";
+if(count($_SERVER['argv'])!=5 && count($_SERVER['argv'])!=7) {
+	echo "Not enough arguments.\n\n";
+	echo "Usage (`c_' suffix denotes constants, not actual value):\n";
+	echo "	{$_SERVER['argv'][0]} <ss_env_file> <c_hostname> <c_privileged_dn> <c_privileged_password> [<c_target_dn> <c_target_password>]\n";
 	exit(1);
 }
 
 $envFilePath = $_SERVER['argv'][1];
 $hostnameConst = $_SERVER['argv'][2];
-$usernameConst = $_SERVER['argv'][3];
-$passwordConst = $_SERVER['argv'][4];
+$privilegedDNConst = $_SERVER['argv'][3];
+$privilegedPasswordConst = $_SERVER['argv'][4];
+
+if (empty($_SERVER['argv'][5])) {
+	// No target user specified, assume the privileged user's password is being changed.
+	$DNConst = $privilegedDNConst;
+	$passwordConst = $privilegedPasswordConst;
+} else {
+	// Target specified for change.
+	$DNConst = $_SERVER['argv'][5];
+	$passwordConst = $_SERVER['argv'][6];
+}
 
 if(!file_exists($envFilePath)) {
 	echo sprintf("%s does not exist\n", $envFilePath);
@@ -65,7 +67,7 @@ $conn = ldap_connect(constant($hostnameConst));
 ldap_set_option($conn, LDAP_OPT_PROTOCOL_VERSION, 3);
 ldap_set_option($conn, LDAP_OPT_REFERRALS, 0);
 
-$bind = @ldap_bind($conn, constant($usernameConst), constant($passwordConst));
+$bind = @ldap_bind($conn, constant($privilegedDNConst), constant($privilegedPasswordConst));
 if(!$bind) {
 	echo sprintf(
 		"Could not bind to LDAP: %s (error code: %s)\n",
@@ -77,11 +79,11 @@ if(!$bind) {
 
 // ldap_read searches the directory but uses LDAP_SCOPE_BASE, so we only get a single entry.
 // We're just doing this to validate that the entry exists in the directory.
-$query = ldap_read($conn, constant($usernameConst), '(objectClass=user)', array('dn'));
+$query = ldap_read($conn, constant($DNConst), '(objectClass=user)', array('dn'));
 if(!$query) {
 	echo sprintf(
 		"Could not read the LDAP entry %s: %s (error code: %s)\n",
-		constant($usernameConst),
+		constant($DNConst),
 		ldap_error($conn),
 		ldap_errno($conn)
 	);
@@ -93,7 +95,7 @@ $results = ldap_get_entries($conn, $query);
 if(empty($results[0]['dn'])) {
 	echo sprintf(
 		"There was a problem retrieving the details for %s\n",
-		constant($usernameConst)
+		constant($DNConst)
 	);
 	exit(1);
 }
@@ -121,7 +123,7 @@ $success = ldap_modify($conn, $results[0]['dn'], array(
 if(!$success) {
 	echo sprintf(
 		"Could not modify the LDAP entry %s: %s (error code: %s)\n",
-		constant($usernameConst),
+		constant($DNConst),
 		ldap_error($conn),
 		ldap_errno($conn)
 	);
