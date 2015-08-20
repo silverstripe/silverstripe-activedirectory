@@ -37,7 +37,7 @@ class LDAPLoginForm extends MemberLoginForm {
 		// will be used to get correct Link()
 		$this->ldapSecController = Injector::inst()->create('LDAPSecurityController');
 
-		$usernameField = new TextField('Username', _t('Member.USERNAME', 'Username'));
+		$usernameField = new TextField('Username', _t('Member.USERNAME', 'Username'), null, null, $this);
 		$this->Fields()->replaceField('Email', $usernameField);
 		$this->setValidator(new RequiredFields('Username', 'Password'));
 		if(Security::config()->remember_username) {
