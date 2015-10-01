@@ -138,6 +138,24 @@ class LDAPGateway extends Object {
 	}
 
 	/**
+	 * Return a particular LDAP group by DN value.
+	 *
+	 * @param string $dn
+	 * @param null|string $baseDn The DN to search from. Default is the baseDn option in the connection if not given
+	 * @param int $scope The scope to perform the search. Zend_Ldap::SEARCH_SCOPE_ONE, Zend_LDAP::SEARCH_SCOPE_BASE. Default is Zend_Ldap::SEARCH_SCOPE_SUB
+	 * @param array $attributes Restrict to specific AD attributes. An empty array will return all attributes
+	 * @return array
+	 */
+	public function getGroupByDN($dn, $baseDn = null, $scope = Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes = array()) {
+		return $this->search(
+			sprintf('(&(objectClass=group)(distinguishedname=%s))', $dn),
+			$baseDn,
+			$scope,
+			$attributes
+		);
+	}
+
+	/**
 	 * Query for LDAP users, but don't include built-in user accounts.
 	 *
 	 * @param null|string $baseDn The DN to search from. Default is the baseDn option in the connection if not given
@@ -165,6 +183,24 @@ class LDAPGateway extends Object {
 	public function getUserByGUID($guid, $baseDn = null, $scope = Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes = array()) {
 		return $this->search(
 			sprintf('(&(objectClass=user)(objectGUID=%s))', LDAPUtil::str_to_hex_guid($guid, true)),
+			$baseDn,
+			$scope,
+			$attributes
+		);
+	}
+
+	/**
+	 * Return a particular LDAP user by DN value.
+	 *
+	 * @param string $dn
+	 * @param null|string $baseDn The DN to search from. Default is the baseDn option in the connection if not given
+	 * @param int $scope The scope to perform the search. Zend_Ldap::SEARCH_SCOPE_ONE, Zend_LDAP::SEARCH_SCOPE_BASE. Default is Zend_Ldap::SEARCH_SCOPE_SUB
+	 * @param array $attributes Restrict to specific AD attributes. An empty array will return all attributes
+	 * @return array
+	 */
+	public function getUserByDN($dn, $baseDn = null, $scope = Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes = array()) {
+		return $this->search(
+			sprintf('(&(objectClass=user)(distinguishedname=%s))', $dn),
 			$baseDn,
 			$scope,
 			$attributes
@@ -202,6 +238,7 @@ class LDAPGateway extends Object {
 			default: // default to principal style
 				$filter = sprintf('(&(objectClass=user)(userprincipalname=%s))', Zend\Ldap\Filter\AbstractFilter::escapeValue($username));
 		}
+
 		return $this->search($filter, $baseDn, $scope, $attributes);
 	}
 

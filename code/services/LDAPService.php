@@ -206,6 +206,21 @@ class LDAPService extends Object implements Flushable {
 	}
 
 	/**
+	 * Get a particular AD group's data given a DN.
+	 *
+	 * @param string $guid
+	 * @param array $attributes List of specific AD attributes to return. Empty array means return everything.
+	 * @return array
+	 */
+	public function getGroupByDN($dn, $attributes = array()) {
+		$searchLocations = $this->config()->groups_search_locations ?: array(null);
+		foreach($searchLocations as $searchLocation) {
+			$records = $this->gateway->getGroupByDN($dn, $searchLocation, Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes);
+			if($records) return $records[0];
+		}
+	}
+
+	/**
 	 * Return all AD users in configured search locations, including all users in nested groups.
 	 * Uses users_search_locations if defined, otherwise falls back to NULL, which tells LDAPGateway
 	 * to use the default baseDn defined in the connection.
@@ -238,6 +253,21 @@ class LDAPService extends Object implements Flushable {
 		$searchLocations = $this->config()->users_search_locations ?: array(null);
 		foreach($searchLocations as $searchLocation) {
 			$records = $this->gateway->getUserByGUID($guid, $searchLocation, Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes);
+			if($records) return $records[0];
+		}
+	}
+
+	/**
+	 * Get a specific AD user's data given a DN.
+	 *
+	 * @param string $guid
+	 * @param array $attributes List of specific AD attributes to return. Empty array means return everything.
+	 * @return array
+	 */
+	public function getUserByDN($dn, $attributes = array()) {
+		$searchLocations = $this->config()->users_search_locations ?: array(null);
+		foreach($searchLocations as $searchLocation) {
+			$records = $this->gateway->getUserByDN($dn, $searchLocation, Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes);
 			if($records) return $records[0];
 		}
 	}
