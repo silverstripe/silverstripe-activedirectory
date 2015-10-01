@@ -86,6 +86,15 @@ class LDAPService extends Object implements Flushable {
 	}
 
 	/**
+	 * Checkes whether or not the service is enabled.
+	 *
+	 * @return bool
+	 */
+	public function enabled() {
+		return !empty($this->gateway->config()->options);
+	}
+
+	/**
 	 * Authenticate the given username and password with LDAP.
 	 *
 	 * @param string $username
