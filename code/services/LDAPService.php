@@ -91,7 +91,8 @@ class LDAPService extends Object implements Flushable {
 	 * @return bool
 	 */
 	public function enabled() {
-		return !empty($this->gateway->config()->options);
+		$options = Config::inst()->get('LDAPGateway', 'options');
+		return !empty($options);
 	}
 
 	/**
@@ -162,6 +163,8 @@ class LDAPService extends Object implements Flushable {
 			$results = array();
 			foreach($searchLocations as $searchLocation) {
 				$records = $this->gateway->getGroups($searchLocation, Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes);
+				if(!$records) continue;
+
 				foreach($records as $record) {
 					$results[$record[$indexBy]] = $record;
 				}
@@ -243,6 +246,8 @@ class LDAPService extends Object implements Flushable {
 
 		foreach($searchLocations as $searchLocation) {
 			$records = $this->gateway->getUsers($searchLocation, Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes);
+			if(!$records) continue;
+
 			foreach($records as $record) {
 				$results[$record['objectguid']] = $record;
 			}
@@ -308,9 +313,8 @@ class LDAPService extends Object implements Flushable {
 	 *            If not given, the data will be looked up by the user's GUID.
 	 * @return bool
 	 */
-	public function updateMemberFromLDAP($member, $data = null) {
-		// don't attempt to do this if there's no LDAP configured
-		if (!Config::inst()->get('LDAPGateway', 'options')) {
+	public function updateMemberFromLDAP(Member $member, $data = null) {
+		if(!$this->enabled()) {
 			return false;
 		}
 
@@ -461,6 +465,50 @@ class LDAPService extends Object implements Flushable {
 		$member->write();
 	}
 
+	/**
+	 * Sync a specific Group by updating it with LDAP data.
+	 *
+	 * @param Group $group An existing Group or a new Group object
+	 * @param array $data LDAP group object data
+	 */
+	public function updateGroupFromLDAP(Group $group, $data) {
+		if(!$this->enabled()) {
+			return false;
+		}
+
+		// Synchronise specific guaranteed fields.
+		$group->Code = $data['samaccountname'];
+		if (!empty($data['name'])) {
+			$group->Title = $data['name'];
+		} else {
+			$group->Title = $data['samaccountname'];
+		}
+		if (!empty($data['description'])) $group->Description = $data['description'];
+		$group->DN = $data['dn'];
+		$group->LastSynced = (string)SS_Datetime::now();
+		$group->IsImportedFromLDAP = true;
+		$group->write();
+
+		// Mappings on this group are automatically maintained to contain just the group's DN.
+		// First, scan through existing mappings and remove ones that are not matching (in case the group moved).
+		$hasCorrectMapping = false;
+		foreach ($group->LDAPGroupMappings() as $mapping) {
+			if ($mapping->DN === $data['dn']) {
+				// This is the correct mapping we want to retain.
+				$hasCorrectMapping = true;
+			} else {
+				$mapping->delete();
+			}
+		}
+
+		// Second, if the main mapping was not found, add it in.
+		if (!$hasCorrectMapping) {
+			$mapping = new LDAPGroupMapping();
+			$mapping->DN = $data['dn'];
+			$mapping->write();
+			$group->LDAPGroupMappings()->add($mapping);
+		}
+	}
 
 	/**
 	 * Change a members password on the AD. Works with ActiveDirectory compatible services that saves the
