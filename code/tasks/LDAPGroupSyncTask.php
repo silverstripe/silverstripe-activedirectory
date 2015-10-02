@@ -62,7 +62,7 @@ class LDAPGroupSyncTask extends BuildTask {
 				));
 			}
 
-			$this->syncGroup($group, $data, true);
+			$this->ldapService->updateGroupFromLDAP($group, $data);
 
 			// cleanup object from memory
 			$group->destroy();
@@ -97,64 +97,6 @@ class LDAPGroupSyncTask extends BuildTask {
 		$end = time() - $start;
 
 		$this->log(sprintf('Done. Processed %s records. Duration: %s seconds', $count, round($end, 0)));
-	}
-
-	/**
-	 * Sync a specific Group by updating it with LDAP data.
-	 *
-	 * @param Group $group An existing Group or a new Group object
-	 * @param array $data LDAP group object data
-	 * @param bool $log Should information on actions performed be logged?
-	 */
-	public function syncGroup(Group $group, $data, $log = false) {
-		// Synchronise specific guaranteed fields.
-		$group->Code = $data['samaccountname'];
-		if (!empty($data['name'])) {
-			$group->Title = $data['name'];
-		} else {
-			$group->Title = $data['samaccountname'];
-		}
-		if (!empty($data['description'])) $group->Description = $data['description'];
-		$group->DN = $data['dn'];
-		$group->LastSynced = (string)SS_Datetime::now();
-		$group->IsImportedFromLDAP = true;
-		$group->write();
-
-		// Mappings on this group are automatically maintained to contain just the group's DN.
-		// First, scan through existing mappings and remove ones that are not matching (in case the group moved).
-		$hasCorrectMapping = false;
-		foreach ($group->LDAPGroupMappings() as $mapping) {
-			if ($mapping->DN === $data['dn']) {
-				// This is the correct mapping we want to retain.
-				$hasCorrectMapping = true;
-			} else {
-				if($log) {
-					$this->log(sprintf(
-						'Deleting invalid mapping %s on %s.',
-						$mapping->DN,
-						$group->getTitle()
-					));
-				}
-
-				$mapping->delete();
-			}
-		}
-
-		// Second, if the main mapping was not found, add it in.
-		if (!$hasCorrectMapping) {
-			if($log) {
-				$this->log(sprintf(
-					'Setting up missing group mapping from %s to %s',
-					$group->getTitle(),
-					$data['dn']
-				));
-			}
-
-			$mapping = new LDAPGroupMapping();
-			$mapping->DN = $data['dn'];
-			$mapping->write();
-			$group->LDAPGroupMappings()->add($mapping);
-		}
 	}
 
 	protected function log($message) {
