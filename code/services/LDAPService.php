@@ -570,6 +570,17 @@ class LDAPService extends Object implements Flushable {
 	}
 
 	/**
+	 * A simple proxy to LDAP copy/delete operation.
+	 *
+	 * @param string $fromDn
+	 * @param string $toDn
+	 * @param bool $recursively Recursively move nested objects?
+	 */
+	public function move($fromDn, $toDn, $recursively = false) {
+		$this->gateway->move($fromDn, $toDn, $recursively);
+	}
+
+	/**
 	 * A simple proxy to LDAP add operation.
 	 *
 	 * @param string $dn Location to add the entry at.

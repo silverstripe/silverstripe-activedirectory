@@ -260,6 +260,18 @@ class LDAPGateway extends Object {
 	}
 
 	/**
+	 * Move an LDAP object from it's original DN location to another.
+	 * This effectively copies the object then deletes the original one.
+	 *
+	 * @param string $fromDn
+	 * @param string $toDn
+	 * @param bool $recursively Recursively move nested objects?
+	 */
+	public function move($fromDn, $toDn, $recursively = false) {
+		$this->ldap->move($fromDn, $toDn, $recursively);
+	}
+
+	/**
 	 * Add an LDAP object.
 	 *
 	 * For this work you might need that LDAP connection is bind:ed with a user with
