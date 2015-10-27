@@ -37,15 +37,20 @@ class LDAPLoginForm extends MemberLoginForm {
 		// will be used to get correct Link()
 		$this->ldapSecController = Injector::inst()->create('LDAPSecurityController');
 
-		$usernameField = new TextField('Username', _t('Member.USERNAME', 'Username'), null, null, $this);
-		$this->Fields()->replaceField('Email', $usernameField);
-		$this->setValidator(new RequiredFields('Username', 'Password'));
+		if (Config::inst()->get('LDAPAuthenticator', 'allow_email_login')==='yes') {
+			$loginField = new TextField('Login', _t('LDAPLoginForm.USERNAMEOREMAIL', 'Username or email'), null, null, $this);
+		} else {
+			$loginField = new TextField('Login', _t('LDAPLoginForm.USERNAME', 'Username'), null, null, $this);
+		}
+
+		$this->Fields()->replaceField('Email', $loginField);
+		$this->setValidator(new RequiredFields('Login', 'Password'));
 		if(Security::config()->remember_username) {
-			$usernameField->setValue(Session::get('SessionForms.MemberLoginForm.Email'));
+			$loginField->setValue(Session::get('SessionForms.MemberLoginForm.Email'));
 		} else {
 			// Some browsers won't respect this attribute unless it's added to the form
 			$this->setAttribute('autocomplete', 'off');
-			$usernameField->setAttribute('autocomplete', 'off');
+			$loginField->setAttribute('autocomplete', 'off');
 		}
 
 		// Users can't change passwords unless appropriate a LDAP user with write permissions is
@@ -65,7 +70,7 @@ class LDAPLoginForm extends MemberLoginForm {
 		Requirements::block('MemberLoginFormFieldFocus');
 		$js = <<<JS
 			(function() {
-				var el = document.getElementById("Username");
+				var el = document.getElementById("Login");
 				if(el && el.focus && (typeof jQuery == 'undefined' || jQuery(el).is(':visible'))) el.focus();
 			})();
 JS;
@@ -90,18 +95,32 @@ JS;
 	 */
 	public function forgotPassword($data) {
 		// No need to protect against injections, LDAPService will ensure that this is safe
-		$username = trim($data['Username']);
+		$login = trim($data['Login']);
 
-		/**
-		 * @var LDAPService
-		 */
 		$service = Injector::inst()->get('LDAPService');
-		$userData = $service->getUserByUsername($username);
+		if (Email::validEmailAddress($login)) {
+			if (Config::inst()->get('LDAPAuthenticator', 'allow_email_login')!='yes') {
+				$this->sessionMessage(
+					_t(
+						'LDAPLoginForm.USERNAMEINSTEADOFEMAIL',
+						'Please enter your username instead of your email to get a password reset link.'
+					),
+					'bad'
+				);
+				$this->controller->redirect($this->controller->Link('lostpassword'));
+				return;
+			}
+			$userData = $service->getUserByEmail($login);
+
+		} else {
+			$userData = $service->getUserByUsername($login);
+		}
 
 		// Avoid information disclosure by displaying the same status,
 		// regardless whether the email address actually exists
 		if(!isset($userData['objectguid'])) {
-			return $this->controller->redirect($this->controller->Link('passwordsent/') . urlencode($data['Username']));
+			return $this->controller->redirect($this->controller->Link('passwordsent/')
+				. urlencode($data['Login']));
 		}
 
 		$member = Member::get()->filter('GUID', $userData['objectguid'])->limit(1)->first();
@@ -130,17 +149,30 @@ JS;
 			));
 			$e->setTo($member->Email);
 			$e->send();
-			$this->controller->redirect($this->controller->Link('passwordsent/') . urlencode($data['Username']));
-		} elseif($data['Username']) {
+			$this->controller->redirect($this->controller->Link('passwordsent/') . urlencode($data['Login']));
+		} elseif($data['Login']) {
 			// Avoid information disclosure by displaying the same status,
 			// regardless whether the email address actually exists
-			$this->controller->redirect($this->controller->Link('passwordsent/') . urlencode($data['Username']));
+			$this->controller->redirect($this->controller->Link('passwordsent/') . urlencode($data['Login']));
 		} else {
-			$this->sessionMessage(
-				_t('LDAPLoginForm.ENTERUSERNAME', 'Please enter a username to get a password reset link.'),
-				'bad'
-			);
-			$this->controller->redirect($this->controller->Link('Security'));
+			if (Config::inst()->get('LDAPAuthenticator', 'allow_email_login')==='yes') {
+				$this->sessionMessage(
+					_t(
+						'LDAPLoginForm.ENTERUSERNAMEOREMAIL',
+						'Please enter your username or your email address to get a password reset link.'
+					),
+					'bad'
+				);
+			} else {
+				$this->sessionMessage(
+					_t(
+						'LDAPLoginForm.ENTERUSERNAME',
+						'Please enter your username to get a password reset link.'
+					),
+					'bad'
+				);
+			}
+			$this->controller->redirect($this->controller->Link('lostpassword'));
 		}
 	}
 }

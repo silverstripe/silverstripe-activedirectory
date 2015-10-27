@@ -287,6 +287,21 @@ class LDAPService extends Object implements Flushable {
 	}
 
 	/**
+	 * Get a specific user's data given an email.
+	 *
+	 * @param string $email
+	 * @param array $attributes List of specific AD attributes to return. Empty array means return everything.
+	 * @return array
+	 */
+	public function getUserByEmail($email, $attributes = array()) {
+		$searchLocations = $this->config()->users_search_locations ?: array(null);
+		foreach($searchLocations as $searchLocation) {
+			$records = $this->gateway->getUserByEmail($email, $searchLocation, Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes);
+			if($records) return $records[0];
+		}
+	}
+
+	/**
 	 * Get a specific user's data given a username.
 	 *
 	 * @param string $username
@@ -299,6 +314,19 @@ class LDAPService extends Object implements Flushable {
 			$records = $this->gateway->getUserByUsername($username, $searchLocation, Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes);
 			if($records) return $records[0];
 		}
+	}
+
+	/**
+	 * Get a username for an email.
+	 *
+	 * @param string $email
+	 * @return string|null
+	 */
+	public function getUsernameByEmail($email) {
+		$data = $this->getUserByEmail($email);
+		if (empty($data)) return null;
+
+		return $this->gateway->getCanonicalUsername($data);
 	}
 
 	/**

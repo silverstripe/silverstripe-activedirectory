@@ -39,6 +39,41 @@ class LDAPSecurityController extends Security {
 		return Object::create('LDAPChangePasswordForm', $this, 'ChangePasswordForm');
 	}
 
+	public function lostpassword() {
+		$controller = $this->getResponseController(_t('LDAPSecurityController.LOSTPASSWORDHEADER', 'Lost password'));
+
+		// if the controller calls Director::redirect(), this will break early
+		if(($response = $controller->getResponse()) && $response->isFinished()) return $response;
+
+		if (Config::inst()->get('LDAPAuthenticator', 'allow_email_login')==='yes') {
+			$customisedController = $controller->customise(array(
+				'Content' =>
+					'<p>' .
+					_t(
+						'LDAPSecurityController.NOTERESETPASSWORDUSERNAMEOREMAIL',
+						'Enter your username or your email address and we will send you a link with which '
+						. 'you can reset your password'
+					) .
+					'</p>',
+				'Form' => $this->LostPasswordForm(),
+			));
+		} else {
+			$customisedController = $controller->customise(array(
+				'Content' =>
+					'<p>' .
+					_t(
+						'LDAPSecurityController.NOTERESETPASSWORDUSERNAME',
+						'Enter your username and we will send you a link with which you can reset your password'
+					) .
+					'</p>',
+				'Form' => $this->LostPasswordForm(),
+			));
+		}
+
+		//Controller::$currentController = $controller;
+		return $customisedController->renderWith($this->getTemplatesFor('lostpassword'));
+	}
+
 	/**
 	 * Factory method for the lost password form
 	 *

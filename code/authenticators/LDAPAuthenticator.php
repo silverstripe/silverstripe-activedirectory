@@ -14,6 +14,19 @@ class LDAPAuthenticator extends Authenticator {
 	private $name = 'LDAP';
 
 	/**
+	 * Set to 'yes' to indicate if this module should look up usernames in LDAP by matching the email addresses.
+	 *
+	 * CAVEAT #1: only set to 'yes' for systems that enforce email uniqueness.
+	 * Otherwise only the first LDAP user with matching email will be accessible.
+	 *
+	 * CAVEAT #2: this is untested for systems that use LDAP with principal style usernames (i.e. foo@bar.com).
+	 * The system will misunderstand emails for usernames with uncertain outcome.
+	 *
+	 * @var string 'no' or 'yes'
+	 */
+	private static $allow_email_login = 'no';
+
+	/**
 	 * @return string
 	 */
 	public static function get_name() {
@@ -38,7 +51,31 @@ class LDAPAuthenticator extends Authenticator {
 	 */
 	public static function authenticate($data, Form $form = null) {
 		$service = Injector::inst()->get('LDAPService');
-		$result = $service->authenticate($data['Username'], $data['Password']);
+		$login = trim($data['Login']);
+		if (Email::validEmailAddress($login)) {
+			if (Config::inst()->get('LDAPAuthenticator', 'allow_email_login')!='yes') {
+				$form->sessionMessage(
+					_t(
+						'LDAPAuthenticator.PLEASEUSEUSERNAME',
+						'Please enter your username instead of your email to log in.'
+					),
+					'bad'
+				);
+				return;
+			}
+
+			$username = $service->getUsernameByEmail($login);
+
+			// No user found with this email.
+			if (!$username) {
+				$form->sessionMessage(_t('LDAPAuthenticator.INVALIDCREDENTIALS', 'Invalid credentials'), 'bad');
+				return;
+			}
+		} else {
+			$username = $login;
+		}
+
+		$result = $service->authenticate($username, $data['Password']);
 
 		$success = $result['success'] === true;
 		if(!$success) {

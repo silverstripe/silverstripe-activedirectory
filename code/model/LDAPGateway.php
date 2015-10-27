@@ -208,6 +208,21 @@ class LDAPGateway extends Object {
 	}
 
 	/**
+	 * Return a particular LDAP user by mail value.
+	 *
+	 * @param string $email
+	 * @return array
+	 */
+	public function getUserByEmail($email, $baseDn = null, $scope = Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes = array()) {
+		return $this->search(
+			sprintf('(&(objectClass=user)(mail=%s))', Zend\Ldap\Filter\AbstractFilter::escapeValue($email)),
+			$baseDn,
+			$scope,
+			$attributes
+		);
+	}
+
+	/**
 	 * Get a specific user's data from LDAP
 	 *
 	 * @param string $username
@@ -240,6 +255,38 @@ class LDAPGateway extends Object {
 		}
 
 		return $this->search($filter, $baseDn, $scope, $attributes);
+	}
+
+	/**
+	 * Get a canonical username from the record based on the connection settings.
+	 *
+	 * @param array $data
+	 * @return string
+	 */
+	public function getCanonicalUsername($data) {
+		$options = $this->config()->options;
+		$option = isset($options['accountCanonicalForm']) ? $options['accountCanonicalForm'] : null;
+
+		switch($option) {
+			case Zend\Ldap\Ldap::ACCTNAME_FORM_USERNAME: // traditional style usernames, e.g. alice
+				if (empty($data['samaccountname'])) {
+					throw new \Exception('Could not extract canonical username: samaccountname field missing');
+				}
+				return $data['samaccountname'];
+			case Zend\Ldap\Ldap::ACCTNAME_FORM_BACKSLASH: // backslash style usernames, e.g. FOO\alice
+				// @todo Not supported yet!
+				throw new Exception('Backslash style not supported in LDAPGateway::getUsernameByEmail()!');
+			case Zend\Ldap\Ldap::ACCTNAME_FORM_PRINCIPAL: // principal style usernames, e.g. alice@foo.com
+				if (empty($data['userprincipalname'])) {
+					throw new \Exception('Could not extract canonical username: userprincipalname field missing');
+				}
+				return $data['userprincipalname'];
+			default: // default to principal style
+				if (empty($data['userprincipalname'])) {
+					throw new \Exception('Could not extract canonical username: userprincipalname field missing');
+				}
+				return $data['userprincipalname'];
+		}
 	}
 
 	/**
