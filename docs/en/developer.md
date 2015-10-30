@@ -153,9 +153,8 @@ will need to set a cookie so it can be used temporarily.
 This will set a cookie to show `MemberAuthenticator` if `showloginform=1` is requested:
 
 	Authenticator::unregister('MemberAuthenticator');
-	
-	if(!empty($_GET['showloginform'])) {
-		Cookie::set('showloginform', true, 1);
+	if(isset($_GET['showloginform'])) {
+		Cookie::set('showloginform', (bool)$_GET['showloginform'], 1);
 	}
 	if(Cookie::get('showloginform')) {
 		Authenticator::register_authenticator('MemberAuthenticator');
