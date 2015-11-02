@@ -145,7 +145,7 @@ JS;
 			$e = Member_ForgotPasswordEmail::create();
 			$e->populateTemplate($member);
 			$e->populateTemplate(array(
-				'PasswordResetLink' => LDAPSecurityController::getPasswordResetLink($member, $token)
+				'PasswordResetLink' => Security::getPasswordResetLink($member, $token)
 			));
 			$e->setTo($member->Email);
 			$e->send();

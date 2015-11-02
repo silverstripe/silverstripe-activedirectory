@@ -19,18 +19,6 @@ class LDAPSecurityController extends Security {
 	);
 
 	/**
-	 * @param Member $member
-	 * @param $autologinToken
-	 * @return string
-	 */
-	public static function getPasswordResetLink($member, $autologinToken) {
-		$autologinToken = urldecode($autologinToken);
-		$selfControllerClass = __CLASS__;
-		$selfController = new $selfControllerClass();
-		return $selfController->Link('changepassword') . "?m={$member->ID}&t=$autologinToken";
-	}
-
-	/**
 	 * Factory method for the lost password form
 	 *
 	 * @return Form Returns the lost password form
