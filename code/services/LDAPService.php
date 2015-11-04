@@ -370,14 +370,14 @@ class LDAPService extends Object implements Flushable {
 					$attribute,
 					$data['objectguid'],
 					$member->ID
-				), SS_Log::WARN);
+				), SS_Log::NOTICE);
 
 				continue;
 			}
 
 			if($attribute == 'thumbnailphoto') {
 				$imageClass = $member->getRelationClass($field);
-				if($imageClass!=='Image' && !is_subclass_of($imageClass, 'Image')) {
+				if($imageClass !== 'Image' && !is_subclass_of($imageClass, 'Image')) {
 					SS_Log::log(sprintf(
 						'Member field %s configured for thumbnailphoto AD attribute, but it isn\'t a valid relation to an Image class',
 						$field
