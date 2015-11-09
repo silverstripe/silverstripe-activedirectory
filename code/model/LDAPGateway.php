@@ -307,6 +307,17 @@ class LDAPGateway extends Object {
 	}
 
 	/**
+	 * Deletes an LDAP object.
+	 *
+	 * @param string $dn Location of object to delete
+	 * @param bool $recursively Recursively delete nested objects?
+	 * @throws \Zend\Ldap\Exception\LdapException
+	 */
+	public function delete($dn, $recursively = false) {
+		$this->ldap->delete($dn, $recursively);
+	}
+
+	/**
 	 * Move an LDAP object from it's original DN location to another.
 	 * This effectively copies the object then deletes the original one.
 	 *
