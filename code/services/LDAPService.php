@@ -597,6 +597,16 @@ class LDAPService extends Object implements Flushable {
 	}
 
 	/**
+	 * A simple proxy to LDAP delete operation.
+	 *
+	 * @param string $dn Location of object to delete
+	 * @param bool $recursively Recursively delete nested objects?
+	 */
+	public function delete($dn, $recursively = false) {
+		$this->gateway->delete($dn, $recursively);
+	}
+
+	/**
 	 * A simple proxy to LDAP copy/delete operation.
 	 *
 	 * @param string $fromDn
