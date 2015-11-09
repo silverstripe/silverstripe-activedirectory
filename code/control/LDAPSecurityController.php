@@ -19,6 +19,10 @@ class LDAPSecurityController extends Security {
 	);
 
 	/**
+	 * This static function is *intentionally* overloaded from Security so
+	 * the user accesses this controller and uses the LDAP change password
+	 * form rather than the "standard" one provided by Security.
+	 *
 	 * @param Member $member
 	 * @param $autologinToken
 	 * @return string
