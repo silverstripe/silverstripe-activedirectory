@@ -563,7 +563,7 @@ class LDAPService extends Object implements Flushable {
 		$userData = $this->getUserByGUID($member->GUID);
 		if(empty($userData['distinguishedname'])) {
 			$validationResult->error(_t('LDAPAuthenticator.NOUSER', 'Your account hasn\'t been setup properly, please contact an administrator.'));
-			return false;
+			return $validationResult;
 		}
 
 		try {
