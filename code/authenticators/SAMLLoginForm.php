@@ -4,123 +4,127 @@
  *
  * This not very interesting in itself. It's pretty much boiler-plate code to access the authenticator.
  */
-class SAMLLoginForm extends LoginForm {
+class SAMLLoginForm extends LoginForm
+{
+    /**
+     * This field is used in the "You are logged in as %s" message
+     * @var string
+     */
+    public $loggedInAsField = 'FirstName';
 
-	/**
-	 * This field is used in the "You are logged in as %s" message
-	 * @var string
-	 */
-	public $loggedInAsField = 'FirstName';
+    /**
+     * @var string
+     */
+    protected $authenticator_class = 'SAMLAuthenticator';
 
-	/**
-	 * @var string
-	 */
-	protected $authenticator_class = 'SAMLAuthenticator';
+    /**
+     * Constructor
+     *
+     * @param Controller $controller
+     * @param string $name method on the $controller
+     * @param FieldList $fields
+     * @param FieldList $actions
+     * @param bool $checkCurrentUser - show logout button if logged in
+     */
+    public function __construct($controller, $name, $fields = null, $actions = null, $checkCurrentUser = true)
+    {
+        $backURL = Session::get('BackURL');
 
-	/**
-	 * Constructor
-	 *
-	 * @param Controller $controller
-	 * @param string $name method on the $controller
-	 * @param FieldList $fields
-	 * @param FieldList $actions
-	 * @param bool $checkCurrentUser - show logout button if logged in
-	 */
-	public function __construct($controller, $name, $fields = null, $actions = null, $checkCurrentUser = true) {
+        if (isset($_REQUEST['BackURL'])) {
+            $backURL = $_REQUEST['BackURL'];
+        }
 
-		$backURL = Session::get('BackURL');
+        if ($checkCurrentUser && $this->shouldShowLogoutFields()) {
+            $fields = new FieldList(array(
+                new HiddenField("AuthenticationMethod", null, $this->authenticator_class, $this)
+            ));
+            $actions = new FieldList(array(
+                new FormAction("logout", _t('Member.BUTTONLOGINOTHER', "Log in as someone else"))
+            ));
+        } else {
+            if (!$fields) {
+                $fields = new FieldList(array(
+                    new HiddenField("AuthenticationMethod", null, $this->authenticator_class, $this)
+                ));
+            }
+            if (!$actions) {
+                $actions = new FieldList(array(
+                    new FormAction('dologin', _t('Member.BUTTONLOGIN', "Log in"))
+                ));
+            }
+        }
 
-		if(isset($_REQUEST['BackURL'])) {
-			$backURL = $_REQUEST['BackURL'];
-		}
+        if ($backURL) {
+            $fields->push(new HiddenField('BackURL', 'BackURL', $backURL));
+        }
 
-		if($checkCurrentUser && $this->shouldShowLogoutFields()) {
-			$fields = new FieldList(array(
-				new HiddenField("AuthenticationMethod", null, $this->authenticator_class, $this)
-			));
-			$actions = new FieldList(array(
-				new FormAction("logout", _t('Member.BUTTONLOGINOTHER', "Log in as someone else"))
-			));
-		} else {
-			if(!$fields) {
-				$fields = new FieldList(array(
-					new HiddenField("AuthenticationMethod", null, $this->authenticator_class, $this)
-				));
-			}
-			if(!$actions) {
-				$actions = new FieldList(array(
-					new FormAction('dologin', _t('Member.BUTTONLOGIN', "Log in"))
-				));
-			}
-		}
+        $this->setFormMethod('POST', true);
 
-		if($backURL) {
-			$fields->push(new HiddenField('BackURL', 'BackURL', $backURL));
-		}
-
-		$this->setFormMethod('POST', true);
-
-		parent::__construct($controller, $name, $fields, $actions);
-	}
-
-
-	/**
-	 *
-	 *
-	 * @return bool
-	 */
-	protected function shouldShowLogoutFields() {
-		if(!Member::currentUser()) {
-			return false;
-		}
-		if(!Member::logged_in_session_exists()) {
-			return false;
-		}
-		return true;
-	}
-
-	/**
-	 * Get message from session
-	 */
-	protected function getMessageFromSession() {
-		// The "MemberLoginForm.force_message session" is set in Security#permissionFailure()
-		// and displays messages like "You don't have access to this page"
-		// if force isn't set, it will just display "You're logged in as {name}"
-		if(($member = Member::currentUser()) && !Session::get('MemberLoginForm.force_message')) {
-			$this->message = _t(
-				'Member.LOGGEDINAS',
-				"You're logged in as {name}.",
-				array('name' => $member->{$this->loggedInAsField})
-			);
-		}
-		Session::set('MemberLoginForm.force_message', false);
-		parent::getMessageFromSession();
-		return $this->message;
-	}
+        parent::__construct($controller, $name, $fields, $actions);
+    }
 
 
-	/**
-	 * Login form handler method
-	 *
-	 * This method is called when the user clicks on "Log in"
-	 *
-	 * @param array $data Submitted data
-	 */
-	public function dologin($data) {
-		call_user_func_array(array($this->authenticator_class, 'authenticate'), array($data, $this));
-	}
+    /**
+     *
+     *
+     * @return bool
+     */
+    protected function shouldShowLogoutFields()
+    {
+        if (!Member::currentUser()) {
+            return false;
+        }
+        if (!Member::logged_in_session_exists()) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Get message from session
+     */
+    protected function getMessageFromSession()
+    {
+        // The "MemberLoginForm.force_message session" is set in Security#permissionFailure()
+        // and displays messages like "You don't have access to this page"
+        // if force isn't set, it will just display "You're logged in as {name}"
+        if (($member = Member::currentUser()) && !Session::get('MemberLoginForm.force_message')) {
+            $this->message = _t(
+                'Member.LOGGEDINAS',
+                "You're logged in as {name}.",
+                array('name' => $member->{$this->loggedInAsField})
+            );
+        }
+        Session::set('MemberLoginForm.force_message', false);
+        parent::getMessageFromSession();
+        return $this->message;
+    }
 
 
-	/**
-	 * Log out form handler method
-	 *
-	 * This method is called when the user clicks on "logout" on the form
-	 * created when the parameter <i>$checkCurrentUser</i> of the
-	 * {@link __construct constructor} was set to TRUE and the user was
-	 * currently logged in.
-	 */
-	public function logout() {
-		$s = new Security();
-		$s->logout(false);
-	}
+    /**
+     * Login form handler method
+     *
+     * This method is called when the user clicks on "Log in"
+     *
+     * @param array $data Submitted data
+     */
+    public function dologin($data)
+    {
+        call_user_func_array(array($this->authenticator_class, 'authenticate'), array($data, $this));
+    }
+
+
+    /**
+     * Log out form handler method
+     *
+     * This method is called when the user clicks on "logout" on the form
+     * created when the parameter <i>$checkCurrentUser</i> of the
+     * {@link __construct constructor} was set to TRUE and the user was
+     * currently logged in.
+     */
+    public function logout()
+    {
+        $s = new Security();
+        $s->logout(false);
+    }
 }

@@ -5,26 +5,26 @@
  * SAMLHelper acts as a simple wrapper for the OneLogin implementation, so that we can configure
  * and inject it via the config system.
  */
-class SAMLHelper extends Object {
+class SAMLHelper extends Object
+{
+    /**
+     * @var array
+     */
+    public static $dependencies = array(
+        'SAMLConfService' => '%$SAMLConfService',
+    );
 
-	/**
-	 * @var array
-	 */
-	public static $dependencies = array(
-		'SAMLConfService' => '%$SAMLConfService',
-	);
+    /**
+     * @var SAMLConfService
+     */
+    public $SAMLConfService;
 
-	/**
-	 * @var SAMLConfService
-	 */
-	public $SAMLConfService;
-
-	/**
-	 * @return OneLogin_Saml2_Auth
-	 */
-	public function getSAMLauth() {
-		$samlConfig = $this->SAMLConfService->asArray();
-		return new \OneLogin_Saml2_Auth($samlConfig);
-	}
-
+    /**
+     * @return OneLogin_Saml2_Auth
+     */
+    public function getSAMLauth()
+    {
+        $samlConfig = $this->SAMLConfService->asArray();
+        return new \OneLogin_Saml2_Auth($samlConfig);
+    }
 }
