@@ -1,5 +1,5 @@
 <?php
-class LDAPFakeGateway extends LDAPGateway
+class LDAPFakeGateway extends LDAPGateway implements TestOnly
 {
     public function __construct()
     {
