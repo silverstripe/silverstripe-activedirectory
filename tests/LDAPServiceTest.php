@@ -1,6 +1,10 @@
 <?php
 class LDAPServiceTest extends SapphireTest
 {
+
+    /**
+     * @var LDAPService
+     */
     protected $service;
 
     public function setUp()
@@ -20,6 +24,11 @@ class LDAPServiceTest extends SapphireTest
             'CN=Users,DC=playpen,DC=local',
             'CN=Others,DC=playpen,DC=local'
         ));
+        // Prevent other module extension hooks from executing during write() etc.
+        Config::inst()->remove('Member', 'extensions');
+        Config::inst()->remove('Group', 'extensions');
+        Config::inst()->update('Group', 'extensions', array('LDAPGroupExtension'));
+        Config::inst()->update('Member', 'extensions', array('LDAPMemberExtension'));
     }
 
     public function tearDown()

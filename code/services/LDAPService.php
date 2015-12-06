@@ -104,6 +104,8 @@ class LDAPService extends Object implements Flushable
      *
      * @param string $username
      * @param string $password
+     *
+     * @return array
      */
     public function authenticate($username, $password)
     {
@@ -158,7 +160,7 @@ class LDAPService extends Object implements Flushable
      * @param boolean $cached Cache the results from AD, so that subsequent calls are faster. Enabled by default.
      * @param array $attributes List of specific AD attributes to return. Empty array means return everything.
      * @param string $indexBy Attribute to use as an index.
-     * @return associative array
+     * @return array
      */
     public function getGroups($cached = true, $attributes = array(), $indexBy = 'dn')
     {
@@ -233,7 +235,7 @@ class LDAPService extends Object implements Flushable
     /**
      * Get a particular AD group's data given a DN.
      *
-     * @param string $guid
+     * @param string $dn
      * @param array $attributes List of specific AD attributes to return. Empty array means return everything.
      * @return array
      */
@@ -296,8 +298,9 @@ class LDAPService extends Object implements Flushable
     /**
      * Get a specific AD user's data given a DN.
      *
-     * @param string $guid
+     * @param string $dn
      * @param array $attributes List of specific AD attributes to return. Empty array means return everything.
+     *
      * @return array
      */
     public function getUserByDN($dn, $attributes = array())
@@ -537,6 +540,8 @@ class LDAPService extends Object implements Flushable
      *
      * @param Group $group An existing Group or a new Group object
      * @param array $data LDAP group object data
+     *
+     * @return bool
      */
     public function updateGroupFromLDAP(Group $group, $data)
     {
