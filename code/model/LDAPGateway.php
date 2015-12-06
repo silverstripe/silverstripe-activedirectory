@@ -20,6 +20,7 @@ class LDAPGateway extends Object
 
     public function __construct()
     {
+        parent::__construct();
         $this->ldap = new Zend\Ldap\Ldap($this->config()->options);
     }
 
