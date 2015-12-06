@@ -1,6 +1,10 @@
 <?php
 class LDAPServiceTest extends SapphireTest
 {
+
+    /**
+     * @var LDAPService
+     */
     protected $service;
 
     public function setUp()
