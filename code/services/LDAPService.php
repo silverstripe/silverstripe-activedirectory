@@ -491,10 +491,13 @@ class LDAPService extends Object implements Flushable
 
                     // the user is a direct member of group with a mapping, add them to the SS group.
                     if ($mapping->DN == $groupDN) {
-                        $mapping->Group()->Members()->add($member, array(
-                            'IsImportedFromLDAP' => '1'
-                        ));
-                        $mappedGroupIDs[] = $mapping->GroupID;
+                        $group = $mapping->Group();
+                        if ($group && $group->exists()) {
+                            $group->Members()->add($member, array(
+                                'IsImportedFromLDAP' => '1'
+                            ));
+                            $mappedGroupIDs[] = $mapping->GroupID;
+                        }
                     }
 
                     // the user *might* be a member of a nested group provided the scope of the mapping
@@ -508,10 +511,13 @@ class LDAPService extends Object implements Flushable
 
                         foreach ($childGroups as $childGroupDN => $childGroupRecord) {
                             if ($childGroupDN == $groupDN) {
-                                $mapping->Group()->Members()->add($member, array(
-                                    'IsImportedFromLDAP' => '1'
-                                ));
-                                $mappedGroupIDs[] = $mapping->GroupID;
+                                $group = $mapping->Group();
+                                if ($group && $group->exists()) {
+                                    $group->Members()->add($member, array(
+                                        'IsImportedFromLDAP' => '1'
+                                    ));
+                                    $mappedGroupIDs[] = $mapping->GroupID;
+                                }
                             }
                         }
                     }
