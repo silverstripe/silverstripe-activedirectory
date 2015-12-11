@@ -92,4 +92,13 @@ class LDAPGroupExtension extends DataExtension
             $fields->addFieldToTab('Root.LDAP', $field);
         }
     }
+
+    /**
+     * LDAPGroupMappings are inherently relying on groups and can be removed now.
+     */
+    public function onBeforeDelete() {
+        foreach ($this->owner->LDAPGroupMappings() as $mapping) {
+            $mapping->delete();
+        }
+    }
 }
