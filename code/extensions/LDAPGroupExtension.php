@@ -96,7 +96,8 @@ class LDAPGroupExtension extends DataExtension
     /**
      * LDAPGroupMappings are inherently relying on groups and can be removed now.
      */
-    public function onBeforeDelete() {
+    public function onBeforeDelete()
+    {
         foreach ($this->owner->LDAPGroupMappings() as $mapping) {
             $mapping->delete();
         }

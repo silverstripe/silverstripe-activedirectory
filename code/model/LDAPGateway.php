@@ -23,7 +23,7 @@ class LDAPGateway extends Object
         parent::__construct();
         // due to dependency injection this class can be created without any LDAP options set
         // and \Zend\Ldap\Ldap will throw a warning with an empty array
-        if(count($this->config()->options)) {
+        if (count($this->config()->options)) {
             $this->ldap = new Zend\Ldap\Ldap($this->config()->options);
         }
     }
