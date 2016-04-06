@@ -44,14 +44,16 @@ class SAMLConfiguration extends Object
 
         // SERVICE PROVIDER SECTION
         $sp = $this->config()->get('SP');
+        $spCertPath = Director::is_absolute($sp['x509cert']) ? $sp['x509cert'] : sprintf('%s/%s', BASE_PATH, $sp['x509cert']);
+        $spKeyPath = Director::is_absolute($sp['privateKey']) ? $sp['privateKey'] : sprintf('%s/%s', BASE_PATH, $sp['privateKey']);
         $conf['sp']['entityId'] = $sp['entityId'];
         $conf['sp']['assertionConsumerService'] = array(
             'url' => $sp['entityId'] . '/saml/acs',
             'binding' => OneLogin_Saml2_Constants::BINDING_HTTP_POST
         );
         $conf['sp']['NameIDFormat'] = OneLogin_Saml2_Constants::NAMEID_TRANSIENT;
-        $conf['sp']['x509cert'] = file_get_contents(BASE_PATH.'/'.$sp['x509cert']);
-        $conf['sp']['privateKey'] = file_get_contents(BASE_PATH.'/'.$sp['privateKey']);
+        $conf['sp']['x509cert'] = file_get_contents($spCertPath);
+        $conf['sp']['privateKey'] = file_get_contents($spKeyPath);
 
         // IDENTITY PROVIDER SECTION
         $idp = $this->config()->get('IdP');
@@ -67,7 +69,8 @@ class SAMLConfiguration extends Object
             );
         }
 
-        $conf['idp']['x509cert'] = file_get_contents(BASE_PATH.'/'.$idp['x509cert']);
+        $idpCertPath = Director::is_absolute($idp['x509cert']) ? $idp['x509cert'] : sprintf('%s/%s', BASE_PATH, $idp['x509cert']);
+        $conf['idp']['x509cert'] = file_get_contents($idpCertPath);
 
         // SECURITY SECTION
         $conf['security'] = array(
