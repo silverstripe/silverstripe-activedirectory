@@ -295,7 +295,7 @@ longer exist in the directory get deleted:
 	LDAPMemberSyncTask:
 	  destructive: true
 
-To configure when the job should re-run itself, set the `LDAPMemberSyncJob.regenerate.time` configuration.
+To configure when the job should re-run itself, set the `LDAPMemberSyncJob.regenerate_time` configuration.
 In this example, this configures the job to run every 8 hours:
 
 	LDAPMemberSyncJob:
