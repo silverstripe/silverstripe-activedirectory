@@ -48,7 +48,7 @@ We assume ADFS 2.0 or greater is used as an IdP.
 First step is to add this module into your SilverStripe project. You can use composer for this:
 
 	composer require "silverstripe/activedirectory:*"
-	
+
 Commit the changes.
 
 ## Make x509 certificates available
@@ -62,7 +62,7 @@ You need to make the SP x509 certificate and private key available to the Silver
 For testing purposes, you can generate this yourself by using the `openssl` command:
 
 	openssl req -x509 -nodes -newkey rsa:2048 -keyout saml.pem -out saml.crt -days 1826
-	
+
 Contact your system administrator if you are not sure how to install these.
 
 ### IdP certificate
@@ -75,7 +75,7 @@ You may also be able to extract the certificate yourself from the IdP endpoint i
 
 ## YAML configuration
 
-Now we need to make the *silverstripe-activedirectory* module aware of where the certificates can be found. 
+Now we need to make the *silverstripe-activedirectory* module aware of where the certificates can be found.
 
 Add the following configuration to `mysite/_config/saml.yml` (make sure to replace paths to the certificates and keys):
 
@@ -95,10 +95,22 @@ Add the following configuration to `mysite/_config/saml.yml` (make sure to repla
 	    entityId: "https://<idp-domain>/adfs/services/trust"
 	    x509cert: "<path-to-adfs-cert>.pem"
 	    singleSignOnService: "https://<idp-domain>/adfs/ls/"
+	  Security:
+	    signatureAlgorithm: "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"
 
 If you don't use absolute paths, the certificate paths will be relative to the `BASE_PATH` (your site web root).
 
 All IdP and SP endpoints must use HTTPS scheme with SSL certificates matching the domain names used.
+
+### A note on signature algorithm config
+
+The signature algorithm must match the setting in the ADFS relying party trust
+configuration. For ADFS it's possible to downgrade the default from SHA-256 to
+ SHA-1, but this is not recommended. To do this, you can change YAML configuration:
+
+	SAMLConfiguration:
+	  Security:
+	    signatureAlgorithm: "http://www.w3.org/2000/09/xmldsig#rsa-sha1"
 
 ### Service Provider (SP)
 
@@ -382,9 +394,9 @@ ldapsearch \
 ## Advanced SAML configuration
 
 It is possible to customize all the settings provided by the 3rd party SAML code.
- 
+
 This can be done by registering your own `SAMLConfiguration` object via `mysite/_config/saml.yml`:
- 
+
 Example:
 
 	---

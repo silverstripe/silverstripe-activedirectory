@@ -73,6 +73,9 @@ class SAMLConfiguration extends Object
         $conf['idp']['x509cert'] = file_get_contents($idpCertPath);
 
         // SECURITY SECTION
+        $security = $this->config()->get('Security');
+        $signatureAlgorithm = $security['signatureAlgorithm'];
+
         $conf['security'] = array(
             /** signatures and encryptions offered */
             // Indicates that the nameID of the <samlp:logoutRequest> sent by this SP will be encrypted.
@@ -94,6 +97,15 @@ class SAMLConfiguration extends Object
             // Indicates a requirement for the NameID received by
             // this SP to be encrypted.
             'wantNameIdEncrypted' => false,
+
+            // Algorithm that the toolkit will use on signing process. Options:
+            //  - 'http://www.w3.org/2000/09/xmldsig#rsa-sha1'
+            //  - 'http://www.w3.org/2000/09/xmldsig#dsa-sha1'
+            //  - 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256'
+            //  - 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha384'
+            //  - 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha512'
+            'signatureAlgorithm' => $signatureAlgorithm,
+
             // Authentication context.
             // Set to false and no AuthContext will be sent in the AuthNRequest,
             // Set true or don't present thi parameter and you will get an AuthContext 'exact' 'urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport'
