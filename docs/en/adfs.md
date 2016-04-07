@@ -96,7 +96,7 @@ Note that the "privatepersonalidentifier" must be a unique identifier (we will r
 Click "Add Rule" and select "Send Claims Using a Custom Rule" from the dropdown. Add the following rule:
 
 	c:[Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/windowsaccountname", Issuer == "AD AUTHORITY"] => issue(store = "Active Directory", types = ("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/privatepersonalidentifier"), query = ";mail,givenName,sn,objectGuid;{0}", param = c.Value);
-	
+
 ![](img/send_ldap_attributes.png)
 
 ### Rule 2: Send objectId as nameidentifier
@@ -109,7 +109,10 @@ Repeat the same "Add Rule" as done above and select "Send Claims Using a Custom 
 
 ## Set the secure hash algorithm
 
-By default ADFS uses a hash algorithm incompatible with *silverstripe-activedirectory* SAML implementation. You will need to change it from SHA-256 to SHA-1.
+By default ADFS uses SHA-256 for signing the requests, the Active Directory
+module by default uses this hash algorithm, but can be changed to use the less
+secure SHA-1. The only reason should be changed is for compatibility with the
+setting used by the SilverStripe site. Here is how to change it:
 
 1. Right click the relying party and choose properties.
 2. Choose the "Advanced" tab and select the "SHA-1" option in the dropdown and press OK.
