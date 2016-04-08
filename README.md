@@ -62,3 +62,7 @@ AD user synchronisation and authentication is hidden behind the backend (server 
 * [ADFS administrator guide](docs/en/adfs.md) - prepare the Identity Provider
 * [CMS usage guide](docs/en/usage.md) - manage LDAP group mappings
 * [Troubleshooting](docs/en/troubleshooting.md) - common problems
+
+## Changelog
+
+The changelog can be found at [CHANGELOG.MD](CHANGELOG.MD).
