@@ -80,7 +80,7 @@ class LDAPMemberSyncTask extends BuildTask
         // remove Member records that were previously imported, but no longer exist in the directory
         // NOTE: DB::query() here is used for performance and so we don't run out of memory
         if ($this->config()->destructive) {
-            foreach (DB::query('SELECT "ID", "GUID" FROM "Member" WHERE "IsImportedFromLDAP" = 1') as $record) {
+            foreach (DB::query('SELECT "ID", "GUID" FROM "Member" WHERE "GUID" IS NOT NULL') as $record) {
                 if (!isset($users[$record['GUID']])) {
                     $member = Member::get()->byId($record['ID']);
                     $member->delete();

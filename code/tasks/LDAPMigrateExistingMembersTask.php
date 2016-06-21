@@ -23,18 +23,16 @@ class LDAPMigrateExistingMembersTask extends BuildTask
                 continue;
             }
 
-            $member = Member::get()->filter(array(
-                'Email' => $user['mail'],
-                'IsImportedFromLDAP' => '0'
-            ))->first();
+            $member = Member::get()->where(
+                sprintf('"Email" = \'%s\' AND "GUID" IS NULL', Convert::raw2sql($user['mail']))
+            )->first();
 
             if (!($member && $member->exists())) {
                 continue;
             }
 
-            // member was found, migrate them by setting the GUID and IsImportedFromLDAP fields
+            // Member was found, migrate them by setting the GUID field
             $member->GUID = $user['objectguid'];
-            $member->IsImportedFromLDAP = 1;
             $member->write();
 
             $count++;

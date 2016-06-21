@@ -367,6 +367,30 @@ class LDAPService extends Object implements Flushable
     }
 
     /**
+     * Given a group DN, get the group membership data in LDAP.
+     *
+     * @param string $dn
+     * @return array
+     */
+    public function getLDAPGroupMembers($dn)
+    {
+        if (!$this->enabled()) {
+            return;
+        }
+
+        $groupObj = Group::get()->filter('DN', $dn)->first();
+        $groupData = $this->getGroupByGUID($groupObj->GUID);
+        $members = !empty($groupData['member']) ? $groupData['member'] : array();
+        // If a user belongs to a single group, this comes through as a string.
+        // Normalise to a array so it's consistent.
+        if ($members && is_string($members)) {
+            $members = array($members);
+        }
+
+        return $members;
+    }
+
+    /**
      * Update the current Member record with data from LDAP.
      *
      * Constraints:
@@ -399,7 +423,6 @@ class LDAPService extends Object implements Flushable
 
         $member->IsExpired = ($data['useraccountcontrol'] & 2) == 2;
         $member->LastSynced = (string)SS_Datetime::now();
-        $member->IsImportedFromLDAP = true;
 
         foreach ($member->config()->ldap_field_mappings as $attribute => $field) {
             if (!isset($data[$attribute])) {
@@ -567,7 +590,6 @@ class LDAPService extends Object implements Flushable
         }
         $group->DN = $data['dn'];
         $group->LastSynced = (string)SS_Datetime::now();
-        $group->IsImportedFromLDAP = true;
         $group->write();
 
         // Mappings on this group are automatically maintained to contain just the group's DN.
@@ -588,6 +610,212 @@ class LDAPService extends Object implements Flushable
             $mapping->DN = $data['dn'];
             $mapping->write();
             $group->LDAPGroupMappings()->add($mapping);
+        }
+    }
+
+    /**
+     * Creates a new LDAP user from the passed Member record.
+     * Note that the Member record must have a non-empty Username field for this to work.
+     *
+     * @param Member $member
+     */
+    public function createLDAPUser(Member $member)
+    {
+        if (!$this->enabled()) {
+            return;
+        }
+        if (empty($member->Username)) {
+            throw new ValidationException('Member missing Username. Cannot create LDAP user');
+        }
+
+        // Normalise username to lowercase to ensure we don't have duplicates of different cases
+        $member->Username = strtolower($member->Username);
+
+        // Create user in LDAP using available information.
+        $dn = sprintf('CN=%s,%s', $member->Username, LDAP_NEW_USERS_DN);
+
+        try {
+            $this->add($dn, array(
+                'objectclass' => 'user',
+                'cn' => $member->Username,
+                'accountexpires' => '9223372036854775807',
+                'useraccountcontrol' => '66048',
+                'userprincipalname' => sprintf(
+                    '%s@%s',
+                    $member->Username,
+                    $this->gateway->config()->options['accountDomainName']
+                ),
+            ));
+        } catch (\Exception $e) {
+            throw new ValidationException('LDAP synchronisation failure: '.$e->getMessage());
+        }
+
+        $user = $this->getUserByUsername($member->Username);
+        if (empty($user['objectguid'])) {
+            throw new ValidationException('LDAP synchronisation failure: user missing GUID');
+        }
+
+        // Creation was successful, mark the user as LDAP managed by setting the GUID.
+        $member->GUID = $user['objectguid'];
+    }
+
+    /**
+     * Update the Member data back to the corresponding LDAP user object.
+     *
+     * @param Member $member
+     * @throws ValidationException
+     */
+    public function updateLDAPFromMember(Member $member)
+    {
+        if (!$this->enabled()) {
+            return;
+        }
+        if (!$member->GUID) {
+            throw new ValidationException('Member missing GUID. Cannot update LDAP user');
+        }
+
+        $data = $this->getUserByGUID($member->GUID);
+        if (empty($data['objectguid'])) {
+            throw new ValidationException('LDAP synchronisation failure: user missing GUID');
+        }
+
+        $dn = $data['distinguishedname'];
+
+        // Normalise username to lowercase to ensure we don't have duplicates of different cases
+        $member->Username = strtolower($member->Username);
+
+        try {
+            // If the common name (cn) has changed, we need to ensure they've been moved
+            // to the new DN, to avoid any clashes between user objects.
+            if ($data['cn'] != $member->Username) {
+                $newDn = sprintf('CN=%s,%s', $member->Username, preg_replace('/^CN=(.+?),/', '', $dn));
+                $this->move($dn, $newDn);
+                $dn = $newDn;
+            }
+        } catch (\Exception $e) {
+            throw new ValidationException('LDAP move failure: '.$e->getMessage());
+        }
+
+        try {
+            $attributes = array(
+                'displayname' => sprintf('%s %s', $member->FirstName, $member->Surname),
+                'name' => sprintf('%s %s', $member->FirstName, $member->Surname),
+                'userprincipalname' => sprintf(
+                    '%s@%s',
+                    $member->Username,
+                    $this->gateway->config()->options['accountDomainName']
+                ),
+            );
+            foreach ($member->config()->ldap_field_mappings as $attribute => $field) {
+                $relationClass = $member->getRelationClass($field);
+                if ($relationClass) {
+                    // todo no support for writing back relations yet.
+                } else {
+                    $attributes[$attribute] = $member->$field;
+                }
+            }
+
+            $this->update($dn, $attributes);
+        } catch (\Exception $e) {
+            throw new ValidationException('LDAP synchronisation failure: '.$e->getMessage());
+        }
+    }
+
+    /**
+     * Ensure the user belongs to the correct groups in LDAP from their membership
+     * to local LDAP mapped SilverStripe groups.
+     *
+     * This also removes them from LDAP groups if they've been taken out of one.
+     * It will not affect group membership of non-mapped groups, so it will
+     * not touch such internal AD groups like "Domain Users".
+     *
+     * @param Member $member
+     */
+    public function updateLDAPGroupsForMember(Member $member)
+    {
+        if (!$this->enabled()) {
+            return;
+        }
+        if (!$member->GUID) {
+            throw new ValidationException('Member missing GUID. Cannot update LDAP user');
+        }
+
+        $addGroups = array();
+        $removeGroups = array();
+
+        $user = $this->getUserByGUID($member->GUID);
+        if (empty($user['objectguid'])) {
+            throw new ValidationException('LDAP update failure: user missing GUID');
+        }
+
+        // If a user belongs to a single group, this comes through as a string.
+        // Normalise to a array so it's consistent.
+        $existingGroups = !empty($user['memberof']) ? $user['memberof'] : array();
+        if ($existingGroups && is_string($existingGroups)) {
+            $existingGroups = array($existingGroups);
+        }
+
+        foreach ($member->Groups() as $group) {
+            if (!$group->GUID) {
+                continue;
+            }
+
+            // mark this group as something we need to ensure the user belongs to in LDAP.
+            $addGroups[] = $group->DN;
+        }
+
+        // Which existing LDAP groups are not in the add groups? We'll check these groups to
+        // see if the user should be removed from any of them.
+        $remainingGroups = array_diff($existingGroups, $addGroups);
+
+        foreach ($remainingGroups as $groupDn) {
+            // We only want to be removing groups we have a local Group mapped to. Removing
+            // membership for anything else would be bad!
+            $group = Group::get()->filter('DN', $groupDn)->first();
+            if (!$group || !$group->exists()) {
+                continue;
+            }
+
+            // this group should be removed from the user's memberof attribute, as it's been removed.
+            $removeGroups[] = $groupDn;
+        }
+
+        // go through the groups we want the user to be in and ensure they're in them.
+        foreach ($addGroups as $groupDn) {
+            $members = $this->getLDAPGroupMembers($groupDn);
+
+            // this user is already in the group, no need to do anything.
+            if (in_array($user['distinguishedname'], $members)) {
+                continue;
+            }
+
+            $members[] = $user['distinguishedname'];
+
+            try {
+                $this->update($groupDn, array('member' => $members));
+            } catch (\Exception $e) {
+                throw new ValidationException('LDAP group membership add failure: '.$e->getMessage());
+            }
+        }
+
+        // go through the groups we _don't_ want the user to be in and ensure they're taken out of them.
+        foreach ($removeGroups as $groupDn) {
+            $members = $this->getLDAPGroupMembers($groupDn);
+
+            // remove the user from the members data.
+            if (in_array($user['distinguishedname'], $members)) {
+                foreach ($members as $i => $dn) {
+                    if ($dn == $user['distinguishedname']) {
+                        unset($members[$i]);
+                    }
+                }
+            }
+
+            try {
+                $this->update($groupDn, array('member' => $members));
+            } catch (\Exception $e) {
+                throw new ValidationException('LDAP group membership remove failure: '.$e->getMessage());
+            }
         }
     }
 
@@ -638,6 +866,29 @@ class LDAPService extends Object implements Flushable
         }
 
         return $validationResult;
+    }
+
+    /**
+     * Delete an LDAP user mapped to the Member record
+     * @param Member $member
+     */
+    public function deleteLDAPMember(Member $member) {
+        if (!$this->enabled()) {
+            return;
+        }
+        if (!$member->GUID) {
+            throw new ValidationException('Member missing GUID. Cannot delete LDAP user');
+        }
+        $data = $this->getUserByGUID($member->GUID);
+        if (empty($data['distinguishedname'])) {
+            throw new ValidationException('LDAP delete failure: could not find distinguishedname attribute');
+        }
+
+        try {
+            $this->delete($data['distinguishedname']);
+        } catch (\Exception $e) {
+            throw new ValidationException('LDAP delete user failed: '.$e->getMessage());
+        }
     }
 
     /**

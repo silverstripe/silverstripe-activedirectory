@@ -13,7 +13,6 @@ class LDAPGroupExtension extends DataExtension
         // Unique user identifier, same field is used by SAMLMemberExtension
         'GUID' => 'Varchar(50)',
         'DN' => 'Text',
-        'IsImportedFromLDAP' => 'Boolean',
         'LastSynced' => 'SS_Datetime'
     );
 
@@ -43,10 +42,6 @@ class LDAPGroupExtension extends DataExtension
     public function updateCMSFields(FieldList $fields)
     {
         // Add read-only LDAP metadata fields.
-        $fields->replaceField('IsImportedFromLDAP', $readOnly[] = new ReadonlyField(
-            'IsImportedFromLDAP',
-            _t('LDAPGroupExtension.ISIMPORTEDFROMLDAP', 'Is group imported from LDAP/AD?')
-        ));
         $fields->addFieldToTab('Root.LDAP', new ReadonlyField('GUID'));
         $fields->addFieldToTab('Root.LDAP', new ReadonlyField('DN'));
         $fields->addFieldToTab('Root.LDAP', new ReadonlyField(
@@ -54,7 +49,7 @@ class LDAPGroupExtension extends DataExtension
             _t('LDAPGroupExtension.LASTSYNCED', 'Last synced'))
         );
 
-        if ($this->owner->IsImportedFromLDAP) {
+        if ($this->owner->GUID) {
             $fields->replaceField('Title', new ReadonlyField('Title'));
             $fields->replaceField('Description', new ReadonlyField('Description'));
             // Surface the code which is normally hidden from the CMS user.

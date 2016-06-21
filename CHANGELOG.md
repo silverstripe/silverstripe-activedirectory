@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.0.0 (Unreleased)
+
+Adding features to allow writing Member data back to LDAP.
+See [Writing LDAP data from SilverStripe](docs/en/developer.md#writing-ldap-data-from-silverstripe).
+
+ - IsImportedFromLDAP field removed from Group and Member. To determine if
+   either of these are imported from LDAP, check if the GUID field is not NULL.
+
 ## 2.0.0
 
 LDAP functionality that modifies user data (i.e. password reset) will require
