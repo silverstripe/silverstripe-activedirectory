@@ -374,10 +374,6 @@ class LDAPService extends Object implements Flushable
      */
     public function getLDAPGroupMembers($dn)
     {
-        if (!$this->enabled()) {
-            return;
-        }
-
         $groupObj = Group::get()->filter('DN', $dn)->first();
         $groupData = $this->getGroupByGUID($groupObj->GUID);
         $members = !empty($groupData['member']) ? $groupData['member'] : array();
