@@ -75,7 +75,7 @@ class LDAPGroupSyncTask extends BuildTask
         // remove Group records that were previously imported, but no longer exist in the directory
         // NOTE: DB::query() here is used for performance and so we don't run out of memory
         if ($this->config()->destructive) {
-            foreach (DB::query('SELECT "ID", "GUID" FROM "Group" WHERE "IsImportedFromLDAP" = 1') as $record) {
+            foreach (DB::query('SELECT "ID", "GUID" FROM "Group" WHERE "GUID" IS NOT NULL') as $record) {
                 if (!isset($ldapGroups[$record['GUID']])) {
                     $group = Group::get()->byId($record['ID']);
                     // Cascade into mappings, just to clean up behind ourselves.

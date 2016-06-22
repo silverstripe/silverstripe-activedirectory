@@ -7,6 +7,8 @@ class LDAPServiceTest extends SapphireTest
      */
     protected $service;
 
+    protected $usesDatabase = true;
+
     public function setUp()
     {
         parent::setUp();
@@ -27,6 +29,8 @@ class LDAPServiceTest extends SapphireTest
         // Prevent other module extension hooks from executing during write() etc.
         Config::inst()->remove('Member', 'extensions');
         Config::inst()->remove('Group', 'extensions');
+        Config::inst()->update('Member', 'update_ldap_from_local', false);
+        Config::inst()->update('Member', 'create_users_in_ldap', false);
         Config::inst()->update('Group', 'extensions', array('LDAPGroupExtension'));
         Config::inst()->update('Member', 'extensions', array('LDAPMemberExtension'));
     }
@@ -61,7 +65,7 @@ class LDAPServiceTest extends SapphireTest
         Config::inst()->update('Member', 'ldap_field_mappings', array(
             'givenname' => 'FirstName',
             'sn' => 'Surname',
-            'mail' => 'Email'
+            'mail' => 'Email',
         ));
 
         $member = new Member();

@@ -23,7 +23,9 @@ class LDAPFakeGateway extends LDAPGateway implements TestOnly
         ),
         'users' => array(
             '123' => array(
+                'distinguishedname' => 'CN=Joe,DC=playpen,DC=local',
                 'objectguid' => '123',
+                'cn' => 'jbloggs',
                 'useraccountcontrol' => '1',
                 'givenname' => 'Joe',
                 'sn' => 'Bloggs',
@@ -63,4 +65,17 @@ class LDAPFakeGateway extends LDAPGateway implements TestOnly
     {
         return array(self::$data['users'][$guid]);
     }
+
+    public function update($dn, array $attributes) {
+    }
+
+    public function delete($dn, $recursively = false) {
+    }
+
+    public function move($fromDn, $toDn, $recursively = false) {
+    }
+
+    public function add($dn, array $attributes) {
+    }
+
 }

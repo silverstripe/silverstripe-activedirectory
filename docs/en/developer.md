@@ -345,8 +345,7 @@ If you have existing Member records on your site that have matching email addres
 you can migrate those by running the task `LDAPMigrateExistingMembersTask`. For example, visting
 `http://mysite.com/dev/tasks/LDAPMigrateExistingMembersTask` will run the migration.
 
-This essentially just updates those existing records with the matching directory user's `GUID` and sets the flag `IsImportedFromLDAP`
-so they will be synced from now on.
+This essentially just updates those existing records with the matching directory user's `GUID` so they will be synced from now on.
 
 ## Debugging
 
@@ -435,12 +434,50 @@ This feature only works if you have the `LDAPAuthenticator` enabled (see "Config
 
 This feature has only been tested on Microsoft AD compatible servers.
 
-Example configuration in `mysite/_config/ldap.yml'
+Example configuration in `mysite/_config/ldap.yml`:
 
 ```yaml
 LDAPService:
   allow_password_change: true
 ```
+
+### Writing LDAP data from SilverStripe
+
+A feature is available that allows data to be written back to LDAP based on the state of `Member` object fields.
+Additionally, you can also create new users in LDAP from your local records.
+
+Before this can be used, the credentials connecting to LDAP need to have write permissions so LDAP attributes can
+be written to.
+
+To turn on the feature, here is some example configuration in `mysite/_config/ldap.yml`:
+
+```yaml
+Member:
+  update_ldap_from_local: true
+  create_users_in_ldap: true
+```
+
+You will also need to define `LDAP_NEW_USERS_DN` in your [environment file](https://docs.silverstripe.org/en/getting_started/environment_management/).
+This is the DN (Distinguished Name) of the location in the LDAP structure where new users will be created.
+
+Example environment file snippet:
+
+    define('LDAP_NEW_USERS_DN', 'CN=Users,DC=mydomain,DC=com');
+
+Now when you create a new user using the Security section in `/admin`, the user will be created in LDAP. Take note
+that the "Username" field must be filled in, otherwise it will not be created, due to LDAP users requiring a username.
+
+You can also programatically create a user. For example:
+
+    $member = new Member();
+    $member->FirstName = 'Joe';
+    $member->Username = 'jbloggs';
+    $member->write();
+
+If you enable `update_ldap_from_local` saving a user in the Security section of the CMS or calling `write()` on
+a Member object will push up the mapped fields to LDAP, assuming that Member record has a `GUID` field.
+
+See "Map AD attributes to Member fields" section above for more information on mapping fields.
 
 ## Resources
 
