@@ -4,8 +4,16 @@
  *
  * This controller is used to debug the LDAP connection.
  */
-class LDAPDebugController extends Controller
+class LDAPDebugController extends ContentController
 {
+
+    /**
+     * @var array
+     */
+    private static $allowed_actions = array(
+        'index',
+    );
+
     /**
      * @var array
      */
@@ -25,6 +33,15 @@ class LDAPDebugController extends Controller
         if (!Permission::check('ADMIN')) {
             Security::permissionFailure();
         }
+    }
+
+    /**
+     * @param SS_HTTPRequest $request
+     *
+     * @return string
+     */
+    public function index(\SS_HTTPRequest $request) {
+        return $this->renderWith(['LDAPDebugController']);
     }
 
     public function Options()

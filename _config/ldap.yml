@@ -4,6 +4,7 @@ Name: ldapconfig
 Director:
   rules:
     'LDAPSecurity': LDAPSecurityController
+    'LDAPDebug': LDAPDebugController
 
 Group:
   extensions:
