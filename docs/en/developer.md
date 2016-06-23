@@ -228,7 +228,7 @@ See "LDAP debugging" section below for more information.
 
 ### Verify LDAP connectivity
 
-You can visit a controller called `/LDAPDebugController` to check that the connection is working. This will output a page listing the connection options used, as well as all AD groups that can be found.
+You can visit a controller called `/LDAPDebug` to check that the connection is working. This will output a page listing the connection options used, as well as all AD groups that can be found.
 
 ### Put imported Member into a default group
 
@@ -371,7 +371,7 @@ Also ensure that all protocols are matching. SAML is very sensitive to differenc
 
 ### Debugging LDAP from SilverStripe
 
-For debugging what information SilverStripe is getting from LDAP, you can visit the `<site-root>/LDAPDebugController` from your browser. Assuming you are an ADMIN, this will give you a breakdown of visible information.
+For debugging what information SilverStripe is getting from LDAP, you can visit the `<site-root>/LDAPDebug` from your browser. Assuming you are an ADMIN, this will give you a breakdown of visible information.
 
 To see debug information on the sync tasks, run them directly from your browser. The tasks are at `<site-root>/dev/tasks/LDAPGroupSyncTask` and `dev/tasks/LDAPMemberSyncTask`.
 
