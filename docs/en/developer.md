@@ -39,6 +39,7 @@ We assume ADFS 2.0 or greater is used as an IdP.
 - [Advanced SAML configuration](#advanced-saml-configuration)
 - [Advanced features](#advanced-features)
   - [Allowing users to update their AD password](#allowing-users-to-update-their-ad-password)
+  - [Writing LDAP data from SilverStripe](#writing-ldap-data-from-silverstripe)
 - [Resources](#resources)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
