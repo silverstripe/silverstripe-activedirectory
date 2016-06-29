@@ -456,14 +456,11 @@ To turn on the feature, here is some example configuration in `mysite/_config/ld
 Member:
   update_ldap_from_local: true
   create_users_in_ldap: true
+LDAPService:
+  new_users_dn: CN=Users,DC=mydomain,DC=com
 ```
 
-You will also need to define `LDAP_NEW_USERS_DN` in your [environment file](https://docs.silverstripe.org/en/getting_started/environment_management/).
-This is the DN (Distinguished Name) of the location in the LDAP structure where new users will be created.
-
-Example environment file snippet:
-
-    define('LDAP_NEW_USERS_DN', 'CN=Users,DC=mydomain,DC=com');
+The `new_users_dn` is the DN (Distinguished Name) of the location in the LDAP structure where new users will be created.
 
 Now when you create a new user using the Security section in `/admin`, the user will be created in LDAP. Take note
 that the "Username" field must be filled in, otherwise it will not be created, due to LDAP users requiring a username.

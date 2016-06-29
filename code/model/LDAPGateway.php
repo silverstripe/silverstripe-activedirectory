@@ -256,7 +256,7 @@ class LDAPGateway extends Object
 
         // will translate the username to username@foo.bar, username or foo\user depending on the
         // $options['accountCanonicalForm']
-        $username = $this->ldap->getCanonicalAccountName($username);
+        $username = $this->ldap->getCanonicalAccountName($username, $option);
         switch ($option) {
             case Zend\Ldap\Ldap::ACCTNAME_FORM_USERNAME: // traditional style usernames, e.g. alice
                 $filter = sprintf('(&(objectClass=user)(samaccountname=%s))', Zend\Ldap\Filter\AbstractFilter::escapeValue($username));
@@ -267,6 +267,10 @@ class LDAPGateway extends Object
                 break;
             case Zend\Ldap\Ldap::ACCTNAME_FORM_PRINCIPAL: // principal style usernames, e.g. alice@foo.com
                 $filter = sprintf('(&(objectClass=user)(userprincipalname=%s))', Zend\Ldap\Filter\AbstractFilter::escapeValue($username));
+                break;
+            case Zend\Ldap\Ldap::ACCTNAME_FORM_DN: // distinguished name, e.g. CN=someone,DC=example,DC=co,DC=nz
+                // @todo Not supported yet!
+                throw new Exception('DN style not supported in LDAPGateway::getUserByUsername()!');
                 break;
             default: // default to principal style
                 $filter = sprintf('(&(objectClass=user)(userprincipalname=%s))', Zend\Ldap\Filter\AbstractFilter::escapeValue($username));
