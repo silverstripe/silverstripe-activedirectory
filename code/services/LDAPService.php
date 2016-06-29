@@ -38,6 +38,14 @@ class LDAPService extends Object implements Flushable
     private static $groups_search_locations = array();
 
     /**
+     * Location to create new users in (distinguished name).
+     * @var string
+     *
+     * @config
+     */
+    private static $new_users_dn;
+
+    /**
      * @var array
      */
     private static $_cache_nested_groups = array();
@@ -623,12 +631,15 @@ class LDAPService extends Object implements Flushable
         if (empty($member->Username)) {
             throw new ValidationException('Member missing Username. Cannot create LDAP user');
         }
+        if (!$this->config()->new_users_dn) {
+            throw new Exception('LDAPService::new_users_dn must be configured to create LDAP users');
+        }
 
         // Normalise username to lowercase to ensure we don't have duplicates of different cases
         $member->Username = strtolower($member->Username);
 
         // Create user in LDAP using available information.
-        $dn = sprintf('CN=%s,%s', $member->Username, LDAP_NEW_USERS_DN);
+        $dn = sprintf('CN=%s,%s', $member->Username, $this->config()->new_users_dn);
 
         try {
             $this->add($dn, array(
