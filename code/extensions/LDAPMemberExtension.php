@@ -58,9 +58,6 @@ class LDAPMemberExtension extends DataExtension
      * This requires setting write permissions on the user configured in the LDAP
      * credentials, which is why this is disabled by default.
      *
-     * Note that some constants must be configured in your environment file:
-     * LDAP_NEW_USERS_DN - where to place users in the directory. e.g. "OU=Users,DC=mydomain,DC=com"
-     *
      * @var bool
      * @config
      */
