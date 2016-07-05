@@ -129,17 +129,17 @@ JS;
         if (!($member && $member->exists())) {
             $member = new Member();
             $member->GUID = $userData['objectguid'];
-            $member->write();
         }
+
+        // Update the users from LDAP so we are sure that the email is correct.
+        // This will also write the Member record.
+        $service->updateMemberFromLDAP($member);
 
         // Allow vetoing forgot password requests
         $results = $this->extend('forgotPassword', $member);
         if ($results && is_array($results) && in_array(false, $results, true)) {
             return $this->controller->redirect($this->ldapSecController->Link('lostpassword'));
         }
-
-        // update the users from LDAP so we are sure that the email is correct
-        $service->updateMemberFromLDAP($member);
 
         if ($member) {
             $token = $member->generateAutologinTokenAndStoreHash();

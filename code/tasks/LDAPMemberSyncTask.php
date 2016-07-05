@@ -45,11 +45,9 @@ class LDAPMemberSyncTask extends BuildTask
                 // create the initial Member with some internal fields
                 $member = new Member();
                 $member->GUID = $data['objectguid'];
-                $member->write();
 
                 $this->log(sprintf(
-                    'Creating new Member (ID: %s, GUID: %s, sAMAccountName: %s)',
-                    $member->ID,
+                    'Creating new Member (GUID: %s, sAMAccountName: %s)',
                     $data['objectguid'],
                     $data['samaccountname']
                 ));
@@ -63,7 +61,7 @@ class LDAPMemberSyncTask extends BuildTask
                 ));
             }
 
-            // sync attributes from LDAP to the Member record
+            // Sync attributes from LDAP to the Member record. This will also write the Member record.
             // this is also responsible for putting the user into mapped groups
             try {
                 $this->ldapService->updateMemberFromLDAP($member, $data);

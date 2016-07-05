@@ -95,11 +95,10 @@ class SAMLController extends Controller
 
         $member->SAMLSessionIndex = $auth->getSessionIndex();
 
-        // This will throw an exception if there are two distinct GUIDs with the same email address.
-        // We are happy with a raw 500 here at this stage.
-        $member->write();
-
         // This will trigger LDAP update through LDAPMemberExtension::memberLoggedIn.
+        // The LDAP update will also write the Member record. We shouldn't write before
+        // calling this, as any onAfterWrite hooks that attempt to update LDAP won't
+        // have the Username field available yet for new Member records, and fail.
         // Both SAML and LDAP identify Members by the GUID field.
         $member->logIn();
 

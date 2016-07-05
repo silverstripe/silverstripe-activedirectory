@@ -104,8 +104,11 @@ class LDAPAuthenticator extends Authenticator
         if (!($member && $member->exists())) {
             $member = new Member();
             $member->GUID = $data['objectguid'];
-            $member->write();
         }
+
+        // Update the users from LDAP so we are sure that the email is correct.
+        // This will also write the Member record.
+        $service->updateMemberFromLDAP($member);
 
         Session::clear('BackURL');
 
