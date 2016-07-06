@@ -686,6 +686,10 @@ class LDAPService extends Object implements Flushable
             throw new ValidationException('LDAP synchronisation failure: user missing GUID');
         }
 
+        if (empty($member->Username)) {
+            throw new ValidationException('Member missing Username. Cannot update LDAP user');
+        }
+
         $dn = $data['distinguishedname'];
 
         // Normalise username to lowercase to ensure we don't have duplicates of different cases
