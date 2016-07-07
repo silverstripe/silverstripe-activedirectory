@@ -15,7 +15,7 @@ error_reporting(E_ALL | E_STRICT);
  * Copy this script into /usr/local/bin/rotate_ldap_password
  *
  * Command synax:
- * rotate_ldap_password <ss_env_file> <c_hostname> <c_privileged_dn> <c_privileged_password> [<c_target_dn> <c_target_password>]
+ * rotate_ldap_password <ss_env_file> <c_hostname|hostname> <c_privileged_dn> <c_privileged_password> [<c_target_dn> <c_target_password>]
  *
  * Example:
  * Assuming you have this configuration in your /sites/_ss_environment.php file:
@@ -28,17 +28,20 @@ error_reporting(E_ALL | E_STRICT);
  * </code>
  * The password can be rotated by running:
  * rotate_ldap_password /sites/_ss_environment.php LDAP_HOSTNAME PRIVILEGED_DN PRIVILEGED_PASSWORD TARGET_DN TARGET_PASSWORD
+ *
+ * LDAP endpoint hostname can also be overriden:
+ * rotate_ldap_password /sites/_ss_environment.php ldaps://otherldap.org PRIVILEGED_DN PRIVILEGED_PASSWORD TARGET_DN TARGET_PASSWORD
  */
 
 if(count($_SERVER['argv'])!=5 && count($_SERVER['argv'])!=7) {
 	echo "Not enough arguments.\n\n";
 	echo "Usage (`c_' suffix denotes constants, not actual value):\n";
-	echo "	{$_SERVER['argv'][0]} <ss_env_file> <c_hostname> <c_privileged_dn> <c_privileged_password> [<c_target_dn> <c_target_password>]\n";
+	echo "	{$_SERVER['argv'][0]} <ss_env_file> <c_hostname|hostname> <c_privileged_dn> <c_privileged_password> [<c_target_dn> <c_target_password>]\n";
 	exit(1);
 }
 
 $envFilePath = $_SERVER['argv'][1];
-$hostnameConst = $_SERVER['argv'][2];
+$hostname = $_SERVER['argv'][2];
 $privilegedDNConst = $_SERVER['argv'][3];
 $privilegedPasswordConst = $_SERVER['argv'][4];
 
@@ -63,7 +66,8 @@ if(!is_writable($envFilePath)) {
 
 require_once($envFilePath);
 
-$conn = ldap_connect(constant($hostnameConst));
+$hostnameValue = defined($hostname) ? constant($hostname) : $hostname;
+$conn = ldap_connect($hostnameValue);
 ldap_set_option($conn, LDAP_OPT_PROTOCOL_VERSION, 3);
 ldap_set_option($conn, LDAP_OPT_REFERRALS, 0);
 
