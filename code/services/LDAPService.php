@@ -864,6 +864,8 @@ class LDAPService extends Object implements Flushable
                 $userData['distinguishedname'],
                 array('unicodePwd' => iconv('UTF-8', 'UTF-16LE', sprintf('"%s"', $password)))
             );
+
+            $this->extend('updateSetPassword', $member, $password, $validationResult);
         } catch (Exception $e) {
             // Try to parse the exception to get the error message to display to user, eg:
             // Can't change password for Member.ID "13": 0x13 (Constraint violation; 0000052D: Constraint violation - check_password_restrictions: the password does not meet the complexity criteria!): updating: CN=User Name,OU=Users,DC=foo,DC=company,DC=com
