@@ -94,8 +94,7 @@ class LDAPChangePasswordForm extends ChangePasswordForm
             return $this->controller->redirect($this->controller->Link('changepassword'));
         } elseif ($data['NewPassword1'] == $data['NewPassword2']) {
             $isValid = $service->setPassword($member, $data['NewPassword1']);
-            // try to catch connection and other errors that the ldap service can through
-
+            // try to catch connection and other errors LDAPService may throw
             if ($isValid->valid()) {
                 $member->logIn();
 
