@@ -27,6 +27,21 @@ class LDAPAuthenticator extends Authenticator
     private static $allow_email_login = 'no';
 
     /**
+     * Set to 'yes' to fallback login attempts to {@link $fallback_authenticator}.
+     * This will occur if LDAP fails to authenticate the user.
+     *
+     * @var string 'no' or 'yes'
+     */
+    private static $fallback_authenticator = 'no';
+
+    /**
+     * The class of {@link Authenticator} to use as the fallback authenticator.
+     *
+     * @var string
+     */
+    private static $fallback_authenticator_class = 'MemberAuthenticator';
+
+    /**
      * @return string
      */
     public static function get_name()
@@ -79,9 +94,19 @@ class LDAPAuthenticator extends Authenticator
         }
 
         $result = $service->authenticate($username, $data['Password']);
-
         $success = $result['success'] === true;
         if (!$success) {
+            if (Config::inst()->get('LDAPAuthenticator', 'fallback_authenticator') === 'yes') {
+                $fallbackMember = call_user_func(
+                    array(Config::inst()->get('LDAPAuthenticator', 'fallback_authenticator_class'), 'authenticate'),
+                    array_merge($data, array('Email' => $data['Login'])),
+                    $form
+                );
+                if ($fallbackMember) {
+                    return $fallbackMember;
+                }
+            }
+
             if ($form) {
                 $form->sessionMessage($result['message'], 'bad');
             }
