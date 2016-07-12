@@ -23,13 +23,24 @@ class LDAPChangePasswordForm extends ChangePasswordForm
             }
         }
 
-        // Get the username.
-        $ldap = Injector::inst()->get('LDAPService')->getUserByGUID($member->GUID, array('samaccountname'));
+        $data = Injector::inst()->get('LDAPService')->getUserByGUID($member->GUID, array('samaccountname'));
 
-        if (!empty($ldap['samaccountname'])) {
-            $usernameField = new TextField('Username', 'Username', $ldap['samaccountname']);
-            $usernameField = $usernameField->performDisabledTransformation();
-            $this->Fields()->unshift($usernameField);
+        $emailField = null;
+        $usernameField = null;
+        if (Config::inst()->get('LDAPAuthenticator', 'allow_email_login')==='yes' && !empty($member->Email)) {
+            $emailField = new TextField('Email', _t('LDAPLoginForm.USERNAMEOREMAIL', 'Email'), $member->Email, null, $this);
+        }
+        if (!empty($data['samaccountname'])) {
+            $usernameField = new TextField('Username', _t('LDAPLoginForm.USERNAME', 'Username'), $data['samaccountname'], null, $this);
+        }
+
+        if ($emailField) {
+            $emailFieldReadonly = $emailField->performDisabledTransformation();
+            $this->Fields()->unshift($emailFieldReadonly);
+        }
+        if ($usernameField) {
+            $usernameFieldReadonly = $usernameField->performDisabledTransformation();
+            $this->Fields()->unshift($usernameFieldReadonly);
         }
     }
 
@@ -41,13 +52,12 @@ class LDAPChangePasswordForm extends ChangePasswordForm
      */
     public function doChangePassword(array $data)
     {
-
         /**
          * @var LDAPService $service
          */
         $service = Injector::inst()->get('LDAPService');
-
-        if ($member = Member::currentUser()) {
+        $member = Member::currentUser();
+        if ($member) {
             try {
                 $userData = $service->getUserByGUID($member->GUID);
             } catch (Exception $e) {
