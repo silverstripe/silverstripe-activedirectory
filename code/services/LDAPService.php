@@ -858,10 +858,11 @@ class LDAPService extends Object implements Flushable
      *
      * @param Member $member
      * @param string $password
+     * @param string|null $oldPassword Supply old password to perform a password change (as opposed to password reset)
      * @return ValidationResult
      * @throws Exception
      */
-    public function setPassword(Member $member, $password)
+    public function setPassword(Member $member, $password, $oldPassword = null)
     {
         $validationResult = ValidationResult::create(true);
 
@@ -880,22 +881,14 @@ class LDAPService extends Object implements Flushable
         }
 
         try {
-            $this->update(
-                $userData['distinguishedname'],
-                array('unicodePwd' => iconv('UTF-8', 'UTF-16LE', sprintf('"%s"', $password)))
-            );
-
+            if (!empty($oldPassword)) {
+                $this->gateway->changePassword($userData['distinguishedname'], $password, $oldPassword);
+            } else {
+                $this->gateway->resetPassword($userData['distinguishedname'], $password);
+            }
             $this->extend('onAfterSetPassword', $member, $password, $validationResult);
         } catch (Exception $e) {
-            // Try to parse the exception to get the error message to display to user, eg:
-            // Can't change password for Member.ID "13": 0x13 (Constraint violation; 0000052D: Constraint violation - check_password_restrictions: the password does not meet the complexity criteria!): updating: CN=User Name,OU=Users,DC=foo,DC=company,DC=com
-            $pattern = '/^([^\s])*\s([^\;]*);\s([^\:]*):\s([^\:]*):\s([^\)]*)/i';
-            if (preg_match($pattern, $e->getMessage(), $matches) && !empty($matches[5])) {
-                $validationResult->error($matches[5]);
-            } else {
-                // Unparsable exception, an administrator should check the logs
-                $validationResult->error(_t('LDAPAuthenticator.CANTCHANGEPASSWORD', 'We couldn\'t change your password, please contact an administrator.'));
-            }
+            $validationResult->error($e->getMessage());
         }
 
         return $validationResult;

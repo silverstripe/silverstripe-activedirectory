@@ -103,8 +103,13 @@ class LDAPChangePasswordForm extends ChangePasswordForm
             // redirect back to the form, instead of using redirectBack() which could send the user elsewhere.
             return $this->controller->redirect($this->controller->Link('changepassword'));
         } elseif ($data['NewPassword1'] == $data['NewPassword2']) {
-            $isValid = $service->setPassword($member, $data['NewPassword1']);
-            // try to catch connection and other errors LDAPService may throw
+            // Providing OldPassword to perform password _change_ operation. This will respect the
+            // password history policy. Unfortunately we cannot support password history policy on password _reset_
+            // at the moment, which means it will not be enforced on SilverStripe-driven email password reset.
+            $oldPassword = !empty($data['OldPassword']) ? $data['OldPassword']: null;
+            $isValid = $service->setPassword($member, $data['NewPassword1'], $oldPassword);
+
+            // try to catch connection and other errors that the ldap service can through
             if ($isValid->valid()) {
                 $member->logIn();
 
