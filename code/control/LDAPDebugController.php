@@ -48,6 +48,10 @@ class LDAPDebugController extends ContentController
     {
         $list = new ArrayList();
         foreach (Config::inst()->get('LDAPGateway', 'options') as $field => $value) {
+            if ($field === 'password') {
+                $value = '***';
+            }
+
             $list->push(new ArrayData(array(
                 'Name' => $field,
                 'Value' => $value
