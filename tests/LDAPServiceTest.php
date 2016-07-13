@@ -21,18 +21,18 @@ class LDAPServiceTest extends SapphireTest
         $this->service = $service;
 
         Config::inst()->nest();
-        Config::inst()->update('LDAPGateway', 'options', array('host' => '1.2.3.4'));
-        Config::inst()->update('LDAPService', 'groups_search_locations', array(
+        Config::inst()->update('LDAPGateway', 'options', ['host' => '1.2.3.4']);
+        Config::inst()->update('LDAPService', 'groups_search_locations', [
             'CN=Users,DC=playpen,DC=local',
             'CN=Others,DC=playpen,DC=local'
-        ));
+        ]);
         // Prevent other module extension hooks from executing during write() etc.
         Config::inst()->remove('Member', 'extensions');
         Config::inst()->remove('Group', 'extensions');
         Config::inst()->update('Member', 'update_ldap_from_local', false);
         Config::inst()->update('Member', 'create_users_in_ldap', false);
-        Config::inst()->update('Group', 'extensions', array('LDAPGroupExtension'));
-        Config::inst()->update('Member', 'extensions', array('LDAPMemberExtension'));
+        Config::inst()->update('Group', 'extensions', ['LDAPGroupExtension']);
+        Config::inst()->update('Member', 'extensions', ['LDAPMemberExtension']);
     }
 
     public function tearDown()
@@ -44,16 +44,16 @@ class LDAPServiceTest extends SapphireTest
 
     public function testGroups()
     {
-        $expected = array(
-            'CN=Group1,CN=Users,DC=playpen,DC=local' => array('dn' => 'CN=Group1,CN=Users,DC=playpen,DC=local'),
-            'CN=Group2,CN=Users,DC=playpen,DC=local' => array('dn' => 'CN=Group2,CN=Users,DC=playpen,DC=local'),
-            'CN=Group3,CN=Users,DC=playpen,DC=local' => array('dn' => 'CN=Group3,CN=Users,DC=playpen,DC=local'),
-            'CN=Group4,CN=Users,DC=playpen,DC=local' => array('dn' => 'CN=Group4,CN=Users,DC=playpen,DC=local'),
-            'CN=Group5,CN=Users,DC=playpen,DC=local' => array('dn' => 'CN=Group5,CN=Users,DC=playpen,DC=local'),
-            'CN=Group6,CN=Others,DC=playpen,DC=local' => array('dn' => 'CN=Group6,CN=Others,DC=playpen,DC=local'),
-            'CN=Group7,CN=Others,DC=playpen,DC=local' => array('dn' => 'CN=Group7,CN=Others,DC=playpen,DC=local'),
-            'CN=Group8,CN=Others,DC=playpen,DC=local' => array('dn' => 'CN=Group8,CN=Others,DC=playpen,DC=local')
-        );
+        $expected = [
+            'CN=Group1,CN=Users,DC=playpen,DC=local' => ['dn' => 'CN=Group1,CN=Users,DC=playpen,DC=local'],
+            'CN=Group2,CN=Users,DC=playpen,DC=local' => ['dn' => 'CN=Group2,CN=Users,DC=playpen,DC=local'],
+            'CN=Group3,CN=Users,DC=playpen,DC=local' => ['dn' => 'CN=Group3,CN=Users,DC=playpen,DC=local'],
+            'CN=Group4,CN=Users,DC=playpen,DC=local' => ['dn' => 'CN=Group4,CN=Users,DC=playpen,DC=local'],
+            'CN=Group5,CN=Users,DC=playpen,DC=local' => ['dn' => 'CN=Group5,CN=Users,DC=playpen,DC=local'],
+            'CN=Group6,CN=Others,DC=playpen,DC=local' => ['dn' => 'CN=Group6,CN=Others,DC=playpen,DC=local'],
+            'CN=Group7,CN=Others,DC=playpen,DC=local' => ['dn' => 'CN=Group7,CN=Others,DC=playpen,DC=local'],
+            'CN=Group8,CN=Others,DC=playpen,DC=local' => ['dn' => 'CN=Group8,CN=Others,DC=playpen,DC=local']
+        ];
 
         $results = $this->service->getGroups();
 
@@ -62,11 +62,11 @@ class LDAPServiceTest extends SapphireTest
 
     public function testUpdateMemberFromLDAP()
     {
-        Config::inst()->update('Member', 'ldap_field_mappings', array(
+        Config::inst()->update('Member', 'ldap_field_mappings', [
             'givenname' => 'FirstName',
             'sn' => 'Surname',
             'mail' => 'Email',
-        ));
+        ]);
 
         $member = new Member();
         $member->GUID = '123';

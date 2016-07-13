@@ -10,14 +10,14 @@ class SAMLController extends Controller
     /**
      * @var array
      */
-    private static $allowed_actions = array(
+    private static $allowed_actions = [
         'index',
         'login',
         'logout',
         'acs',
         'sls',
         'metadata'
-    );
+    ];
 
     /**
      * Assertion Consumer Service

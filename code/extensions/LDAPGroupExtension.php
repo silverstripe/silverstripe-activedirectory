@@ -9,20 +9,20 @@ class LDAPGroupExtension extends DataExtension
     /**
      * @var array
      */
-    private static $db = array(
+    private static $db = [
         // Unique user identifier, same field is used by SAMLMemberExtension
         'GUID' => 'Varchar(50)',
         'DN' => 'Text',
         'LastSynced' => 'SS_Datetime'
-    );
+    ];
 
     /**
      * A SilverStripe group can have several mappings to LDAP groups.
      * @var array
      */
-    private static $has_many = array(
+    private static $has_many = [
         'LDAPGroupMappings' => 'LDAPGroupMapping'
-    );
+    ];
 
     /**
      * Add a field to the Group_Members join table so we can keep track
@@ -33,11 +33,11 @@ class LDAPGroupExtension extends DataExtension
      *
      * @var array
      */
-    private static $many_many_extraFields = array(
-        'Members' => array(
+    private static $many_many_extraFields = [
+        'Members' => [
             'IsImportedFromLDAP' => 'Boolean'
-        )
-    );
+        ]
+    ];
 
     public function updateCMSFields(FieldList $fields)
     {

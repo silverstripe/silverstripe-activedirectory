@@ -9,31 +9,31 @@ class LDAPGroupMapping extends DataObject
     /**
      * @var array
      */
-    private static $db = array(
+    private static $db = [
         'DN' => 'Text', // the DN value of the LDAP object in AD, e.g. CN=Users,DN=playpen,DN=local
         'Scope' => 'Enum("Subtree,OneLevel","Subtree")' // the scope of the mapping
-    );
+    ];
 
     /**
      * @var array
      */
-    private static $has_one = array(
+    private static $has_one = [
         'Group' => 'Group'
-    );
+    ];
 
     /**
      * @var array
      */
-    private static $summary_fields = array(
+    private static $summary_fields = [
         'DN'
-    );
+    ];
 
     /**
      * @var array
      */
-    private static $dependencies = array(
+    private static $dependencies = [
         'ldapService' => '%$LDAPService'
-    );
+    ];
 
     public function getCMSFields()
     {
@@ -42,7 +42,7 @@ class LDAPGroupMapping extends DataObject
 
         $field = new DropdownField('DN', _t('LDAPGroupMapping.LDAPGROUP', 'LDAP Group'));
         $field->setEmptyString(_t('LDAPGroupMapping.SELECTONE', 'Select one'));
-        $groups = $this->ldapService->getGroups(true, array('dn', 'name'));
+        $groups = $this->ldapService->getGroups(true, ['dn', 'name']);
         if ($groups) {
             foreach ($groups as $dn => $record) {
                 $source[$dn] = sprintf('%s (%s)', $record['name'], $dn);
@@ -55,10 +55,10 @@ class LDAPGroupMapping extends DataObject
         $fields->removeByName('Scope');
         $fields->addFieldToTab(
             'Root.Main',
-            new DropdownField('Scope', _t('LDAPGroupMapping.SCOPE', 'Scope'), array(
+            new DropdownField('Scope', _t('LDAPGroupMapping.SCOPE', 'Scope'), [
                 'Subtree' => _t('LDAPGroupMapping.SUBTREE_DESCRIPTION', 'Users within this group and all nested groups within'),
                 'OneLevel' => _t('LDAPGroupMapping.ONELEVEL_DESCRIPTION', 'Only users within this group'),
-            ))
+            ])
         );
 
         return $fields;

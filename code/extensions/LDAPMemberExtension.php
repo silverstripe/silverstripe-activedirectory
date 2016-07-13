@@ -9,13 +9,13 @@ class LDAPMemberExtension extends DataExtension
     /**
      * @var array
      */
-    private static $db = array(
+    private static $db = [
         // Unique user identifier, same field is used by SAMLMemberExtension
         'GUID' => 'Varchar(50)',
         'Username' => 'Varchar(64)',
         'IsExpired' => 'Boolean',
         'LastSynced' => 'SS_Datetime',
-    );
+    ];
 
     /**
      * These fields are used by {@link LDAPMemberSync} to map specific AD attributes
@@ -24,12 +24,12 @@ class LDAPMemberExtension extends DataExtension
      * @var array
      * @config
      */
-    private static $ldap_field_mappings = array(
+    private static $ldap_field_mappings = [
         'givenname' => 'FirstName',
         'samaccountname' => 'Username',
         'sn' => 'Surname',
         'mail' => 'Email',
-    );
+    ];
 
     /**
      * The location (relative to /assets) where to save thumbnailphoto data.
@@ -80,7 +80,7 @@ class LDAPMemberExtension extends DataExtension
     public function updateCMSFields(FieldList $fields)
     {
         // Redo LDAP metadata fields as read-only and move to LDAP tab.
-        $ldapMetadata = array();
+        $ldapMetadata = [];
         $fields->replaceField('GUID', $ldapMetadata[] = new ReadonlyField('GUID'));
         $fields->replaceField('IsExpired', $ldapMetadata[] = new ReadonlyField(
             'IsExpired',

@@ -83,7 +83,7 @@ if(!$bind) {
 
 // ldap_read searches the directory but uses LDAP_SCOPE_BASE, so we only get a single entry.
 // We're just doing this to validate that the entry exists in the directory.
-$query = ldap_read($conn, constant($DNConst), '(objectClass=user)', array('dn'));
+$query = ldap_read($conn, constant($DNConst), '(objectClass=user)', ['dn']);
 if(!$query) {
 	echo sprintf(
 		"Could not read the LDAP entry %s: %s (error code: %s)\n",
@@ -120,9 +120,9 @@ for (;;) {
 	}
 }
 
-$success = ldap_modify($conn, $results[0]['dn'], array(
+$success = ldap_modify($conn, $results[0]['dn'], [
 	'unicodePwd' => iconv('UTF-8', 'UTF-16LE', sprintf('"%s"', $password))
-));
+]);
 
 if(!$success) {
 	echo sprintf(

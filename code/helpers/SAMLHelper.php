@@ -10,9 +10,9 @@ class SAMLHelper extends Object
     /**
      * @var array
      */
-    public static $dependencies = array(
+    public static $dependencies = [
         'SAMLConfService' => '%$SAMLConfService',
-    );
+    ];
 
     /**
      * @var SAMLConfService

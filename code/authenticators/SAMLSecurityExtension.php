@@ -53,6 +53,6 @@ class SAMLSecurityExtension extends Extension
         }
 
         $authenticator = Injector::inst()->create('SAMLAuthenticator');
-        $authenticator->authenticate(array("BackURL" => $backURL));
+        $authenticator->authenticate(["BackURL" => $backURL]);
     }
 }

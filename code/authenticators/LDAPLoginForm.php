@@ -145,9 +145,9 @@ JS;
             $token = $member->generateAutologinTokenAndStoreHash();
             $e = Member_ForgotPasswordEmail::create();
             $e->populateTemplate($member);
-            $e->populateTemplate(array(
+            $e->populateTemplate([
                 'PasswordResetLink' => LDAPSecurityController::getPasswordResetLink($member, $token)
-            ));
+            ]);
             $e->setTo($member->Email);
             $e->send();
             $this->controller->redirect($this->controller->Link('passwordsent/') . urlencode($data['Login']));

@@ -35,22 +35,22 @@ class SAMLLoginForm extends LoginForm
         }
 
         if ($checkCurrentUser && $this->shouldShowLogoutFields()) {
-            $fields = new FieldList(array(
+            $fields = new FieldList([
                 new HiddenField("AuthenticationMethod", null, $this->authenticator_class, $this)
-            ));
-            $actions = new FieldList(array(
+            ]);
+            $actions = new FieldList([
                 new FormAction("logout", _t('Member.BUTTONLOGINOTHER', "Log in as someone else"))
-            ));
+            ]);
         } else {
             if (!$fields) {
-                $fields = new FieldList(array(
+                $fields = new FieldList([
                     new HiddenField("AuthenticationMethod", null, $this->authenticator_class, $this)
-                ));
+                ]);
             }
             if (!$actions) {
-                $actions = new FieldList(array(
+                $actions = new FieldList([
                     new FormAction('dologin', _t('Member.BUTTONLOGIN', "Log in"))
-                ));
+                ]);
             }
         }
 
@@ -92,7 +92,7 @@ class SAMLLoginForm extends LoginForm
             $this->message = _t(
                 'Member.LOGGEDINAS',
                 "You're logged in as {name}.",
-                array('name' => $member->{$this->loggedInAsField})
+                ['name' => $member->{$this->loggedInAsField}]
             );
         }
         Session::set('MemberLoginForm.force_message', false);
@@ -110,7 +110,7 @@ class SAMLLoginForm extends LoginForm
      */
     public function dologin($data)
     {
-        call_user_func_array(array($this->authenticator_class, 'authenticate'), array($data, $this));
+        call_user_func_array([$this->authenticator_class, 'authenticate'], [$data, $this]);
     }
 
 
