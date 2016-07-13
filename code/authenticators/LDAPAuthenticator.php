@@ -147,10 +147,10 @@ class LDAPAuthenticator extends Authenticator
      * Try to authenticate using the fallback authenticator.
      *
      * @param array $data
-     * @param Form $form
+     * @param null|Form $form
      * @return null|Member
      */
-    protected static function fallback_authenticate($data, Form $form)
+    protected static function fallback_authenticate($data, Form $form = null)
     {
         return call_user_func(
             array(Config::inst()->get('LDAPAuthenticator', 'fallback_authenticator_class'), 'authenticate'),
