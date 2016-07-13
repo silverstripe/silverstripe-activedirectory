@@ -183,7 +183,7 @@ You can also review the [troubleshooting](troubleshooting.md) guide if you are e
 
 ## Configure LDAP synchronisation
 
-There are the following reasons for setting LDAP synchronisation up:
+These are the reasons for configuring LDAP synchronisation:
 
 * It allows you to authorise users based on their AD groups. *silverstripe-activedirectory* is able to automatically maintain Group memberships for its managed users based on the AD "memberOf" attribute.
 * You can pull in additional personal details about your users that may not be available from the IdP directly - either because of claim rules, or inherent limitations such as binary data transfers.
@@ -422,6 +422,37 @@ See the [advanced\_settings\_example.php](https://github.com/onelogin/php-saml/b
 for the advanced settings.
 
 ## Advanced features
+
+### Allowing email login on LDAP login form instead of username
+
+`LDAPAuthenticator` expects a username to log in, due to authentication with LDAP traditionally
+using username instead of email. You can additionally allow people to authenticate with their email.
+
+Example configuration in `mysite/_config/ldap.yml`:
+
+```yaml
+LDAPAuthenticator:
+  allow_email_login: 'yes'
+```
+
+Note that your LDAP users logging in must have the `mail` attribute set, otherwise this will not work.
+
+### Falling back authentication on LDAP login form
+
+You can allow users who have not been migrated to LDAP to authenticate via the default `MemberAuthenticator`.
+This is different to registering multiple authenticators, in that the fallback works on the one login form.
+
+Example configuration in `mysite/_config/ldap.yml`:
+
+```yaml
+LDAPAuthenticator:
+  fallback_authenticator: 'yes'
+```
+
+The fallback authenticator will be used in the following conditions:
+
+ * User logs in using their email address, but does not have a username
+ * The user logs in with a password that does not match what is set in LDAP
 
 ### Allowing users to update their AD password
 
