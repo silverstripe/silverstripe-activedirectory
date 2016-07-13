@@ -313,6 +313,70 @@ class LDAPGateway extends Object
     }
 
     /**
+     * Changes user password via LDAP.
+     *
+     * Change password is different to administrative password reset in that it will respect the password
+     * history policy. This is achieved by sending a remove followed by an add in one batch (which is different
+     * to an ordinary attribute modification operation).
+     *
+     * @param string $dn Location to update the entry at.
+     * @param string $password New password to set.
+     * @param string $oldPassword Old password is needed to trigger a password change.
+     * @throws \Zend\Ldap\Exception\LdapException
+     */
+    public function changePassword($dn, $password, $oldPassword)
+    {
+        if (!function_exists('ldap_modify_batch')) {
+            // Password change is unsupported - missing PHP API method.
+            $this->resetPassword($dn, $password);
+            return;
+        }
+
+        $modifications = [
+            [
+                "attrib"  => "unicodePwd",
+                "modtype" => LDAP_MODIFY_BATCH_REMOVE,
+                "values"  => [iconv('UTF-8', 'UTF-16LE', sprintf('"%s"', $oldPassword))],
+            ],
+            [
+                "attrib"  => "unicodePwd",
+                "modtype" => LDAP_MODIFY_BATCH_ADD,
+                "values"  => [iconv('UTF-8', 'UTF-16LE', sprintf('"%s"', $password))],
+            ],
+        ];
+        // Batch attribute operations are not supported by Zend_Ldap, use raw resource.
+        $ldapConn = $this->ldap->getResource();
+        \Zend\Stdlib\ErrorHandler::start(E_WARNING);
+        $succeeded = ldap_modify_batch($ldapConn, $dn, $modifications);
+        \Zend\Stdlib\ErrorHandler::stop();
+        if (!$succeeded) {
+            throw new Exception($this->getLastPasswordError());
+        }
+    }
+
+    /**
+     * Administrative password reset.
+     *
+     * This is different to password change - it does not require old password, but also
+     * it does not respect password history policy setting.
+     *
+     * @param string $dn Location to update the entry at.
+     * @param string $password New password to set.
+     * @throws \Zend\Ldap\Exception\LdapException
+     */
+    public function resetPassword($dn, $password)
+    {
+        try {
+            $this->update(
+                $dn,
+                array('unicodePwd' => iconv('UTF-8', 'UTF-16LE', sprintf('"%s"', $password)))
+            );
+        } catch(\Zend\Ldap\Exception\LdapException $e) {
+            throw new Exception($this->getLastPasswordError());
+        }
+    }
+
+    /**
      * Updates an LDAP object.
      *
      * For this work you might need that LDAP connection is bind:ed with a user with
@@ -369,5 +433,31 @@ class LDAPGateway extends Object
     public function add($dn, array $attributes)
     {
         $this->ldap->add($dn, $attributes);
+    }
+
+    /**
+     * @param \Zend\Ldap\Exception\LdapException
+     * @return string
+     */
+    private function getLastPasswordError() {
+        $defaultError = _t('LDAPAuthenticator.CANTCHANGEPASSWORD', 'We couldn\'t change your password, please contact an administrator.');
+        $error = '';
+        ldap_get_option($this->ldap->getResource(), LDAP_OPT_ERROR_STRING, $error);
+
+        if (!$error) {
+            return $defaultError;
+        }
+
+        // Try to parse the exception to get the error message to display to user, eg:
+        // 0000052D: Constraint violation - check_password_restrictions: the password does not meet the complexity criteria!)
+        // 0000052D: Constraint violation - check_password_restrictions: the password was already used (in history)!)
+
+        // We are only interested in the explanatory message after the last colon.
+        $message = preg_replace('/.*:/', '', $error);
+        if ($error) {
+            return ucfirst(trim($message));
+        }
+
+        return $defaultError;
     }
 }
