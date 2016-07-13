@@ -86,6 +86,13 @@ class LDAPAuthenticator extends Authenticator
 
             // No user found with this email.
             if (!$username) {
+                if (Config::inst()->get('LDAPAuthenticator', 'fallback_authenticator') === 'yes') {
+                    $fallbackMember = self::fallback_authenticate($data);
+                    if ($fallbackMember) {
+                        return $fallbackMember;
+                    }
+                }
+
                 $form->sessionMessage(_t('LDAPAuthenticator.INVALIDCREDENTIALS', 'Invalid credentials'), 'bad');
                 return;
             }
@@ -97,11 +104,7 @@ class LDAPAuthenticator extends Authenticator
         $success = $result['success'] === true;
         if (!$success) {
             if (Config::inst()->get('LDAPAuthenticator', 'fallback_authenticator') === 'yes') {
-                $fallbackMember = call_user_func(
-                    array(Config::inst()->get('LDAPAuthenticator', 'fallback_authenticator_class'), 'authenticate'),
-                    array_merge($data, array('Email' => $data['Login'])),
-                    $form
-                );
+                $fallbackMember = self::fallback_authenticate($data);
                 if ($fallbackMember) {
                     return $fallbackMember;
                 }
@@ -139,4 +142,20 @@ class LDAPAuthenticator extends Authenticator
 
         return $member;
     }
+
+    /**
+     * Try to authenticate using the fallback authenticator.
+     *
+     * @param array $data
+     * @return null|Member
+     */
+    protected static function fallback_authenticate($data)
+    {
+        return call_user_func(
+            array(Config::inst()->get('LDAPAuthenticator', 'fallback_authenticator_class'), 'authenticate'),
+            array_merge($data, array('Email' => $data['Login'])),
+            $form
+        );
+    }
+
 }
