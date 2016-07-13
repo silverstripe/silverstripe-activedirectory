@@ -10,13 +10,13 @@ class LDAPSecurityController extends Security
     /**
      * @var array
      */
-    private static $allowed_actions = array(
+    private static $allowed_actions = [
         'index',
         'lostpassword',
         'LostPasswordForm',
         'ChangePasswordForm',
         'passwordsent'
-    );
+    ];
 
     /**
      * This static function is *intentionally* overloaded from Security so
@@ -55,7 +55,7 @@ class LDAPSecurityController extends Security
         }
 
         if (Config::inst()->get('LDAPAuthenticator', 'allow_email_login')==='yes') {
-            $customisedController = $controller->customise(array(
+            $customisedController = $controller->customise([
                 'Content' =>
                     '<p>' .
                     _t(
@@ -65,9 +65,9 @@ class LDAPSecurityController extends Security
                     ) .
                     '</p>',
                 'Form' => $this->LostPasswordForm(),
-            ));
+            ]);
         } else {
-            $customisedController = $controller->customise(array(
+            $customisedController = $controller->customise([
                 'Content' =>
                     '<p>' .
                     _t(
@@ -76,7 +76,7 @@ class LDAPSecurityController extends Security
                     ) .
                     '</p>',
                 'Form' => $this->LostPasswordForm(),
-            ));
+            ]);
         }
 
         //Controller::$currentController = $controller;
@@ -94,8 +94,8 @@ class LDAPSecurityController extends Security
         $action = new FormAction('forgotPassword', _t('Security.BUTTONSEND', 'Send me the password reset link'));
         return LDAPLoginForm::create($this,
             'LostPasswordForm',
-            new FieldList(array($email)),
-            new FieldList(array($action)),
+            new FieldList([$email]),
+            new FieldList([$action]),
             false
         );
     }
@@ -127,17 +127,17 @@ class LDAPSecurityController extends Security
 
         $username = Convert::raw2xml(rawurldecode($request->param('ID')));
 
-        $customisedController = $controller->customise(array(
+        $customisedController = $controller->customise([
             'Title' => _t('LDAPSecurity.PASSWORDSENTHEADER', "Password reset link sent to '{username}'",
-                array('username' => $username)),
+                ['username' => $username]),
             'Content' =>
                 "<p>"
                 . _t('LDAPSecurity.PASSWORDSENTTEXT',
                     "Thank you! A reset link has been sent to '{username}', provided an account exists.",
-                    array('username' => $username))
+                    ['username' => $username])
                 . "</p>",
             'Username' => $username
-        ));
+        ]);
         return $customisedController->renderWith($this->getTemplatesFor('passwordsent'));
     }
 }

@@ -37,7 +37,7 @@ class SAMLConfiguration extends Object
      */
     public function asArray()
     {
-        $conf = array();
+        $conf = [];
 
         $conf['strict'] = $this->config()->get('strict');
         $conf['debug'] = $this->config()->get('debug');
@@ -47,10 +47,10 @@ class SAMLConfiguration extends Object
         $spCertPath = Director::is_absolute($sp['x509cert']) ? $sp['x509cert'] : sprintf('%s/%s', BASE_PATH, $sp['x509cert']);
         $spKeyPath = Director::is_absolute($sp['privateKey']) ? $sp['privateKey'] : sprintf('%s/%s', BASE_PATH, $sp['privateKey']);
         $conf['sp']['entityId'] = $sp['entityId'];
-        $conf['sp']['assertionConsumerService'] = array(
+        $conf['sp']['assertionConsumerService'] = [
             'url' => $sp['entityId'] . '/saml/acs',
             'binding' => OneLogin_Saml2_Constants::BINDING_HTTP_POST
-        );
+        ];
         $conf['sp']['NameIDFormat'] = OneLogin_Saml2_Constants::NAMEID_TRANSIENT;
         $conf['sp']['x509cert'] = file_get_contents($spCertPath);
         $conf['sp']['privateKey'] = file_get_contents($spKeyPath);
@@ -58,15 +58,15 @@ class SAMLConfiguration extends Object
         // IDENTITY PROVIDER SECTION
         $idp = $this->config()->get('IdP');
         $conf['idp']['entityId'] = $idp['entityId'];
-        $conf['idp']['singleSignOnService'] = array(
+        $conf['idp']['singleSignOnService'] = [
             'url' => $idp['singleSignOnService'],
             'binding' => OneLogin_Saml2_Constants::BINDING_HTTP_REDIRECT,
-        );
+        ];
         if (isset($idp['singleLogoutService'])) {
-            $conf['idp']['singleLogoutService'] = array(
+            $conf['idp']['singleLogoutService'] = [
                 'url' => $idp['singleLogoutService'],
                 'binding' => OneLogin_Saml2_Constants::BINDING_HTTP_REDIRECT,
-            );
+            ];
         }
 
         $idpCertPath = Director::is_absolute($idp['x509cert']) ? $idp['x509cert'] : sprintf('%s/%s', BASE_PATH, $idp['x509cert']);
@@ -76,7 +76,7 @@ class SAMLConfiguration extends Object
         $security = $this->config()->get('Security');
         $signatureAlgorithm = $security['signatureAlgorithm'];
 
-        $conf['security'] = array(
+        $conf['security'] = [
             /** signatures and encryptions offered */
             // Indicates that the nameID of the <samlp:logoutRequest> sent by this SP will be encrypted.
             'nameIdEncrypted' => true,
@@ -110,15 +110,15 @@ class SAMLConfiguration extends Object
             // Set to false and no AuthContext will be sent in the AuthNRequest,
             // Set true or don't present thi parameter and you will get an AuthContext 'exact' 'urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport'
             // Set an array with the possible auth context values: array ('urn:oasis:names:tc:SAML:2.0:ac:classes:Password', 'urn:oasis:names:tc:SAML:2.0:ac:classes:X509'),
-            'requestedAuthnContext' => array(
+            'requestedAuthnContext' => [
                 'urn:federation:authentication:windows',
                 'urn:oasis:names:tc:SAML:2.0:ac:classes:Password',
                 'urn:oasis:names:tc:SAML:2.0:ac:classes:X509',
-            ),
+            ],
             // Indicates if the SP will validate all received xmls.
             // (In order to validate the xml, 'strict' and 'wantXMLValidation' must be true).
             'wantXMLValidation' => true,
-        );
+        ];
 
         return $conf;
     }

@@ -6,9 +6,9 @@
  */
 class LDAPGroupSyncTask extends BuildTask
 {
-    private static $dependencies = array(
+    private static $dependencies = [
         'ldapService' => '%$LDAPService'
-    );
+    ];
 
     /**
      * Setting this to true causes the sync to delete any local Group
@@ -31,7 +31,7 @@ class LDAPGroupSyncTask extends BuildTask
         // especially in the case where getGroups() would return a lot of groups
         $ldapGroups = $this->ldapService->getGroups(
             false,
-            array('objectguid', 'samaccountname', 'dn', 'name', 'description'),
+            ['objectguid', 'samaccountname', 'dn', 'name', 'description'],
             // Change the indexing attribute so we can look up by GUID during the deletion process below.
             'objectguid'
         );

@@ -6,9 +6,9 @@
  */
 class LDAPMemberSyncTask extends BuildTask
 {
-    private static $dependencies = array(
+    private static $dependencies = [
         'ldapService' => '%$LDAPService'
-    );
+    ];
 
     /**
      * Setting this to true causes the sync to delete any local Member
@@ -30,7 +30,7 @@ class LDAPMemberSyncTask extends BuildTask
         // this is useful to avoid holding onto too much data in memory
         // especially in the case where getUser() would return a lot of users
         $users = $this->ldapService->getUsers(array_merge(
-            array('objectguid', 'samaccountname', 'useraccountcontrol', 'memberof'),
+            ['objectguid', 'samaccountname', 'useraccountcontrol', 'memberof'],
             array_keys(Config::inst()->get('Member', 'ldap_field_mappings'))
         ));
 

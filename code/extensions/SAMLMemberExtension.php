@@ -9,12 +9,12 @@ class SAMLMemberExtension extends DataExtension
     /**
      * @var array
      */
-    private static $db = array(
+    private static $db = [
         // Pointer to the session object held by the IdP
         'SAMLSessionIndex' => 'Varchar(255)',
         // Unique user identifier, same field is used by LDAPMemberExtension
         'GUID' => 'Varchar(50)',
-    );
+    ];
 
     /**
      * These are used by {@link SAMLController} to map specific IdP claim rules
@@ -24,11 +24,11 @@ class SAMLMemberExtension extends DataExtension
      * @var array
      * @config
      */
-    private static $claims_field_mappings = array(
+    private static $claims_field_mappings = [
         'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname' => 'FirstName',
         'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname' => 'Surname',
         'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress' => 'Email'
-    );
+    ];
 
     /**
      * @param FieldList $fields

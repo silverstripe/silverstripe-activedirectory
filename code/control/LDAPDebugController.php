@@ -10,16 +10,16 @@ class LDAPDebugController extends ContentController
     /**
      * @var array
      */
-    private static $allowed_actions = array(
+    private static $allowed_actions = [
         'index',
-    );
+    ];
 
     /**
      * @var array
      */
-    private static $dependencies = array(
+    private static $dependencies = [
         'ldapService' => '%$LDAPService'
-    );
+    ];
 
     /**
      * @var LDAPService
@@ -52,10 +52,10 @@ class LDAPDebugController extends ContentController
                 $value = '***';
             }
 
-            $list->push(new ArrayData(array(
+            $list->push(new ArrayData([
                 'Name' => $field,
                 'Value' => $value
-            )));
+            ]));
         }
         return $list;
     }
@@ -66,9 +66,9 @@ class LDAPDebugController extends ContentController
         $list = new ArrayList();
         if ($locations) {
             foreach ($locations as $location) {
-                $list->push(new ArrayData(array(
+                $list->push(new ArrayData([
                     'Value' => $location
-                )));
+                ]));
             }
         } else {
             $list->push($this->Options()->find('Name', 'baseDn'));
@@ -83,9 +83,9 @@ class LDAPDebugController extends ContentController
         $list = new ArrayList();
         if ($locations) {
             foreach ($locations as $location) {
-                $list->push(new ArrayData(array(
+                $list->push(new ArrayData([
                     'Value' => $location
-                )));
+                ]));
             }
         } else {
             $list->push($this->Options()->find('Name', 'baseDn'));
@@ -122,9 +122,9 @@ class LDAPDebugController extends ContentController
         $groups = $this->ldapService->getNodes(false);
         $list = new ArrayList();
         foreach ($groups as $record) {
-            $list->push(new ArrayData(array(
+            $list->push(new ArrayData([
                 'DN' => $record['dn']
-            )));
+            ]));
         }
         return $list;
     }
@@ -134,9 +134,9 @@ class LDAPDebugController extends ContentController
         $groups = $this->ldapService->getGroups(false);
         $list = new ArrayList();
         foreach ($groups as $record) {
-            $list->push(new ArrayData(array(
+            $list->push(new ArrayData([
                 'DN' => $record['dn']
-            )));
+            ]));
         }
         return $list;
     }

@@ -17,9 +17,9 @@ class LDAPService extends Object implements Flushable
     /**
      * @var array
      */
-    private static $dependencies = array(
+    private static $dependencies = [
         'gateway' => '%$LDAPGateway'
-    );
+    ];
 
     /**
      * If configured, only user objects within these locations will be exposed to this service.
@@ -27,7 +27,7 @@ class LDAPService extends Object implements Flushable
      * @var array
      * @config
      */
-    private static $users_search_locations = array();
+    private static $users_search_locations = [];
 
     /**
      * If configured, only group objects within these locations will be exposed to this service.
@@ -35,7 +35,7 @@ class LDAPService extends Object implements Flushable
      *
      * @config
      */
-    private static $groups_search_locations = array();
+    private static $groups_search_locations = [];
 
     /**
      * Location to create new users in (distinguished name).
@@ -48,7 +48,7 @@ class LDAPService extends Object implements Flushable
     /**
      * @var array
      */
-    private static $_cache_nested_groups = array();
+    private static $_cache_nested_groups = [];
 
     /**
      * If this is configured to a "Code" value of a {@link Group} in SilverStripe, the user will always
@@ -67,10 +67,10 @@ class LDAPService extends Object implements Flushable
      */
     public static function get_cache()
     {
-        return SS_Cache::factory('ldap', 'Output', array(
+        return SS_Cache::factory('ldap', 'Output', [
             'automatic_serialization' => true,
             'lifetime' => 28800
-        ));
+        ]);
     }
 
     /**
@@ -145,11 +145,11 @@ class LDAPService extends Object implements Flushable
             );
         }
 
-        return array(
+        return [
             'success' => $result->getCode() === 1,
             'identity' => $result->getIdentity(),
             'message' => $message
-        );
+        ];
     }
 
     /**
@@ -159,13 +159,13 @@ class LDAPService extends Object implements Flushable
      * @param array $attributes List of specific AD attributes to return. Empty array means return everything.
      * @return array
      */
-    public function getNodes($cached = true, $attributes = array())
+    public function getNodes($cached = true, $attributes = [])
     {
         $cache = self::get_cache();
         $results = $cache->load('nodes' . md5(implode('', $attributes)));
 
         if (!$results || !$cached) {
-            $results = array();
+            $results = [];
             $records = $this->gateway->getNodes(null, Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes);
             foreach ($records as $record) {
                 $results[$record['dn']] = $record;
@@ -187,14 +187,14 @@ class LDAPService extends Object implements Flushable
      * @param string $indexBy Attribute to use as an index.
      * @return array
      */
-    public function getGroups($cached = true, $attributes = array(), $indexBy = 'dn')
+    public function getGroups($cached = true, $attributes = [], $indexBy = 'dn')
     {
-        $searchLocations = $this->config()->groups_search_locations ?: array(null);
+        $searchLocations = $this->config()->groups_search_locations ?: [null];
         $cache = self::get_cache();
         $results = $cache->load('groups' . md5(implode('', array_merge($searchLocations, $attributes))));
 
         if (!$results || !$cached) {
-            $results = array();
+            $results = [];
             foreach ($searchLocations as $searchLocation) {
                 $records = $this->gateway->getGroups($searchLocation, Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes);
                 if (!$records) {
@@ -220,14 +220,14 @@ class LDAPService extends Object implements Flushable
      * @param array $attributes List of specific AD attributes to return. Empty array means return everything.
      * @return array
      */
-    public function getNestedGroups($dn, $attributes = array())
+    public function getNestedGroups($dn, $attributes = [])
     {
         if (isset(self::$_cache_nested_groups[$dn])) {
             return self::$_cache_nested_groups[$dn];
         }
 
-        $searchLocations = $this->config()->groups_search_locations ?: array(null);
-        $results = array();
+        $searchLocations = $this->config()->groups_search_locations ?: [null];
+        $results = [];
         foreach ($searchLocations as $searchLocation) {
             $records = $this->gateway->getNestedGroups($dn, $searchLocation, Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes);
             foreach ($records as $record) {
@@ -246,9 +246,9 @@ class LDAPService extends Object implements Flushable
      * @param array $attributes List of specific AD attributes to return. Empty array means return everything.
      * @return array
      */
-    public function getGroupByGUID($guid, $attributes = array())
+    public function getGroupByGUID($guid, $attributes = [])
     {
-        $searchLocations = $this->config()->groups_search_locations ?: array(null);
+        $searchLocations = $this->config()->groups_search_locations ?: [null];
         foreach ($searchLocations as $searchLocation) {
             $records = $this->gateway->getGroupByGUID($guid, $searchLocation, Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes);
             if ($records) {
@@ -264,9 +264,9 @@ class LDAPService extends Object implements Flushable
      * @param array $attributes List of specific AD attributes to return. Empty array means return everything.
      * @return array
      */
-    public function getGroupByDN($dn, $attributes = array())
+    public function getGroupByDN($dn, $attributes = [])
     {
-        $searchLocations = $this->config()->groups_search_locations ?: array(null);
+        $searchLocations = $this->config()->groups_search_locations ?: [null];
         foreach ($searchLocations as $searchLocation) {
             $records = $this->gateway->getGroupByDN($dn, $searchLocation, Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes);
             if ($records) {
@@ -283,10 +283,10 @@ class LDAPService extends Object implements Flushable
      * @param array $attributes List of specific AD attributes to return. Empty array means return everything.
      * @return array
      */
-    public function getUsers($attributes = array())
+    public function getUsers($attributes = [])
     {
-        $searchLocations = $this->config()->users_search_locations ?: array(null);
-        $results = array();
+        $searchLocations = $this->config()->users_search_locations ?: [null];
+        $results = [];
 
         foreach ($searchLocations as $searchLocation) {
             $records = $this->gateway->getUsers($searchLocation, Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes);
@@ -309,9 +309,9 @@ class LDAPService extends Object implements Flushable
      * @param array $attributes List of specific AD attributes to return. Empty array means return everything.
      * @return array
      */
-    public function getUserByGUID($guid, $attributes = array())
+    public function getUserByGUID($guid, $attributes = [])
     {
-        $searchLocations = $this->config()->users_search_locations ?: array(null);
+        $searchLocations = $this->config()->users_search_locations ?: [null];
         foreach ($searchLocations as $searchLocation) {
             $records = $this->gateway->getUserByGUID($guid, $searchLocation, Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes);
             if ($records) {
@@ -328,9 +328,9 @@ class LDAPService extends Object implements Flushable
      *
      * @return array
      */
-    public function getUserByDN($dn, $attributes = array())
+    public function getUserByDN($dn, $attributes = [])
     {
-        $searchLocations = $this->config()->users_search_locations ?: array(null);
+        $searchLocations = $this->config()->users_search_locations ?: [null];
         foreach ($searchLocations as $searchLocation) {
             $records = $this->gateway->getUserByDN($dn, $searchLocation, Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes);
             if ($records) {
@@ -346,9 +346,9 @@ class LDAPService extends Object implements Flushable
      * @param array $attributes List of specific AD attributes to return. Empty array means return everything.
      * @return array
      */
-    public function getUserByEmail($email, $attributes = array())
+    public function getUserByEmail($email, $attributes = [])
     {
-        $searchLocations = $this->config()->users_search_locations ?: array(null);
+        $searchLocations = $this->config()->users_search_locations ?: [null];
         foreach ($searchLocations as $searchLocation) {
             $records = $this->gateway->getUserByEmail($email, $searchLocation, Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes);
             if ($records) {
@@ -364,9 +364,9 @@ class LDAPService extends Object implements Flushable
      * @param array $attributes List of specific AD attributes to return. Empty array means return everything.
      * @return array
      */
-    public function getUserByUsername($username, $attributes = array())
+    public function getUserByUsername($username, $attributes = [])
     {
-        $searchLocations = $this->config()->users_search_locations ?: array(null);
+        $searchLocations = $this->config()->users_search_locations ?: [null];
         foreach ($searchLocations as $searchLocation) {
             $records = $this->gateway->getUserByUsername($username, $searchLocation, Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes);
             if ($records) {
@@ -401,11 +401,11 @@ class LDAPService extends Object implements Flushable
     {
         $groupObj = Group::get()->filter('DN', $dn)->first();
         $groupData = $this->getGroupByGUID($groupObj->GUID);
-        $members = !empty($groupData['member']) ? $groupData['member'] : array();
+        $members = !empty($groupData['member']) ? $groupData['member'] : [];
         // If a user belongs to a single group, this comes through as a string.
         // Normalise to a array so it's consistent.
         if ($members && is_string($members)) {
-            $members = array($members);
+            $members = [$members];
         }
 
         return $members;
@@ -507,19 +507,19 @@ class LDAPService extends Object implements Flushable
                     SS_Log::WARN
                 );
             } else {
-                $group->Members()->add($member, array(
+                $group->Members()->add($member, [
                     'IsImportedFromLDAP' => '1'
-                ));
+                ]);
             }
         }
 
         // this is to keep track of which groups the user gets mapped to
         // and we'll use that later to remove them from any groups that they're no longer mapped to
-        $mappedGroupIDs = array();
+        $mappedGroupIDs = [];
 
         // ensure the user is in any mapped groups
         if (isset($data['memberof'])) {
-            $ldapGroups = is_array($data['memberof']) ? $data['memberof'] : array($data['memberof']);
+            $ldapGroups = is_array($data['memberof']) ? $data['memberof'] : [$data['memberof']];
             foreach ($ldapGroups as $groupDN) {
                 foreach (LDAPGroupMapping::get() as $mapping) {
                     if (!$mapping->DN) {
@@ -537,9 +537,9 @@ class LDAPService extends Object implements Flushable
                     if ($mapping->DN == $groupDN) {
                         $group = $mapping->Group();
                         if ($group && $group->exists()) {
-                            $group->Members()->add($member, array(
+                            $group->Members()->add($member, [
                                 'IsImportedFromLDAP' => '1'
-                            ));
+                            ]);
                             $mappedGroupIDs[] = $mapping->GroupID;
                         }
                     }
@@ -548,7 +548,7 @@ class LDAPService extends Object implements Flushable
                     // is to include the entire subtree. Check all those mappings and find the LDAP child groups
                     // to see if they are a member of one of those. If they are, add them to the SS group
                     if ($mapping->Scope == 'Subtree') {
-                        $childGroups = $this->getNestedGroups($mapping->DN, array('dn'));
+                        $childGroups = $this->getNestedGroups($mapping->DN, ['dn']);
                         if (!$childGroups) {
                             continue;
                         }
@@ -557,9 +557,9 @@ class LDAPService extends Object implements Flushable
                             if ($childGroupDN == $groupDN) {
                                 $group = $mapping->Group();
                                 if ($group && $group->exists()) {
-                                    $group->Members()->add($member, array(
+                                    $group->Members()->add($member, [
                                         'IsImportedFromLDAP' => '1'
-                                    ));
+                                    ]);
                                     $mappedGroupIDs[] = $mapping->GroupID;
                                 }
                             }
@@ -659,7 +659,7 @@ class LDAPService extends Object implements Flushable
         $dn = sprintf('CN=%s,%s', $member->Username, $this->config()->new_users_dn);
 
         try {
-            $this->add($dn, array(
+            $this->add($dn, [
                 'objectclass' => 'user',
                 'cn' => $member->Username,
                 'accountexpires' => '9223372036854775807',
@@ -669,7 +669,7 @@ class LDAPService extends Object implements Flushable
                     $member->Username,
                     $this->gateway->config()->options['accountDomainName']
                 ),
-            ));
+            ]);
         } catch (\Exception $e) {
             throw new ValidationException('LDAP synchronisation failure: '.$e->getMessage());
         }
@@ -725,7 +725,7 @@ class LDAPService extends Object implements Flushable
         }
 
         try {
-            $attributes = array(
+            $attributes = [
                 'displayname' => sprintf('%s %s', $member->FirstName, $member->Surname),
                 'name' => sprintf('%s %s', $member->FirstName, $member->Surname),
                 'userprincipalname' => sprintf(
@@ -733,7 +733,7 @@ class LDAPService extends Object implements Flushable
                     $member->Username,
                     $this->gateway->config()->options['accountDomainName']
                 ),
-            );
+            ];
             foreach ($member->config()->ldap_field_mappings as $attribute => $field) {
                 $relationClass = $member->getRelationClass($field);
                 if ($relationClass) {
@@ -768,8 +768,8 @@ class LDAPService extends Object implements Flushable
             throw new ValidationException('Member missing GUID. Cannot update LDAP user');
         }
 
-        $addGroups = array();
-        $removeGroups = array();
+        $addGroups = [];
+        $removeGroups = [];
 
         $user = $this->getUserByGUID($member->GUID);
         if (empty($user['objectguid'])) {
@@ -778,9 +778,9 @@ class LDAPService extends Object implements Flushable
 
         // If a user belongs to a single group, this comes through as a string.
         // Normalise to a array so it's consistent.
-        $existingGroups = !empty($user['memberof']) ? $user['memberof'] : array();
+        $existingGroups = !empty($user['memberof']) ? $user['memberof'] : [];
         if ($existingGroups && is_string($existingGroups)) {
-            $existingGroups = array($existingGroups);
+            $existingGroups = [$existingGroups];
         }
 
         foreach ($member->Groups() as $group) {
@@ -820,7 +820,7 @@ class LDAPService extends Object implements Flushable
             $members[] = $user['distinguishedname'];
 
             try {
-                $this->update($groupDn, array('member' => $members));
+                $this->update($groupDn, ['member' => $members]);
             } catch (\Exception $e) {
                 throw new ValidationException('LDAP group membership add failure: '.$e->getMessage());
             }
@@ -840,7 +840,7 @@ class LDAPService extends Object implements Flushable
             }
 
             try {
-                $this->update($groupDn, array('member' => $members));
+                $this->update($groupDn, ['member' => $members]);
             } catch (\Exception $e) {
                 throw new ValidationException('LDAP group membership remove failure: '.$e->getMessage());
             }

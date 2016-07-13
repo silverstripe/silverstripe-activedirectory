@@ -23,7 +23,7 @@ class LDAPChangePasswordForm extends ChangePasswordForm
             }
         }
 
-        $data = Injector::inst()->get('LDAPService')->getUserByGUID($member->GUID, array('samaccountname'));
+        $data = Injector::inst()->get('LDAPService')->getUserByGUID($member->GUID, ['samaccountname']);
 
         $emailField = null;
         $usernameField = null;

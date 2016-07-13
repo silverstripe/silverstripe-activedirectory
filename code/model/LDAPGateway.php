@@ -11,7 +11,7 @@ class LDAPGateway extends Object
      * @var array
      * @config
      */
-    private static $options = array();
+    private static $options = [];
 
     /**
      * @var Zend\Ldap\Ldap
@@ -38,11 +38,11 @@ class LDAPGateway extends Object
      * @param string $sort Sort results by this attribute if given
      * @return array
      */
-    protected function search($filter, $baseDn = null, $scope = Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes = array(), $sort = '')
+    protected function search($filter, $baseDn = null, $scope = Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes = [], $sort = '')
     {
         $records = $this->ldap->search($filter, $baseDn, $scope, $attributes, $sort);
 
-        $results = array();
+        $results = [];
         foreach ($records as $record) {
             foreach ($record as $attribute => $value) {
                 // if the value is an array with a single value, e.g. 'samaccountname' => array(0 => 'myusername')
@@ -79,7 +79,7 @@ class LDAPGateway extends Object
     public function authenticate($username, $password)
     {
         $auth = new Zend\Authentication\AuthenticationService();
-        $adapter = new Zend\Authentication\Adapter\Ldap(array($this->config()->options), $username, $password);
+        $adapter = new Zend\Authentication\Adapter\Ldap([$this->config()->options], $username, $password);
         return $auth->authenticate($adapter);
     }
 
@@ -92,7 +92,7 @@ class LDAPGateway extends Object
      * @param string $sort Sort results by this attribute if given
      * @return array
      */
-    public function getNodes($baseDn = null, $scope = Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes = array(), $sort = '')
+    public function getNodes($baseDn = null, $scope = Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes = [], $sort = '')
     {
         return $this->search('(|(objectClass=organizationalUnit)(objectClass=container)(objectClass=domain))', $baseDn, $scope, $attributes, $sort);
     }
@@ -106,7 +106,7 @@ class LDAPGateway extends Object
      * @param string $sort Sort results by this attribute if given
      * @return array
      */
-    public function getGroups($baseDn = null, $scope = Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes = array(), $sort = '')
+    public function getGroups($baseDn = null, $scope = Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes = [], $sort = '')
     {
         return $this->search('(objectClass=group)', $baseDn, $scope, $attributes, $sort);
     }
@@ -120,7 +120,7 @@ class LDAPGateway extends Object
      * @param array $attributes Restrict to specific AD attributes. An empty array will return all attributes
      * @return array
      */
-    public function getNestedGroups($dn, $baseDn = null, $scope = Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes = array())
+    public function getNestedGroups($dn, $baseDn = null, $scope = Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes = [])
     {
         return $this->search(
             sprintf('(&(objectClass=group)(memberOf:1.2.840.113556.1.4.1941:=%s))', $dn),
@@ -139,7 +139,7 @@ class LDAPGateway extends Object
      * @param array $attributes Restrict to specific AD attributes. An empty array will return all attributes
      * @return array
      */
-    public function getGroupByGUID($guid, $baseDn = null, $scope = Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes = array())
+    public function getGroupByGUID($guid, $baseDn = null, $scope = Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes = [])
     {
         return $this->search(
             sprintf('(&(objectClass=group)(objectGUID=%s))', LDAPUtil::str_to_hex_guid($guid, true)),
@@ -158,7 +158,7 @@ class LDAPGateway extends Object
      * @param array $attributes Restrict to specific AD attributes. An empty array will return all attributes
      * @return array
      */
-    public function getGroupByDN($dn, $baseDn = null, $scope = Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes = array())
+    public function getGroupByDN($dn, $baseDn = null, $scope = Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes = [])
     {
         return $this->search(
             sprintf('(&(objectClass=group)(distinguishedname=%s))', $dn),
@@ -177,7 +177,7 @@ class LDAPGateway extends Object
      * @param string $sort Sort results by this attribute if given
      * @return array
      */
-    public function getUsers($baseDn = null, $scope = Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes = array(), $sort = '')
+    public function getUsers($baseDn = null, $scope = Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes = [], $sort = '')
     {
         return $this->search(
             '(&(objectClass=user)(!(objectClass=computer))(!(samaccountname=Guest))(!(samaccountname=Administrator))(!(samaccountname=krbtgt)))',
@@ -194,7 +194,7 @@ class LDAPGateway extends Object
      * @param string $guid
      * @return array
      */
-    public function getUserByGUID($guid, $baseDn = null, $scope = Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes = array())
+    public function getUserByGUID($guid, $baseDn = null, $scope = Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes = [])
     {
         return $this->search(
             sprintf('(&(objectClass=user)(objectGUID=%s))', LDAPUtil::str_to_hex_guid($guid, true)),
@@ -213,7 +213,7 @@ class LDAPGateway extends Object
      * @param array $attributes Restrict to specific AD attributes. An empty array will return all attributes
      * @return array
      */
-    public function getUserByDN($dn, $baseDn = null, $scope = Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes = array())
+    public function getUserByDN($dn, $baseDn = null, $scope = Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes = [])
     {
         return $this->search(
             sprintf('(&(objectClass=user)(distinguishedname=%s))', $dn),
@@ -229,7 +229,7 @@ class LDAPGateway extends Object
      * @param string $email
      * @return array
      */
-    public function getUserByEmail($email, $baseDn = null, $scope = Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes = array())
+    public function getUserByEmail($email, $baseDn = null, $scope = Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes = [])
     {
         return $this->search(
             sprintf('(&(objectClass=user)(mail=%s))', Zend\Ldap\Filter\AbstractFilter::escapeValue($email)),
@@ -249,7 +249,7 @@ class LDAPGateway extends Object
      * @return array
      * @throws Exception
      */
-    public function getUserByUsername($username, $baseDn = null, $scope = Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes = array())
+    public function getUserByUsername($username, $baseDn = null, $scope = Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes = [])
     {
         $options = $this->config()->options;
         $option = isset($options['accountCanonicalForm']) ? $options['accountCanonicalForm'] : null;
@@ -369,7 +369,7 @@ class LDAPGateway extends Object
         try {
             $this->update(
                 $dn,
-                array('unicodePwd' => iconv('UTF-8', 'UTF-16LE', sprintf('"%s"', $password)))
+                ['unicodePwd' => iconv('UTF-8', 'UTF-16LE', sprintf('"%s"', $password))]
             );
         } catch(\Zend\Ldap\Exception\LdapException $e) {
             throw new Exception($this->getLastPasswordError());

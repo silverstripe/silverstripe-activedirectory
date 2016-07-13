@@ -279,15 +279,15 @@ mentioned above. You will still need to apply that extension to `Member` to get 
 ```php
 <?php
 class MyMemberExtension extends DataExtension {
-	private static $db = array(
+	private static $db = [
 		// 'description' is a regular textual field and is written automatically.
 		'Description' => 'Varchar(50)',
 		...
-	);
-	private static $has_one = array(
+	];
+	private static $has_one = [
 		// 'thumbnailphoto' writes to has_one Image automatically.
 		'Photo' => 'Image'
-	);
+	];
 	/**
 	 * 'othertelephone' is an array, needs manual processing.
 	 */
@@ -412,9 +412,9 @@ and the MySAMLConfiguration.php:
 	<?php
 	class MySAMLConfiguration extends Object {
 		public function asArray() {
-			return array(
+			return [
 				// add settings here;
-			);
+			];
 		}
 	}
 

@@ -7,13 +7,13 @@
  */
 class LDAPMigrateExistingMembersTask extends BuildTask
 {
-    private static $dependencies = array(
+    private static $dependencies = [
         'ldapService' => '%$LDAPService'
-    );
+    ];
 
     public function run($request)
     {
-        $users = $this->ldapService->getUsers(array('objectguid', 'mail'));
+        $users = $this->ldapService->getUsers(['objectguid', 'mail']);
         $start = time();
         $count = 0;
 

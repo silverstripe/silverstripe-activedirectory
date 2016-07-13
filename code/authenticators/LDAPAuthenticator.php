@@ -153,8 +153,8 @@ class LDAPAuthenticator extends Authenticator
     protected static function fallback_authenticate($data, Form $form = null)
     {
         return call_user_func(
-            array(Config::inst()->get('LDAPAuthenticator', 'fallback_authenticator_class'), 'authenticate'),
-            array_merge($data, array('Email' => $data['Login'])),
+            [Config::inst()->get('LDAPAuthenticator', 'fallback_authenticator_class'), 'authenticate'],
+            array_merge($data, ['Email' => $data['Login']]),
             $form
         );
     }
