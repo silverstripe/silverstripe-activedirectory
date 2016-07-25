@@ -60,6 +60,18 @@ class LDAPService extends Object implements Flushable
     private static $default_group;
 
     /**
+     * For samba4 directory, there is no way to enforce password history on password resets.
+     * This only happens with changePassword (which requires the old password).
+     * This works around it by making the old password up and setting it administratively.
+     *
+     * A cleaner fix would be to use the LDAP_SERVER_POLICY_HINTS_OID connection flag,
+     * but it's not implemented in samba https://bugzilla.samba.org/show_bug.cgi?id=12020
+     *
+     * @var bool
+     */
+    private static $password_history_workaround = false;
+
+    /**
      * Get the cache objecgt used for LDAP results. Note that the default lifetime set here
      * is 8 hours, but you can change that by calling SS_Cache::set_lifetime('ldap', <lifetime in seconds>)
      *
@@ -883,6 +895,8 @@ class LDAPService extends Object implements Flushable
         try {
             if (!empty($oldPassword)) {
                 $this->gateway->changePassword($userData['distinguishedname'], $password, $oldPassword);
+            } else if ($this->config()->password_history_workaround) {
+                $this->passwordHistoryWorkaround($userData['distinguishedname'], $password);
             } else {
                 $this->gateway->resetPassword($userData['distinguishedname'], $password);
             }
@@ -961,4 +975,18 @@ class LDAPService extends Object implements Flushable
     {
         $this->gateway->add($dn, $attributes);
     }
+
+    /**
+     * @param string $dn Distinguished name of the user
+     * @param string $password New password.
+     * @throws Exception
+     */
+    private function passwordHistoryWorkaround($dn, $password) {
+        $generator = new RandomGenerator();
+        // 'Aa1' is there to satisfy the complexity criterion.
+        $tempPassword = sprintf('Aa1%s', substr($generator->randomToken('sha1'), 0, 21));
+        $this->gateway->resetPassword($dn, $tempPassword);
+        $this->gateway->changePassword($dn, $password, $tempPassword);
+    }
+
 }
