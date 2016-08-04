@@ -52,8 +52,7 @@ class LDAPMemberExtension extends DataExtension
     private static $update_ldap_from_local = false;
 
     /**
-     * If enabled, Member records with a Username field have the user created in LDAP
-     * on write.
+     * If enabled, Member records are created in LDAP on write.
      *
      * This requires setting write permissions on the user configured in the LDAP
      * credentials, which is why this is disabled by default.
@@ -133,7 +132,7 @@ class LDAPMemberExtension extends DataExtension
         // We allow empty Username for registration purposes, as we need to
         // create Member records with empty Username temporarily. Forms should explicitly
         // check for Username not being empty if they require it not to be.
-        if (empty($this->owner->Username) || !$this->owner->config()->create_users_in_ldap) {
+        if (!$this->owner->config()->create_users_in_ldap) {
             return;
         }
 
@@ -147,6 +146,44 @@ class LDAPMemberExtension extends DataExtension
     }
 
     /**
+     * Generate a username for the user based on their name and/or email
+     * @return string
+     */
+    public function generateLDAPUsername()
+    {
+        $service = Injector::inst()->get('LDAPService');
+        if (!$service->enabled()) {
+            return;
+        }
+
+        if (!$this->owner->FirstName && !$this->owner->Surname && !$this->owner->Email) {
+            throw new ValidationException('Please ensure first name, surname, and email are set');
+        }
+
+        // Prepare the base string based on first name and surname.
+        $baseArray = [];
+        if ($this->owner->FirstName) $baseArray[] = strtolower($this->owner->FirstName);
+        if ($this->owner->Surname) $baseArray[] = strtolower($this->owner->Surname);
+        $baseUsername = implode('.', $baseArray);
+
+        // Fallback to the first part of email.
+        if (!$baseUsername) $baseUsername = preg_replace('/@.*/', '', $this->owner->Email);
+
+        // Sanitise so it passes LDAP validator.
+        $baseUsername = preg_replace('/[^a-z0-9\.]/', '', $baseUsername);
+
+        // Ensure uniqueness.
+        $suffix = 0;
+        $tryUsername = $baseUsername;
+        while ($service->getUserByUsername($tryUsername)) {
+            $suffix++;
+            $tryUsername = sprintf('%s%d', $baseUsername, $suffix);
+        }
+
+        return $tryUsername;
+    }
+
+    /**
      * Create the user in LDAP, provided this configuration is enabled
      * and a username was passed to a new Member record.
      */
@@ -156,10 +193,14 @@ class LDAPMemberExtension extends DataExtension
         if (
             !$service->enabled() ||
             !$this->owner->config()->create_users_in_ldap ||
-            !$this->owner->Username ||
             $this->owner->GUID
         ) {
             return;
+        }
+
+        // If a username wasn't provided, generate one
+        if (!$this->owner->Username) {
+            $this->owner->Username = $this->generateLDAPUsername();
         }
 
         $service->createLDAPUser($this->owner);
