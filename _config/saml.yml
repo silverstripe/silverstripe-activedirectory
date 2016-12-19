@@ -2,25 +2,25 @@
 Name: samlsettings
 After: '#rootroutes'
 ---
-Director:
+SilverStripe\Control\Director:
   rules:
-    'saml': SAMLController
+    'saml': SilverStripe\ActiveDirectory\Control\SAMLController
 
-Member:
+SilverStripe\Security\Member:
   extensions:
-    - SAMLMemberExtension
+    - SilverStripe\ActiveDirectory\Extensions\SAMLMemberExtension
 
-Security:
+SilverStripe\Security\Security:
   extensions:
-    - SAMLSecurityExtension
+    - SilverStripe\ActiveDirectory\Authenticators\SAMLSecurityExtension
 
-Injector:
-  SAMLConfService: SAMLConfiguration
+SilverStripe\Core\Injector\Injector:
+  SAMLConfService: SilverStripe\ActiveDirectory\Services\SAMLConfiguration
 
-SAMLAuthenticator:
+SilverStripe\ActiveDirectory\Authenticators\SAMLAuthenticator:
   name: "SAML"
 
-SAMLConfiguration:
+SilverStripe\ActiveDirectory\Services\SAMLConfiguration:
   strict: true
   debug: false
   Security:

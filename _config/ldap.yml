@@ -1,20 +1,20 @@
 ---
 Name: ldapconfig
 ---
-Director:
+SilverStripe\Control\Director:
   rules:
-    'LDAPSecurity': LDAPSecurityController
-    'LDAPDebug': LDAPDebugController
+    'LDAPSecurity': SilverStripe\ActiveDirectory\Control\LDAPSecurityController
+    'LDAPDebug': SilverStripe\ActiveDirectory\Control\LDAPDebugController
 
-Group:
+SilverStripe\Security\Group:
   extensions:
-    - LDAPGroupExtension
-Member:
+    - SilverStripe\ActiveDirectory\Extensions\LDAPGroupExtension
+SilverStripe\Security\Member:
   extensions:
-    - LDAPMemberExtension
+    - SilverStripe\ActiveDirectory\Extensions\LDAPMemberExtension
 
-LDAPAuthenticator:
+SilverStripe\ActiveDirectory\Authenticators\LDAPAuthenticator:
   name: "LDAP"
 
-LDAPService:
+SilverStripe\ActiveDirectory\Services\LDAPService:
   allow_password_change: false

@@ -1,40 +1,70 @@
 <?php
+
+use SilverStripe\Dev\SapphireTest;
+use SilverStripe\Core\Config\Config;
+use SilverStripe\Core\Injector\Injector;
+use SilverStripe\Security\Member;
+
+/**
+ * @coversDefaultClass \SilverStripe\ActiveDirectory\Services\LDAPService
+ * @package activedirectory
+ */
 class LDAPServiceTest extends SapphireTest
 {
-
     /**
      * @var LDAPService
      */
     protected $service;
 
+    /**
+     * {@inheritDoc}
+     * @var bool
+     */
     protected $usesDatabase = true;
 
+    /**
+     * {@inheritDoc}
+     */
     public function setUp()
     {
         parent::setUp();
 
-        $gateway = new LDAPFakeGateway();
-        Injector::inst()->registerService($gateway, 'LDAPGateway');
+        $gateway = new \LDAPFakeGateway();
+        Injector::inst()->registerService($gateway, 'SilverStripe\\ActiveDirectory\\Model\\LDAPGateway');
 
-        $service = Injector::inst()->create('LDAPService');
+        $service = Injector::inst()->create('SilverStripe\\ActiveDirectory\\Services\\LDAPService');
         $service->setGateway($gateway);
         $this->service = $service;
 
         Config::inst()->nest();
-        Config::inst()->update('LDAPGateway', 'options', ['host' => '1.2.3.4']);
-        Config::inst()->update('LDAPService', 'groups_search_locations', [
+        Config::inst()->update('SilverStripe\\ActiveDirectory\\Model\\LDAPGateway', 'options', ['host' => '1.2.3.4']);
+        Config::inst()->update('SilverStripe\\ActiveDirectory\\Services\\LDAPService', 'groups_search_locations', [
             'CN=Users,DC=playpen,DC=local',
             'CN=Others,DC=playpen,DC=local'
         ]);
         // Prevent other module extension hooks from executing during write() etc.
-        Config::inst()->remove('Member', 'extensions');
-        Config::inst()->remove('Group', 'extensions');
-        Config::inst()->update('Member', 'update_ldap_from_local', false);
-        Config::inst()->update('Member', 'create_users_in_ldap', false);
-        Config::inst()->update('Group', 'extensions', ['LDAPGroupExtension']);
-        Config::inst()->update('Member', 'extensions', ['LDAPMemberExtension']);
+        Config::inst()->remove('SilverStripe\\Security\\Member', 'extensions');
+        Config::inst()->remove('SilverStripe\\Security\\Group', 'extensions');
+        Config::inst()->update('SilverStripe\\Security\\Member', 'update_ldap_from_local', false);
+        Config::inst()->update('SilverStripe\\Security\\Member', 'create_users_in_ldap', false);
+        Config::inst()->update(
+            'SilverStripe\\Security\\Group',
+            'extensions',
+            ['SilverStripe\\ActiveDirectory\\Extensions\\LDAPGroupExtension']
+        );
+        Config::inst()->update(
+            'SilverStripe\\Security\\Member',
+            'extensions',
+            ['SilverStripe\\ActiveDirectory\\Extensions\\LDAPMemberExtension']
+        );
+
+        // Disable Monolog logging to stderr by default if you don't give it a handler
+        $this->service->getLogger()->pushHandler(new \Monolog\Handler\NullHandler);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function tearDown()
     {
         parent::tearDown();
@@ -62,11 +92,15 @@ class LDAPServiceTest extends SapphireTest
 
     public function testUpdateMemberFromLDAP()
     {
-        Config::inst()->update('Member', 'ldap_field_mappings', [
-            'givenname' => 'FirstName',
-            'sn' => 'Surname',
-            'mail' => 'Email',
-        ]);
+        Config::inst()->update(
+            'SilverStripe\\Security\\Member',
+            'ldap_field_mappings',
+            [
+                'givenname' => 'FirstName',
+                'sn' => 'Surname',
+                'mail' => 'Email',
+            ]
+        );
 
         $member = new Member();
         $member->GUID = '123';

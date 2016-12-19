@@ -93,11 +93,11 @@ More [detailed information](https://sysadminspot.com/windows/google-chrome-and-n
 
 The list of groups here is cached, with a default lifetime of 8 hours. You can clear and regenerate the cache by adding `?flush=1` in the URL.
 
-To change the cache lifetime, for example to make sure caches only last for an hour, a developer can set 
+To change the cache lifetime, for example to make sure caches only last for an hour, a developer can set
 this the your `mysite/_config.php`:
 
-	SS_Cache::set_lifetime('ldap', 3600);
-	
+	\SilverStripe\Core\Cache::set_lifetime('ldap', 3600);
+
 ## 1000 users limit in AD
 
 Active Directory has a default max LDAP page size limit of 1000. This means if you have over 1000 users some of them won't be imported.
@@ -113,9 +113,9 @@ Active Directory server using `ntdsutil.exe`:
 	Connected to <yourservername> using credentials of locally logged on user.
 	server connections: q
 	ldap policy: show values
-	
+
 	Policy                          Current(New)
-	
+
 	MaxPoolThreads                  4
 	MaxDatagramRecv                 1024
 	MaxReceiveBuffer                10485760
@@ -128,7 +128,7 @@ Active Directory server using `ntdsutil.exe`:
 	MaxResultSetSize                262144
 	MaxNotificationPerConn          5
 	MaxValRange                     0
-	
+
 	ldap policy: set maxpagesize to 10000
 	ldap policy: commit changes
 	ldap policy: q

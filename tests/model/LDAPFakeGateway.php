@@ -1,4 +1,12 @@
 <?php
+
+use SilverStripe\ActiveDirectory\Model\LDAPGateway;
+use SilverStripe\Dev\TestOnly;
+use Zend\Ldap\Ldap;
+
+/**
+ * @package activedirectory
+ */
 class LDAPFakeGateway extends LDAPGateway implements TestOnly
 {
     public function __construct()
@@ -38,44 +46,47 @@ class LDAPFakeGateway extends LDAPGateway implements TestOnly
     {
     }
 
-    public function getNodes($baseDn = null, $scope = Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes = [], $sort = '')
+    public function getNodes($baseDn = null, $scope = Ldap::SEARCH_SCOPE_SUB, $attributes = [], $sort = '')
     {
     }
 
-    public function getGroups($baseDn = null, $scope = Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes = [], $sort = '')
+    public function getGroups($baseDn = null, $scope = Ldap::SEARCH_SCOPE_SUB, $attributes = [], $sort = '')
     {
         if (isset($baseDn)) {
             return !empty(self::$data['groups'][$baseDn]) ? self::$data['groups'][$baseDn] : null;
         }
     }
 
-    public function getNestedGroups($dn, $baseDn = null, $scope = Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes = [])
+    public function getNestedGroups($dn, $baseDn = null, $scope = Ldap::SEARCH_SCOPE_SUB, $attributes = [])
     {
     }
 
-    public function getGroupByGUID($guid, $baseDn = null, $scope = Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes = [])
+    public function getGroupByGUID($guid, $baseDn = null, $scope = Ldap::SEARCH_SCOPE_SUB, $attributes = [])
     {
     }
 
-    public function getUsers($baseDn = null, $scope = Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes = [], $sort = '')
+    public function getUsers($baseDn = null, $scope = Ldap::SEARCH_SCOPE_SUB, $attributes = [], $sort = '')
     {
     }
 
-    public function getUserByGUID($guid, $baseDn = null, $scope = Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes = [])
+    public function getUserByGUID($guid, $baseDn = null, $scope = Ldap::SEARCH_SCOPE_SUB, $attributes = [])
     {
         return [self::$data['users'][$guid]];
     }
 
-    public function update($dn, array $attributes) {
+    public function update($dn, array $attributes)
+    {
     }
 
-    public function delete($dn, $recursively = false) {
+    public function delete($dn, $recursively = false)
+    {
     }
 
-    public function move($fromDn, $toDn, $recursively = false) {
+    public function move($fromDn, $toDn, $recursively = false)
+    {
     }
 
-    public function add($dn, array $attributes) {
+    public function add($dn, array $attributes)
+    {
     }
-
 }

@@ -48,7 +48,7 @@ We assume ADFS 2.0 or greater is used as an IdP.
 
 First step is to add this module into your SilverStripe project. You can use composer for this:
 
-	composer require "silverstripe/activedirectory:*"
+    composer require "silverstripe/activedirectory:*"
 
 Commit the changes.
 
@@ -62,7 +62,7 @@ You need to make the SP x509 certificate and private key available to the Silver
 
 For testing purposes, you can generate this yourself by using the `openssl` command:
 
-	openssl req -x509 -nodes -newkey rsa:2048 -keyout saml.pem -out saml.crt -days 1826
+    openssl req -x509 -nodes -newkey rsa:2048 -keyout saml.pem -out saml.crt -days 1826
 
 Contact your system administrator if you are not sure how to install these.
 
@@ -80,24 +80,24 @@ Now we need to make the *silverstripe-activedirectory* module aware of where the
 
 Add the following configuration to `mysite/_config/saml.yml` (make sure to replace paths to the certificates and keys):
 
-	---
-	Name: mysamlsettings
-	After:
-	  - "#samlsettings"
-	---
-	SAMLConfiguration:
-	  strict: true
-	  debug: false
-	  SP:
-	    entityId: "https://<your-site-domain>"
-	    privateKey: "<path-to-silverstripe-private-key>.pem"
-	    x509cert: "<path-to-silverstripe-cert>.crt"
-	  IdP:
-	    entityId: "https://<idp-domain>/adfs/services/trust"
-	    x509cert: "<path-to-adfs-cert>.pem"
-	    singleSignOnService: "https://<idp-domain>/adfs/ls/"
-	  Security:
-	    signatureAlgorithm: "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"
+    ---
+    Name: mysamlsettings
+    After:
+      - "#samlsettings"
+    ---
+    SilverStripe\ActiveDirectory\Services\SAMLConfiguration:
+      strict: true
+      debug: false
+      SP:
+        entityId: "https://<your-site-domain>"
+        privateKey: "<path-to-silverstripe-private-key>.pem"
+        x509cert: "<path-to-silverstripe-cert>.crt"
+      IdP:
+        entityId: "https://<idp-domain>/adfs/services/trust"
+        x509cert: "<path-to-adfs-cert>.pem"
+        singleSignOnService: "https://<idp-domain>/adfs/ls/"
+      Security:
+        signatureAlgorithm: "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"
 
 If you don't use absolute paths, the certificate paths will be relative to the `BASE_PATH` (your site web root).
 
@@ -109,9 +109,9 @@ The signature algorithm must match the setting in the ADFS relying party trust
 configuration. For ADFS it's possible to downgrade the default from SHA-256 to
  SHA-1, but this is not recommended. To do this, you can change YAML configuration:
 
-	SAMLConfiguration:
-	  Security:
-	    signatureAlgorithm: "http://www.w3.org/2000/09/xmldsig#rsa-sha1"
+    SilverStripe\ActiveDirectory\Services\SAMLConfiguration:
+      Security:
+        signatureAlgorithm: "http://www.w3.org/2000/09/xmldsig#rsa-sha1"
 
 ### Service Provider (SP)
 
@@ -135,18 +135,22 @@ ADFS should now be configured to extract the SP certificate from SilverStripe's 
 
 ## Configure SilverStripe Authenticators
 
-To be able to use the SAML or the LDAP authenticator you will need to set them up in the `mysite/config.php`.
+To be able to use the SAML or the LDAP authenticator you will need to set them up in the `mysite/_config.php`.
 
 You can choose which authenticators you would like to display on the login form.
 
-	// Show the SAML Login button on login form
-	Authenticator::register_authenticator('SAMLAuthenticator');
-	// Show the LDAP Login form
-	Authenticator::register_authenticator('LDAPAuthenticator');
+    // Show the SAML Login button on login form
+    \SilverStripe\Security\Authenticator::register_authenticator(
+        'SilverStripe\\ActiveDirectory\\Authenticators\\SAMLAuthenticator'
+    );
+    // Show the LDAP Login form
+    \SilverStripe\Security\Authenticator::register_authenticator(
+        'SilverStripe\\ActiveDirectory\\Authenticators\\LDAPAuthenticator'
+    );
 
 You can unregister the default authenticator by adding this line:
 
-	Authenticator::unregister('MemberAuthenticator');
+    \SilverStripe\Security\Authenticator::unregister('SilverStripe\\Security\\MemberAuthenticator');
 
 To prevent locking yourself out, before you remove the "MemberAuthenticator" make sure you map at least one LDAP group to the SilverStripe `Administrator` Security Group. Consult [CMS usage docs](usage.md) for how to do it.
 
@@ -154,26 +158,28 @@ To prevent locking yourself out, before you remove the "MemberAuthenticator" mak
 
 If you register the SAMLAuthenticator as the default authenticator, it will automatically send users to the ADFS login server when they are required to login.
 
-	Authenticator::set_default_authenticator('SAMLAuthenticator');
+    \SilverStripe\Security\Authenticator::set_default_authenticator(
+        'SilverStripe\\ActiveDirectory\\Authenticators\\SAMLAuthenticator'
+    );
 
 Should you need to access the login form with all the configured Authenticators, go to:
 
-	/Security/login?showloginform=1
+    /Security/login?showloginform=1
 
 Note that if you have unregistered the `MemberAuthenticator`, and you wish to use that method during `showloginform=1`, you
 will need to set a cookie so it can be used temporarily.
 
 This will set a cookie to show `MemberAuthenticator` if `showloginform=1` is requested:
 
-	Authenticator::unregister('MemberAuthenticator');
-	if(isset($_GET['showloginform'])) {
-		Cookie::set('showloginform', (bool)$_GET['showloginform'], 1);
-	}
-	if(Cookie::get('showloginform')) {
-		Authenticator::register_authenticator('MemberAuthenticator');
-	}
+    \SilverStripe\Security\Authenticator::unregister('SilverStripe\\Security\\MemberAuthenticator');
+    if(isset($_GET['showloginform'])) {
+        \SilverStripe\Control\Cookie::set('showloginform', (bool)$_GET['showloginform'], 1);
+    }
+    if(\SilverStripe\Control\Cookie::get('showloginform')) {
+        \SilverStripe\Security\Authenticator::register_authenticator('SilverStripe\\Security\\MemberAuthenticator');
+    }
 
-For more information see the [SAMLSecurityExtension.php](../../code/authenticators/SAMLSecurityExtension.php).
+For more information see the [`SAMLSecurityExtension.php`](../../src/Authenticators/SAMLSecurityExtension.php).
 
 ## Test the connection
 
@@ -193,15 +199,15 @@ These are the reasons for configuring LDAP synchronisation:
 
 Example configuration for `mysite/_config/ldap.yml`:
 
-	LDAPGateway:
-	  options:
-	    'host': 'ad.mydomain.local'
-	    'username': 'myusername'
-	    'password': 'mypassword'
-	    'accountDomainName': 'mydomain.local'
-	    'baseDn': 'DC=mydomain,DC=local'
-	    'networkTimeout': 10
-	    'useSsl': 'TRUE'
+    SilverStripe\ActiveDirectory\Model\LDAPGateway:
+      options:
+        'host': 'ad.mydomain.local'
+        'username': 'myusername'
+        'password': 'mypassword'
+        'accountDomainName': 'mydomain.local'
+        'baseDn': 'DC=mydomain,DC=local'
+        'networkTimeout': 10
+        'useSsl': 'TRUE'
 
 The `baseDn` option defines the initial scope of the directory where the connector can perform queries. This should be set to the root base DN, e.g. DC=mydomain,DC=local
 
@@ -213,12 +219,12 @@ For more information about available LDAP options, please [see the Zend\Ldap doc
 
 You can then set specific locations to search your directory. Note that these locations must be within the `baseDn` you have specified above:
 
-	LDAPService:
-	  users_search_locations:
-	    - 'CN=Users,DC=mydomain,DC=local'
-	    - 'CN=Others,DC=mydomain,DC=local'
-	  groups_search_locations:
-	    - 'CN=Somewhere,DC=mydomain,DC=local'
+    SilverStripe\ActiveDirectory\Services\LDAPService:
+      users_search_locations:
+        - 'CN=Users,DC=mydomain,DC=local'
+        - 'CN=Others,DC=mydomain,DC=local'
+      groups_search_locations:
+        - 'CN=Somewhere,DC=mydomain,DC=local'
 
 Note that these search locations should only be tree nodes (e.g. containers, organisational units, domains) within your Active Directory.
 Specifying groups will not work. [More information](http://stackoverflow.com/questions/9945518/can-ldap-matching-rule-in-chain-return-subtree-search-results-with-attributes) is available on the distinction between a node and a group.
@@ -236,23 +242,23 @@ You can visit a controller called `/LDAPDebug` to check that the connection is w
 You can configure the module so everyone imported goes into a default group. The group must already exist before
 you can use this setting. The value of this setting should be the "Code" field from the Group.
 
-	LDAPService:
-	  default_group: "content-authors"
+    SilverStripe\ActiveDirectory\Services\LDAPService:
+      default_group: "content-authors"
 
 ### Map AD attributes to Member fields
 
-`Member.ldap_field_mappings` defines the AD attributes that should be mapped to `Member` fields.
+`SilverStripe\Security\Member.ldap_field_mappings` defines the AD attributes that should be mapped to `Member` fields.
 By default, it will map the AD first name, surname and email to the built-in FirstName, Surname,
 and Email Member fields.
 
 You can map AD attributes to custom fields by specifying configuration in your `mysite/_config/ldap.yml`. The three
 different AD fields types that can be mapped are: textual, array and thumbnail photo.
 
-	Member:
-	  ldap_field_mappings:
-	    'description': 'Description'
-	    'othertelephone': 'OtherTelephone'
-	    'thumbnailphoto': 'Photo'
+    SilverStripe\Security\Member:
+      ldap_field_mappings:
+        'description': 'Description'
+        'othertelephone': 'OtherTelephone'
+        'thumbnailphoto': 'Photo'
 
 A couple of things to note:
 
@@ -266,8 +272,8 @@ to this attribute, and it will put the file into place and assign the image to t
 By default, thumbnails are saved into `assets/Uploads`, but you can specify the location
 (relative to /assets) by setting the following configuration:
 
-	Member:
-	  ldap_thumbnail_path: 'some-path'
+    SilverStripe\Security\Member:
+      ldap_thumbnail_path: 'some-path'
 
 The image files will be saved in this format: `thumbnailphoto-{sAMAccountName}.jpg`.
 
@@ -278,23 +284,27 @@ mentioned above. You will still need to apply that extension to `Member` to get 
 
 ```php
 <?php
-class MyMemberExtension extends DataExtension {
-	private static $db = [
-		// 'description' is a regular textual field and is written automatically.
-		'Description' => 'Varchar(50)',
-		...
-	];
-	private static $has_one = [
-		// 'thumbnailphoto' writes to has_one Image automatically.
-		'Photo' => 'Image'
-	];
-	/**
-	 * 'othertelephone' is an array, needs manual processing.
-	 */
-	public function setOtherTelephone($array) {
-		$serialised = implode(',', $array));
-		...
-	}
+
+use SilverStripe\ORM\DataExtension;
+
+class MyMemberExtension extends DataExtension
+{
+    private static $db = [
+        // 'description' is a regular textual field and is written automatically.
+        'Description' => 'Varchar(50)',
+        // ...
+    ];
+    private static $has_one = [
+        // 'thumbnailphoto' writes to has_one Image automatically.
+        'Photo' => 'SilverStripe\\Assets\\Image'
+    ];
+    /**
+     * 'othertelephone' is an array, needs manual processing.
+     */
+    public function setOtherTelephone($array) {
+        $serialised = implode(',', $array);
+        // ...
+    }
 }
 ```
 
@@ -305,21 +315,21 @@ You can schedule a job to run, then have it re-schedule itself so it runs again 
 If you want, you can set the behaviour of the sync to be destructive, which means any previously imported users who no
 longer exist in the directory get deleted:
 
-	LDAPMemberSyncTask:
-	  destructive: true
+    SilverStripe\ActiveDirectory\Tasks\LDAPMemberSyncTask:
+      destructive: true
 
-To configure when the job should re-run itself, set the `LDAPMemberSyncJob.regenerate_time` configuration.
+To configure when the job should re-run itself, set the `SilverStripe\ActiveDirectory\Jobs\LDAPMemberSyncJob.regenerate_time` configuration.
 In this example, this configures the job to run every 8 hours:
 
-	LDAPMemberSyncJob:
-	  regenerate_time: 28800
+    SilverStripe\ActiveDirectory\Jobs\LDAPMemberSyncJob:
+      regenerate_time: 28800
 
 Once the job runs, it will enqueue itself again, so it's effectively run on a schedule. Keep in mind that you'll need to have `queuedjobs` setup on a cron so that it can automatically run those queued jobs.
 See the [module docs](https://github.com/silverstripe-australia/silverstripe-queuedjobs) on how to configure that.
 
 If you don't want to run a queued job, you can set a cronjob yourself by calling:
 
-	/usr/bin/php framework/cli-script.php dev/tasks/LDAPMemberSyncTask
+    /usr/bin/php framework/cli-script.php dev/tasks/LDAPMemberSyncTask
 
 ### Syncing AD groups and users on a schedule
 
@@ -327,18 +337,18 @@ Similarly to syncing AD users, you can also schedule a full group and user sync.
 
 As with the user sync, you can separately set the group sync to be destructive:
 
-	LDAPGroupSyncTask:
-	  destructive: true
+    SilverStripe\ActiveDirectory\Tasks\LDAPGroupSyncTask:
+      destructive: true
 
 And here is how you make the job reschedule itself after completion:
 
-	LDAPAllSyncJob:
-	  regenerate_time: 28800
+    SilverStripe\ActiveDirectory\Jobs\LDAPAllSyncJob:
+      regenerate_time: 28800
 
 If you don't want to run a queued job, you can set a cronjob yourself by calling the two sync tasks (order is important, otherwise your group memberships might not get updated):
 
-	/usr/bin/php framework/cli-script.php dev/tasks/LDAPGroupSyncTask
-	/usr/bin/php framework/cli-script.php dev/tasks/LDAPMemberSyncTask
+    /usr/bin/php framework/cli-script.php dev/tasks/LDAPGroupSyncTask
+    /usr/bin/php framework/cli-script.php dev/tasks/LDAPMemberSyncTask
 
 ### Migrating existing users
 
@@ -350,16 +360,14 @@ This essentially just updates those existing records with the matching directory
 
 ## Debugging
 
-There are certain parts of his module that have debugging messages logged. You can configure logging to receive these via email, for example. In your `mysite/_config.php`:
-
-	SS_Log::add_writer(new SS_LogEmailWriter('my@email.com'), SS_Log::DEBUG, '<=');
+There are certain parts of his module that have debugging messages logged. You can configure logging to receive these via email, for example. For more information on this topic see [Logging and Error Handling](https://docs.silverstripe.org/en/4/developer_guides/debugging/error_handling/) in the developer documentation.
 
 ### SAML debugging
 
 To enable some very light weight debugging from the 3rd party library set the `debug` to true
 
-	SAMLConfiguration:
-	  debug: true
+    SilverStripe\ActiveDirectory\Services\SAMLConfiguration:
+      debug: true
 
 In general it can be tricky to debug what is failing during the setup phase. The SAML protocol error
 message as quite hard to decipher.
@@ -384,39 +392,45 @@ Here is an example of `ldapsearch` usage. You will need to bind to the directory
 
 ```bash
 ldapsearch \
-	-W \
-	-H ldaps://<ldap-url>:<ldap-port> \
-	-D "CN=<administrative-user>,DC=yourldap,DC=co,DC=nz" \
-	-b "DC=yourldap,DC=co,DC=nz" \
-	"(name=*)"
+    -W \
+    -H ldaps://<ldap-url>:<ldap-port> \
+    -D "CN=<administrative-user>,DC=yourldap,DC=co,DC=nz" \
+    -b "DC=yourldap,DC=co,DC=nz" \
+    "(name=*)"
 ```
 
 ## Advanced SAML configuration
 
 It is possible to customize all the settings provided by the 3rd party SAML code.
 
-This can be done by registering your own `SAMLConfiguration` object via `mysite/_config/saml.yml`:
+This can be done by registering your own `SilverStripe\ActiveDirectory\Services\SAMLConfiguration` object via `mysite/_config/saml.yml`:
 
 Example:
 
-	---
-	Name: samlconfig
-	After:
-	  - "#samlsettings"
-	---
-	Injector:
-	  SAMLConfService: MySAMLConfiguration
+    ---
+    Name: samlconfig
+    After:
+      - "#samlsettings"
+    ---
+    SilverStripe\Core\Injector\Injector:
+      SAMLConfService: YourVendor\YourModule\MySAMLConfiguration
 
-and the MySAMLConfiguration.php:
+and then in your namespaced `MySAMLConfiguration.php`:
 
-	<?php
-	class MySAMLConfiguration extends Object {
-		public function asArray() {
-			return [
-				// add settings here;
-			];
-		}
-	}
+    <?php
+
+    namespace YourVendor\YourModule;
+
+    use SilverStripe\Core\Object;
+
+    class MySAMLConfiguration extends Object
+    {
+        public function asArray() {
+            return [
+                // add settings here;
+            ];
+        }
+    }
 
 See the [advanced\_settings\_example.php](https://github.com/onelogin/php-saml/blob/master/advanced_settings_example.php)
 for the advanced settings.
@@ -431,7 +445,7 @@ using username instead of email. You can additionally allow people to authentica
 Example configuration in `mysite/_config/ldap.yml`:
 
 ```yaml
-LDAPAuthenticator:
+SilverStripe\ActiveDirectory\Authenticators\LDAPAuthenticator:
   allow_email_login: 'yes'
 ```
 
@@ -439,13 +453,13 @@ Note that your LDAP users logging in must have the `mail` attribute set, otherwi
 
 ### Falling back authentication on LDAP login form
 
-You can allow users who have not been migrated to LDAP to authenticate via the default `MemberAuthenticator`.
+You can allow users who have not been migrated to LDAP to authenticate via the default `SilverStripe\Security\MemberAuthenticator`.
 This is different to registering multiple authenticators, in that the fallback works on the one login form.
 
 Example configuration in `mysite/_config/ldap.yml`:
 
 ```yaml
-LDAPAuthenticator:
+SilverStripe\ActiveDirectory\Authenticators\LDAPAuthenticator:
   fallback_authenticator: 'yes'
 ```
 
@@ -469,13 +483,13 @@ This feature has only been tested on Microsoft AD compatible servers.
 Example configuration in `mysite/_config/ldap.yml`:
 
 ```yaml
-LDAPService:
+SilverStripe\ActiveDirectory\Services\LDAPService:
   allow_password_change: true
 ```
 
 ### Writing LDAP data from SilverStripe
 
-A feature is available that allows data to be written back to LDAP based on the state of `Member` object fields.
+A feature is available that allows data to be written back to LDAP based on the state of `SilverStripe\Security\Member` object fields.
 Additionally, you can also create new users in LDAP from your local records.
 
 Before this can be used, the credentials connecting to LDAP need to have write permissions so LDAP attributes can
@@ -484,10 +498,10 @@ be written to.
 To turn on the feature, here is some example configuration in `mysite/_config/ldap.yml`:
 
 ```yaml
-Member:
+SilverStripe\Security\Member:
   update_ldap_from_local: true
   create_users_in_ldap: true
-LDAPService:
+SilverStripe\ActiveDirectory\Services\LDAPService:
   new_users_dn: CN=Users,DC=mydomain,DC=com
 ```
 
@@ -498,7 +512,7 @@ that the "Username" field must be filled in, otherwise it will not be created, d
 
 You can also programatically create a user. For example:
 
-    $member = new Member();
+    $member = new \SilverStripe\Security\Member();
     $member->FirstName = 'Joe';
     $member->Username = 'jbloggs';
     $member->write();
