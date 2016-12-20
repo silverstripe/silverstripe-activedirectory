@@ -493,8 +493,8 @@ LDAPService:
 
 The `new_users_dn` is the DN (Distinguished Name) of the location in the LDAP structure where new users will be created.
 
-Now when you create a new user using the Security section in `/admin`, the user will be created in LDAP. Take note
-that the "Username" field must be filled in, otherwise it will not be created, due to LDAP users requiring a username.
+Now when you create a new user using the Security section in `/admin`, the user will be created in LDAP. A username
+will be generated based on the `FirstName`, `Surname`, and falling back to `Email` if the `Username` field is not provided.
 
 You can also programatically create a user. For example:
 
