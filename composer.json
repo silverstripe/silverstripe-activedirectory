@@ -27,7 +27,7 @@
         "phpunit/phpunit": "~4.8"
     },
     "extra": {
-        "branch-alias": [
+        "branch-alias": {
             "3.x-dev": "3.0.x-dev"
         }
     }
