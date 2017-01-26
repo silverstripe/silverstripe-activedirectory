@@ -1,0 +1,24 @@
+mappings:
+  LDAPAuthenticator: SilverStripe\ActiveDirectory\Authenticators\LDAPAuthenticator
+  LDAPLoginForm: SilverStripe\ActiveDirectory\Authenticators\LDAPLoginForm
+  SAMLAuthenticator: SilverStripe\ActiveDirectory\Authenticators\SAMLAuthenticator
+  SAMLLoginForm: SilverStripe\ActiveDirectory\Authenticators\SAMLLoginForm
+  SAMLSecurityExtension: SilverStripe\ActiveDirectory\Authenticators\SAMLSecurityExtension
+  LDAPDebugController: SilverStripe\ActiveDirectory\Control\LDAPDebugController
+  LDAPSecurityController: SilverStripe\ActiveDirectory\Control\LDAPSecurityController
+  SAMLController: SilverStripe\ActiveDirectory\Control\SAMLController
+  LDAPGroupExtension: SilverStripe\ActiveDirectory\Extensions\LDAPGroupExtension
+  LDAPMemberExtension: SilverStripe\ActiveDirectory\Extensions\LDAPMemberExtension
+  SAMLMemberExtension: SilverStripe\ActiveDirectory\Extensions\SAMLMemberExtension
+  LDAPChangePasswordForm: SilverStripe\ActiveDirectory\Forms\LDAPChangePasswordForm
+  SAMLHelper: SilverStripe\ActiveDirectory\Helpers\SAMLHelper
+  LDAPAllSyncJob: SilverStripe\ActiveDirectory\Jobs\LDAPAllSyncJob
+  LDAPMemberSyncJob: SilverStripe\ActiveDirectory\Jobs\LDAPMemberSyncJob
+  LDAPGateway: SilverStripe\ActiveDirectory\Model\LDAPGateway
+  LDAPGroupMapping: SilverStripe\ActiveDirectory\Model\LDAPGroupMapping
+  LDAPUtil: SilverStripe\ActiveDirectory\Model\LDAPUtil
+  LDAPService: SilverStripe\ActiveDirectory\Services\LDAPService
+  SAMLConfiguration: SilverStripe\ActiveDirectory\Services\SAMLConfiguration
+  LDAPGroupSyncTask: SilverStripe\ActiveDirectory\Tasks\LDAPGroupSyncTask
+  LDAPMemberSyncTask: SilverStripe\ActiveDirectory\Tasks\LDAPMemberSyncTask
+  LDAPMigrateExistingMembersTask: SilverStripe\ActiveDirectory\Tasks\LDAPMigrateExistingMembersTask

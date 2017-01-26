@@ -1,17 +1,17 @@
-# See https://github.com/silverstripe-labs/silverstripe-travis-support for setup details
+# See https://github.com/silverstripe/silverstripe-travis-support for setup details
 
 language: php
 
 sudo: false
 
-matrix:
-  include:
-    - php: 5.4
-      env: DB=MYSQL CORE_RELEASE=3.2
-    - php: 5.5
-      env: DB=MYSQL CORE_RELEASE=3.3
-    - php: 5.6
-      env: DB=MYSQL CORE_RELEASE=3.4
+php:
+  - 5.5
+  - 5.6
+  - 7.0
+  - 7.1
+
+env:
+  - DB=MYSQL CORE_RELEASE=4
 
 before_install:
   - echo "extension=ldap.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
@@ -19,7 +19,7 @@ before_install:
 before_script:
   - composer self-update || true
   - phpenv rehash
-  - git clone git://github.com/silverstripe-labs/silverstripe-travis-support.git ~/travis-support
+  - git clone git://github.com/silverstripe/silverstripe-travis-support.git ~/travis-support
   - php ~/travis-support/travis_setup.php --source `pwd` --target ~/builds/ss
   - cd ~/builds/ss
 
