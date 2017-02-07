@@ -822,20 +822,7 @@ class LDAPService extends Object implements Flushable
 
         // go through the groups we want the user to be in and ensure they're in them.
         foreach ($addGroups as $groupDn) {
-            $members = $this->getLDAPGroupMembers($groupDn);
-
-            // this user is already in the group, no need to do anything.
-            if (in_array($user['distinguishedname'], $members)) {
-                continue;
-            }
-
-            $members[] = $user['distinguishedname'];
-
-            try {
-                $this->update($groupDn, ['member' => $members]);
-            } catch (\Exception $e) {
-                throw new ValidationException('LDAP group membership add failure: '.$e->getMessage());
-            }
+            $this->addLDAPUserToGroup($user['distinguishedname'], $groupDn);
         }
 
         // go through the groups we _don't_ want the user to be in and ensure they're taken out of them.
@@ -856,6 +843,30 @@ class LDAPService extends Object implements Flushable
             } catch (\Exception $e) {
                 throw new ValidationException('LDAP group membership remove failure: '.$e->getMessage());
             }
+        }
+    }
+
+    /**
+     * Add LDAP user by DN to LDAP group.
+     *
+     * @param string $userDn
+     * @param string $groupDn
+     * @throws \Exception
+     */
+    public function addLDAPUserToGroup($userDn, $groupDn) {
+        $members = $this->getLDAPGroupMembers($groupDn);
+
+        // this user is already in the group, no need to do anything.
+        if (in_array($userDn, $members)) {
+            return;
+        }
+
+        $members[] = $userDn;
+
+        try {
+            $this->update($groupDn, ['member' => $members]);
+        } catch (\Exception $e) {
+            throw new ValidationException('LDAP group membership add failure: '.$e->getMessage());
         }
     }
 
