@@ -46,6 +46,14 @@ class LDAPService extends Object implements Flushable
     private static $new_users_dn;
 
     /**
+     * Location to create new groups in (distinguished name).
+     * @var string
+     *
+     * @config
+     */
+    private static $new_groups_dn;
+
+    /**
      * @var array
      */
     private static $_cache_nested_groups = [];
@@ -693,6 +701,51 @@ class LDAPService extends Object implements Flushable
 
         // Creation was successful, mark the user as LDAP managed by setting the GUID.
         $member->GUID = $user['objectguid'];
+    }
+
+    /**
+     * Creates a new LDAP group from the passed Group record.
+     *
+     * @param Group $group
+     * @throws ValidationException
+     */
+    public function createLDAPGroup(Group $group) {
+        if (!$this->enabled()) {
+            return;
+        }
+        if (empty($group->Title)) {
+            throw new ValidationException('Group missing Title. Cannot create LDAP group');
+        }
+        if (!$this->config()->new_groups_dn) {
+            throw new Exception('LDAPService::new_groups_dn must be configured to create LDAP groups');
+        }
+
+        $dn = sprintf('CN=%s,%s', $group->Title, $this->config()->new_groups_dn);
+        try {
+            $this->add($dn, [
+                'objectclass' => 'group',
+                'cn' => $group->Title,
+                'name' => $group->Title,
+                'samaccountname' => $group->Title,
+                'distinguishedname' => $dn
+            ]);
+        } catch (\Exception $e) {
+            throw new \ValidationException('LDAP group creation failure: ' . $e->getMessage());
+        }
+
+        $data = $this->getGroupByDN($dn);
+        if (empty($data['objectguid'])) {
+            throw new \ValidationException(
+                new \ValidationResult(
+                    false,
+                    'LDAP group creation failure: group might have been created in LDAP. GUID is missing.'
+                )
+            );
+        }
+
+        // Creation was successful, mark the group as LDAP managed by setting the GUID.
+        $group->GUID = $data['objectguid'];
+        $group->DN = $data['dn'];
     }
 
     /**
