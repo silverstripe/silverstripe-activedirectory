@@ -654,11 +654,7 @@ class LDAPService extends Object implements Flushable
 
         // Synchronise specific guaranteed fields.
         $group->Code = $data['samaccountname'];
-        if (!empty($data['name'])) {
-            $group->Title = $data['name'];
-        } else {
-            $group->Title = $data['samaccountname'];
-        }
+        $group->Title = $data['samaccountname'];
         if (!empty($data['description'])) {
             $group->Description = $data['description'];
         }
@@ -755,6 +751,9 @@ class LDAPService extends Object implements Flushable
             throw new Exception('LDAPService::new_groups_dn must be configured to create LDAP groups');
         }
 
+        // LDAP isn't really meant to distinguish between a Title and Code. Squash them.
+        $group->Code = $group->Title;
+
         $dn = sprintf('CN=%s,%s', $group->Title, $this->config()->new_groups_dn);
         try {
             $this->add($dn, [
@@ -762,6 +761,7 @@ class LDAPService extends Object implements Flushable
                 'cn' => $group->Title,
                 'name' => $group->Title,
                 'samaccountname' => $group->Title,
+                'description' => $group->Description,
                 'distinguishedname' => $dn
             ]);
         } catch (\Exception $e) {
