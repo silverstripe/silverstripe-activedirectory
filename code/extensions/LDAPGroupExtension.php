@@ -39,6 +39,17 @@ class LDAPGroupExtension extends DataExtension
         ]
     ];
 
+    /**
+     * If enabled, deleting Group records mapped to LDAP deletes the LDAP group.
+     *
+     * This requires setting write permissions on the user configured in the LDAP
+     * credentials, which is why this is disabled by default.
+     *
+     * @var bool
+     * @config
+     */
+    private static $delete_groups_in_ldap = false;
+
     public function updateCMSFields(FieldList $fields)
     {
         // Add read-only LDAP metadata fields.
@@ -97,4 +108,18 @@ class LDAPGroupExtension extends DataExtension
             $mapping->delete();
         }
     }
+
+    public function onAfterDelete() {
+        $service = Injector::inst()->get('LDAPService');
+        if (
+            !$service->enabled() ||
+            !$this->owner->config()->delete_groups_in_ldap ||
+            !$this->owner->GUID
+        ) {
+            return;
+        }
+
+        $service->deleteLDAPGroup($this->owner);
+    }
+
 }
