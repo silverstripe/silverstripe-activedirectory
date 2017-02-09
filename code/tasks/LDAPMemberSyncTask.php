@@ -80,6 +80,12 @@ class LDAPMemberSyncTask extends BuildTask
         if ($this->config()->destructive) {
             foreach (DB::query('SELECT "ID", "GUID" FROM "Member" WHERE "GUID" IS NOT NULL') as $record) {
                 if (!isset($users[$record['GUID']])) {
+                    $this->log(sprintf(
+                        'Removing Member "%s" (GUID: %s) that no longer exists in LDAP.',
+                        $member->getName(),
+                        $member->GUID
+                    ));
+
                     $member = Member::get()->byId($record['ID']);
                     try {
                         $member->delete();
@@ -88,11 +94,6 @@ class LDAPMemberSyncTask extends BuildTask
                         continue;
                     }
 
-                    $this->log(sprintf(
-                        'Removing Member "%s" (GUID: %s) that no longer exists in LDAP.',
-                        $member->getName(),
-                        $member->GUID
-                    ));
                     $deleted++;
                 }
             }
