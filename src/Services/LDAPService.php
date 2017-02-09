@@ -764,14 +764,14 @@ class LDAPService extends Object implements Flushable
                 'description' => $group->Description,
                 'distinguishedname' => $dn
             ]);
-        } catch (\Exception $e) {
-            throw new \ValidationException('LDAP group creation failure: ' . $e->getMessage());
+        } catch (Exception $e) {
+            throw new ValidationException('LDAP group creation failure: ' . $e->getMessage());
         }
 
         $data = $this->getGroupByDN($dn);
         if (empty($data['objectguid'])) {
-            throw new \ValidationException(
-                new \ValidationResult(
+            throw new ValidationException(
+                new ValidationResult(
                     false,
                     'LDAP group creation failure: group might have been created in LDAP. GUID is missing.'
                 )
@@ -940,7 +940,7 @@ class LDAPService extends Object implements Flushable
      *
      * @param string $userDn
      * @param string $groupDn
-     * @throws \Exception
+     * @throws Exception
      */
     public function addLDAPUserToGroup($userDn, $groupDn) {
         $members = $this->getLDAPGroupMembers($groupDn);
