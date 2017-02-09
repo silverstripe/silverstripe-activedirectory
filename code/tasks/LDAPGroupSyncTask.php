@@ -49,8 +49,7 @@ class LDAPGroupSyncTask extends BuildTask
                 $group->GUID = $data['objectguid'];
 
                 $this->log(sprintf(
-                    'Creating new Group (ID: %s, GUID: %s, sAMAccountName: %s)',
-                    $group->ID,
+                    'Creating new Group (GUID: %s, sAMAccountName: %s)',
                     $data['objectguid'],
                     $data['samaccountname']
                 ));
