@@ -36,7 +36,9 @@ class LDAPMemberSyncTask extends BuildTask
 
         $start = time();
 
-        $count = 0;
+        $created = 0;
+        $updated = 0;
+        $deleted = 0;
 
         foreach ($users as $data) {
             $member = Member::get()->filter('GUID', $data['objectguid'])->limit(1)->first();
@@ -51,6 +53,7 @@ class LDAPMemberSyncTask extends BuildTask
                     $data['objectguid'],
                     $data['samaccountname']
                 ));
+                $created++;
             } else {
                 $this->log(sprintf(
                     'Updating existing Member "%s" (ID: %s, GUID: %s, sAMAccountName: %s)',
@@ -59,6 +62,7 @@ class LDAPMemberSyncTask extends BuildTask
                     $data['objectguid'],
                     $data['samaccountname']
                 ));
+                $updated++;
             }
 
             // Sync attributes from LDAP to the Member record. This will also write the Member record.
@@ -67,12 +71,8 @@ class LDAPMemberSyncTask extends BuildTask
                 $this->ldapService->updateMemberFromLDAP($member, $data);
             } catch (Exception $e) {
                 $this->log($e->getMessage());
+                continue;
             }
-
-            // cleanup object from memory
-            $member->destroy();
-
-            $count++;
         }
 
         // remove Member records that were previously imported, but no longer exist in the directory
@@ -81,23 +81,32 @@ class LDAPMemberSyncTask extends BuildTask
             foreach (DB::query('SELECT "ID", "GUID" FROM "Member" WHERE "GUID" IS NOT NULL') as $record) {
                 if (!isset($users[$record['GUID']])) {
                     $member = Member::get()->byId($record['ID']);
-                    $member->delete();
+                    try {
+                        $member->delete();
+                    } catch (Exception $e) {
+                        $this->log($e->getMessage());
+                        continue;
+                    }
 
                     $this->log(sprintf(
                         'Removing Member "%s" (GUID: %s) that no longer exists in LDAP.',
                         $member->getName(),
                         $member->GUID
                     ));
-
-                    // cleanup object from memory
-                    $member->destroy();
+                    $deleted++;
                 }
             }
         }
 
         $end = time() - $start;
 
-        $this->log(sprintf('Done. Processed %s records. Duration: %s seconds', $count, round($end, 0)));
+        $this->log(sprintf(
+            'Done. Created %s records. Updated %s records. Deleted %s records. Duration: %s seconds',
+            $created,
+            $updated,
+            $deleted,
+            round($end, 0)
+        ));
     }
 
     protected function log($message)
