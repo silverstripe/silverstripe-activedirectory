@@ -38,7 +38,9 @@ class LDAPGroupSyncTask extends BuildTask
 
         $start = time();
 
-        $count = 0;
+        $created = 0;
+        $updated = 0;
+        $deleted = 0;
 
         foreach ($ldapGroups as $data) {
             $group = Group::get()->filter('GUID', $data['objectguid'])->limit(1)->first();
@@ -53,6 +55,7 @@ class LDAPGroupSyncTask extends BuildTask
                     $data['objectguid'],
                     $data['samaccountname']
                 ));
+                $created++;
             } else {
                 $this->log(sprintf(
                     'Updating existing Group "%s" (ID: %s, GUID: %s, sAMAccountName: %s)',
@@ -61,14 +64,15 @@ class LDAPGroupSyncTask extends BuildTask
                     $data['objectguid'],
                     $data['samaccountname']
                 ));
+                $updated++;
             }
 
-            $this->ldapService->updateGroupFromLDAP($group, $data);
-
-            // cleanup object from memory
-            $group->destroy();
-
-            $count++;
+            try {
+                $this->ldapService->updateGroupFromLDAP($group, $data);
+            } catch (Exception $e) {
+                $this->log($e->getMessage());
+                continue;
+            }
         }
 
         // remove Group records that were previously imported, but no longer exist in the directory
@@ -77,27 +81,36 @@ class LDAPGroupSyncTask extends BuildTask
             foreach (DB::query('SELECT "ID", "GUID" FROM "Group" WHERE "GUID" IS NOT NULL') as $record) {
                 if (!isset($ldapGroups[$record['GUID']])) {
                     $group = Group::get()->byId($record['ID']);
-                    // Cascade into mappings, just to clean up behind ourselves.
-                    foreach ($group->LDAPGroupMappings() as $mapping) {
-                        $mapping->delete();
+                    try {
+                        // Cascade into mappings, just to clean up behind ourselves.
+                        foreach ($group->LDAPGroupMappings() as $mapping) {
+                            $mapping->delete();
+                        }
+                        $group->delete();
+                    } catch (Exception $e) {
+                        $this->log($e->getMessage());
+                        continue;
                     }
-                    $group->delete();
 
                     $this->log(sprintf(
                         'Removing Group "%s" (GUID: %s) that no longer exists in LDAP.',
                         $group->Title,
                         $group->GUID
                     ));
-
-                    // cleanup object from memory
-                    $group->destroy();
+                    $deleted++;
                 }
             }
         }
 
         $end = time() - $start;
 
-        $this->log(sprintf('Done. Processed %s records. Duration: %s seconds', $count, round($end, 0)));
+        $this->log(sprintf(
+            'Done. Created %s records. Updated %s records. Deleted %s records. Duration: %s seconds',
+            $created,
+            $updated,
+            $deleted,
+            round($end, 0)
+        ));
     }
 
     protected function log($message)
