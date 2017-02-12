@@ -41,7 +41,12 @@ class LDAPMemberExtension extends DataExtension
 
     /**
      * When enabled, LDAP managed Member records (GUID flag)
-     * have their data written back to LDAP on write.
+     * have their data written back to LDAP on write, and synchronise
+     * membership to groups mapped to LDAP.
+     *
+     * Keep in mind this will currently NOT trigger if there are no
+     * field changes due to onAfterWrite in framework not being called
+     * when there are no changes.
      *
      * This requires setting write permissions on the user configured in the LDAP
      * credentials, which is why this is disabled by default.
@@ -165,23 +170,12 @@ class LDAPMemberExtension extends DataExtension
         $service->createLDAPUser($this->owner);
     }
 
-    /**
-     * Update the local data with LDAP, and ensure local membership is also set in
-     * LDAP too. This writes into LDAP, provided that feature is enabled.
-     */
     public function onAfterWrite()
     {
-        $service = Injector::inst()->get('LDAPService');
-        if (
-            !$service->enabled() ||
-            !$this->owner->config()->update_ldap_from_local ||
-            !$this->owner->GUID
-        ) {
+        if (!$this->owner->config()->update_ldap_from_local) {
             return;
         }
-
-        $service->updateLDAPFromMember($this->owner);
-        $service->updateLDAPGroupsForMember($this->owner);
+        $this->sync();
     }
 
     public function onAfterDelete() {
@@ -195,6 +189,22 @@ class LDAPMemberExtension extends DataExtension
         }
 
         $service->deleteLDAPMember($this->owner);
+    }
+
+    /**
+     * Update the local data with LDAP, and ensure local membership is also set in
+     * LDAP too. This writes into LDAP, provided that feature is enabled.
+     */
+    public function sync() {
+        $service = Injector::inst()->get('LDAPService');
+        if (
+            !$service->enabled() ||
+            !$this->owner->GUID
+        ) {
+            return;
+        }
+        $service->updateLDAPFromMember($this->owner);
+        $service->updateLDAPGroupsForMember($this->owner);
     }
 
     /**
