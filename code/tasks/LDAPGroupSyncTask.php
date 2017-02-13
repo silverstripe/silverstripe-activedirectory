@@ -80,13 +80,14 @@ class LDAPGroupSyncTask extends BuildTask
         if ($this->config()->destructive) {
             foreach (DB::query('SELECT "ID", "GUID" FROM "Group" WHERE "GUID" IS NOT NULL') as $record) {
                 if (!isset($ldapGroups[$record['GUID']])) {
+                    $group = Group::get()->byId($record['ID']);
+
                     $this->log(sprintf(
                         'Removing Group "%s" (GUID: %s) that no longer exists in LDAP.',
                         $group->Title,
                         $group->GUID
                     ));
 
-                    $group = Group::get()->byId($record['ID']);
                     try {
                         // Cascade into mappings, just to clean up behind ourselves.
                         foreach ($group->LDAPGroupMappings() as $mapping) {
