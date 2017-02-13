@@ -941,7 +941,7 @@ class LDAPService extends Object implements Flushable
      *
      * @param string $userDn
      * @param string $groupDn
-     * @throws \Exception
+     * @throws Exception
      */
     public function addLDAPUserToGroup($userDn, $groupDn)
     {
@@ -956,8 +956,8 @@ class LDAPService extends Object implements Flushable
 
         try {
             $this->update($groupDn, ['member' => $members]);
-        } catch (\Exception $e) {
-            throw new ValidationException('LDAP group membership add failure: '.$e->getMessage());
+        } catch (Exception $e) {
+            throw new ValidationException('LDAP group membership add failure: ' . $e->getMessage());
         }
     }
 
