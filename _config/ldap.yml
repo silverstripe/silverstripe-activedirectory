@@ -18,3 +18,24 @@ LDAPAuthenticator:
 
 LDAPService:
   allow_password_change: false
+
+SS_Backtrace:
+  ignore_function_args:
+    -
+      - 'LDAPGateway'
+      - 'authenticate'
+    -
+      - 'LDAPGateway'
+      - 'changePassword'
+    -
+      - 'LDAPGateway'
+      - 'resetPassword'
+    -
+      - 'LDAPService'
+      - 'authenticate'
+    -
+      - 'LDAPService'
+      - 'setPassword'
+    -
+      - 'LDAPService'
+      - 'passwordHistoryWorkaround'
