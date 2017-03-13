@@ -17,7 +17,6 @@ As an ADFS administrator, after reading this guide, you should be able to provid
 - [Setup claim rules](#setup-claim-rules)
   - [Rule 1: Send LDAP Attributes](#rule-1-send-ldap-attributes)
   - [Rule 2: Send objectId as nameidentifier](#rule-2-send-objectid-as-nameidentifier)
-- [Set the secure hash algorithm](#set-the-secure-hash-algorithm)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -106,17 +105,3 @@ This rule relies on the previous one. We need a unique identifier to perform the
 Repeat the same "Add Rule" as done above and select "Send Claims Using a Custom Rule" from the dropdown to add this rule:
 
 	c:[Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/privatepersonalidentifier"] => issue(Type = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier", Issuer = c.Issuer, OriginalIssuer = c.OriginalIssuer, Value = c.Value, ValueType = c.ValueType, Properties["http://schemas.xmlsoap.org/ws/2005/05/identity/claimproperties/format"] = "urn:oasis:names:tc:SAML:2.0:nameid-format:transient");
-
-## Set the secure hash algorithm
-
-By default ADFS uses SHA-256 for signing the requests, the Active Directory
-module by default uses this hash algorithm, but can be changed to use the less
-secure SHA-1. The only reason should be changed is for compatibility with the
-setting used by the SilverStripe site. Here is how to change it:
-
-1. Right click the relying party and choose properties.
-2. Choose the "Advanced" tab and select the "SHA-1" option in the dropdown and press OK.
-
-![](img/1_set_encryption_to_sha1.png)
-
-![](img/2_set_encryption_to_sha1.png)
