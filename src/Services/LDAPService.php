@@ -3,9 +3,12 @@
 namespace SilverStripe\ActiveDirectory\Services;
 
 use Exception;
+use Psr\Log\LoggerInterface;
+use Psr\SimpleCache\CacheInterface;
+use SilverStripe\ActiveDirectory\Model\LDAPGateway;
 use SilverStripe\ActiveDirectory\Model\LDAPGroupMapping;
+use SilverStripe\Assets\Image;
 use SilverStripe\Assets\Filesystem;
-use SilverStripe\Core\Cache;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Flushable;
 use SilverStripe\Core\Injector\Injector;
@@ -17,7 +20,6 @@ use SilverStripe\ORM\ValidationResult;
 use SilverStripe\Security\Group;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\RandomGenerator;
-use Zend_Cache;
 use Zend\Ldap\Ldap;
 
 /**
@@ -41,7 +43,7 @@ class LDAPService extends Object implements Flushable
      * @var array
      */
     private static $dependencies = [
-        'gateway' => '%$SilverStripe\\ActiveDirectory\\Model\\LDAPGateway'
+        'gateway' => '%$' . LDAPGateway::class
     ];
 
     /**
@@ -104,16 +106,20 @@ class LDAPService extends Object implements Flushable
 
     /**
      * Get the cache object used for LDAP results. Note that the default lifetime set here
-     * is 8 hours, but you can change that by calling Cache::set_lifetime('ldap', <lifetime in seconds>)
+     * is 8 hours, but you can change that by adding configuration:
      *
-     * @return Zend_Cache_Frontend
+     * <code>
+     * SilverStripe\Core\Injector\Injector:
+     *   Psr\SimpleCache\CacheInterface.ldap:
+     *     constructor:
+     *       defaultLifetime: 3600 # time in seconds
+     * </code>
+     *
+     * @return Psr\SimpleCache\CacheInterface
      */
     public static function get_cache()
     {
-        return Cache::factory('ldap', 'Output', [
-            'automatic_serialization' => true,
-            'lifetime' => 28800
-        ]);
+        return Injector::inst()->get(CacheInterface::class . '.ldap');
     }
 
     /**
@@ -121,8 +127,9 @@ class LDAPService extends Object implements Flushable
      */
     public static function flush()
     {
+        /** @var CacheInterface $cache */
         $cache = self::get_cache();
-        $cache->clean(Zend_Cache::CLEANING_MODE_ALL);
+        $cache->clear();
     }
 
     /**
@@ -146,7 +153,7 @@ class LDAPService extends Object implements Flushable
      */
     public function enabled()
     {
-        $options = Config::inst()->get('SilverStripe\\ActiveDirectory\\Model\\LDAPGateway', 'options');
+        $options = Config::inst()->get(LDAPGateway::class, 'options');
         return !empty($options);
     }
 
@@ -205,7 +212,8 @@ class LDAPService extends Object implements Flushable
     public function getNodes($cached = true, $attributes = [])
     {
         $cache = self::get_cache();
-        $results = $cache->load('nodes' . md5(implode('', $attributes)));
+        $cacheKey = 'nodes' . md5(implode('', $attributes));
+        $results = $cache->has($cacheKey);
 
         if (!$results || !$cached) {
             $results = [];
@@ -214,7 +222,7 @@ class LDAPService extends Object implements Flushable
                 $results[$record['dn']] = $record;
             }
 
-            $cache->save($results);
+            $cache->set($cacheKey, $results);
         }
 
         return $results;
@@ -234,7 +242,8 @@ class LDAPService extends Object implements Flushable
     {
         $searchLocations = $this->config()->groups_search_locations ?: [null];
         $cache = self::get_cache();
-        $results = $cache->load('groups' . md5(implode('', array_merge($searchLocations, $attributes))));
+        $cacheKey = 'groups' . md5(implode('', array_merge($searchLocations, $attributes)));
+        $results = $cache->has($cacheKey);
 
         if (!$results || !$cached) {
             $results = [];
@@ -249,7 +258,11 @@ class LDAPService extends Object implements Flushable
                 }
             }
 
-            $cache->save($results);
+            $cache->set($cacheKey, $results);
+        }
+
+        if ($cached && $results === true) {
+            $results = $cache->get($cacheKey);
         }
 
         return $results;
@@ -504,8 +517,8 @@ class LDAPService extends Object implements Flushable
 
             if ($attribute == 'thumbnailphoto') {
                 $imageClass = $member->getRelationClass($field);
-                if ($imageClass !== 'SilverStripe\\Assets\\Image'
-                    && !is_subclass_of($imageClass, 'SilverStripe\\Assets\\Image')
+                if ($imageClass !== Image::class
+                    && !is_subclass_of($imageClass, Image::class)
                 ) {
                     $this->getLogger()->warn(
                         sprintf(
@@ -1110,6 +1123,6 @@ class LDAPService extends Object implements Flushable
      */
     public function getLogger()
     {
-        return Injector::inst()->get('Logger');
+        return Injector::inst()->get(LoggerInterface::class);
     }
 }

@@ -2,7 +2,9 @@
 
 namespace SilverStripe\ActiveDirectory\Control;
 
+use SilverStripe\ActiveDirectory\Model\LDAPGateway;
 use SilverStripe\ActiveDirectory\Model\LDAPGroupMapping;
+use SilverStripe\ActiveDirectory\Services\LDAPService;
 use SilverStripe\CMS\Controllers\ContentController;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Config\Config;
@@ -32,7 +34,7 @@ class LDAPDebugController extends ContentController
      * @var array
      */
     private static $dependencies = [
-        'ldapService' => '%$SilverStripe\\ActiveDirectory\\Services\\LDAPService'
+        'ldapService' => '%$' . LDAPService::class
     ];
 
     /**
@@ -40,7 +42,7 @@ class LDAPDebugController extends ContentController
      */
     public $ldapService;
 
-    public function init()
+    protected function init()
     {
         parent::init();
 
@@ -56,13 +58,13 @@ class LDAPDebugController extends ContentController
      */
     public function index(HTTPRequest $request)
     {
-        return $this->renderWith(['SilverStripe\\ActiveDirectory\\Control\\LDAPDebugController']);
+        return $this->renderWith([self::class]);
     }
 
     public function Options()
     {
         $list = new ArrayList();
-        foreach (Config::inst()->get('SilverStripe\\ActiveDirectory\\Model\\LDAPGateway', 'options') as $field => $value) {
+        foreach (Config::inst()->get(LDAPGateway::class, 'options') as $field => $value) {
             if ($field === 'password') {
                 $value = '***';
             }
@@ -77,7 +79,7 @@ class LDAPDebugController extends ContentController
 
     public function UsersSearchLocations()
     {
-        $locations = Config::inst()->get('SilverStripe\\ActiveDirectory\\Services\\LDAPService', 'users_search_locations');
+        $locations = Config::inst()->get(LDAPService::class, 'users_search_locations');
         $list = new ArrayList();
         if ($locations) {
             foreach ($locations as $location) {
@@ -94,7 +96,7 @@ class LDAPDebugController extends ContentController
 
     public function GroupsSearchLocations()
     {
-        $locations = Config::inst()->get('SilverStripe\\ActiveDirectory\\Services\\LDAPService', 'groups_search_locations');
+        $locations = Config::inst()->get(LDAPService::class, 'groups_search_locations');
         $list = new ArrayList();
         if ($locations) {
             foreach ($locations as $location) {
@@ -111,7 +113,7 @@ class LDAPDebugController extends ContentController
 
     public function DefaultGroup()
     {
-        $code = Config::inst()->get('SilverStripe\\ActiveDirectory\\Services\\LDAPService', 'default_group');
+        $code = Config::inst()->get(LDAPService::class, 'default_group');
         if ($code) {
             $group = Group::get()->filter('Code', $code)->limit(1)->first();
             if (!($group && $group->exists())) {

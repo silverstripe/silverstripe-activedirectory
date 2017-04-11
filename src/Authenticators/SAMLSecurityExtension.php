@@ -29,7 +29,7 @@ class SAMLSecurityExtension extends Extension
      */
     public function onBeforeSecurityLogin()
     {
-        if (Authenticator::get_default_authenticator() != 'SilverStripe\\ActiveDirectory\\Authenticators\\SAMLAuthenticator') {
+        if (Authenticator::get_default_authenticator() != SAMLAuthenticator::class) {
             return;
         }
 
@@ -63,7 +63,7 @@ class SAMLSecurityExtension extends Extension
             $backURL = $this->owner->request->getVar('BackURL');
         }
 
-        $authenticator = Injector::inst()->create('SilverStripe\\ActiveDirectory\\Authenticators\\SAMLAuthenticator');
+        $authenticator = Injector::inst()->create(SAMLAuthenticator::class);
         $authenticator->authenticate(['BackURL' => $backURL]);
     }
 }

@@ -28,7 +28,12 @@ class SAMLLoginForm extends LoginForm
     /**
      * @var string
      */
-    protected $authenticator_class = 'SilverStripe\\ActiveDirectory\\Authenticators\\SAMLAuthenticator';
+    protected $authenticator_class = SAMLAuthenticator::class;
+
+    public function getAuthenticatorName()
+    {
+        return "SAML";
+    }
 
     /**
      * Constructor
@@ -56,14 +61,10 @@ class SAMLLoginForm extends LoginForm
             ]);
         } else {
             if (!$fields) {
-                $fields = FieldList::create([
-                    HiddenField::create('AuthenticationMethod', null, $this->authenticator_class, $this)
-                ]);
+                $fields = $this->getFormFields();
             }
             if (!$actions) {
-                $actions = FieldList::create([
-                    FormAction::create('dologin', _t('Member.BUTTONLOGIN', 'Log in'))
-                ]);
+                $actions = $this->getFormActions();
             }
         }
 
@@ -76,10 +77,21 @@ class SAMLLoginForm extends LoginForm
         parent::__construct($controller, $name, $fields, $actions);
     }
 
+    protected function getFormFields()
+    {
+        return FieldList::create([
+            HiddenField::create('AuthenticationMethod', null, $this->authenticator_class, $this)
+        ]);
+    }
+
+    protected function getFormActions()
+    {
+        return FieldList::create([
+            FormAction::create('dologin', _t('Member.BUTTONLOGIN', 'Log in'))
+        ]);
+    }
 
     /**
-     *
-     *
      * @return bool
      */
     protected function shouldShowLogoutFields()
@@ -112,7 +124,6 @@ class SAMLLoginForm extends LoginForm
         parent::getMessageFromSession();
         return $this->message;
     }
-
 
     /**
      * Login form handler method

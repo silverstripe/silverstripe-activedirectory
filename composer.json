@@ -16,7 +16,8 @@
     ],
     "require": {
         "php": ">=5.5",
-        "silverstripe/framework": "^4.0@dev",
+        "silverstripe/framework": "4.0.0-alpha7 || 4.0.x-dev",
+        "silverstripe/cms": "4.0.0-alpha7 || 4.0.x-dev",
         "silverstripe/queuedjobs": "^3.0@dev",
         "zendframework/zend-ldap": "2.5.1",
         "zendframework/zend-authentication": "2.5.1",
@@ -35,5 +36,7 @@
         "psr-4": {
             "SilverStripe\\ActiveDirectory\\": "src/"
         }
-    }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }
