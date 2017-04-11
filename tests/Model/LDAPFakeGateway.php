@@ -1,5 +1,7 @@
 <?php
 
+namespace SilverStripe\ActiveDirectory\Tests\Model;
+
 use SilverStripe\ActiveDirectory\Model\LDAPGateway;
 use SilverStripe\Dev\TestOnly;
 use Zend\Ldap\Ldap;

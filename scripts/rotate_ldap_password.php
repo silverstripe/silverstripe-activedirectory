@@ -18,13 +18,13 @@ error_reporting(E_ALL | E_STRICT);
  * rotate_ldap_password <ss_env_file> <c_hostname|hostname> <c_privileged_dn> <c_privileged_password> [<c_target_dn> <c_target_password>]
  *
  * Example:
- * Assuming you have this configuration in your /sites/_ss_environment.php file:
+ * Assuming you have this configuration in your /sites/.env file:
  * <code>
- * define('LDAP_HOSTNAME', 'ldap://myldap.hostname:636');
- * define('PRIVILEGED_DN', 'CN=PrivilegedUser,DC=platform,DC=silverstripe,DC=com');
- * define('PRIVILEGED_PASSWORD', 'somesupersecretpassword');
- * define('TARGET_DN', 'CN=MyUser,DC=platform,DC=silverstripe,DC=com');
- * define('TARGET_PASSWORD', 'somesupersecretpassword');
+ * LDAP_HOSTNAME="ldap://myldap.hostname:636"
+ * PRIVILEGED_DN="CN=PrivilegedUser,DC=platform,DC=silverstripe,DC=com"
+ * PRIVILEGED_PASSWORD="somesupersecretpassword"
+ * TARGET_DN="CN=MyUser,DC=platform,DC=silverstripe,DC=com"
+ * TARGET_PASSWORD="somesupersecretpassword"
  * </code>
  * The password can be rotated by running:
  * rotate_ldap_password /sites/_ss_environment.php LDAP_HOSTNAME PRIVILEGED_DN PRIVILEGED_PASSWORD TARGET_DN TARGET_PASSWORD

@@ -2,6 +2,7 @@
 
 namespace SilverStripe\ActiveDirectory\Authenticators;
 
+use SilverStripe\ActiveDirectory\Helpers\SAMLHelper;
 use SilverStripe\Control\Controller;
 use Silverstripe\Control\Director;
 use SilverStripe\Control\Session;
@@ -38,7 +39,7 @@ class SAMLAuthenticator extends Authenticator
      */
     public static function get_name()
     {
-        return Config::inst()->get('SilverStripe\\ActiveDirectory\\Authenticators\\SAMLAuthenticator', 'name');
+        return Config::inst()->get(self::class, 'name');
     }
 
     /**
@@ -63,7 +64,7 @@ class SAMLAuthenticator extends Authenticator
     public static function authenticate($data, Form $form = null)
     {
         // $data is not used - the form is just one button, with no fields.
-        $auth = Injector::inst()->get('SilverStripe\\ActiveDirectory\\Helpers\\SAMLHelper')->getSAMLAuth();
+        $auth = Injector::inst()->get(SAMLHelper::class)->getSAMLAuth();
         Session::set('BackURL', isset($data['BackURL']) ? $data['BackURL'] : null);
         Session::save();
         $auth->login(Director::absoluteBaseURL().'saml/');

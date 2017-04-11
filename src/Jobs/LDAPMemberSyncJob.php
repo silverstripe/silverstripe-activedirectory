@@ -7,6 +7,8 @@ use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\QueuedJobs\Services\AbstractQueuedJob;
 use SilverStripe\QueuedJobs\Services\QueuedJob;
+use SilverStripe\QueuedJobs\Services\QueuedJobService;
+
 
 /**
  * Class LDAPMemberSyncJob
@@ -85,7 +87,7 @@ class LDAPMemberSyncJob extends AbstractQueuedJob
             $this->validateRegenerateTime();
 
             $nextJob = Injector::inst()->create('SilverStripe\\ActiveDirectory\\Jobs\\LDAPMemberSyncJob');
-            singleton('QueuedJobService')->queueJob($nextJob, date('Y-m-d H:i:s', time() + $regenerateTime));
+            singleton(QueuedJobService::class)->queueJob($nextJob, date('Y-m-d H:i:s', time() + $regenerateTime));
         }
 
         $task = Injector::inst()->create('SilverStripe\\ActiveDirectory\\Tasks\\LDAPMemberSyncTask');
