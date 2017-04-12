@@ -44,6 +44,10 @@ class SAMLConfiguration extends Object
 
         // SERVICE PROVIDER SECTION
         $sp = $this->config()->get('SP');
+
+        // set baseurl for SAML messages coming back to the SP
+        $conf['baseurl'] = $sp['entityId'];
+
         $spCertPath = Director::is_absolute($sp['x509cert']) ? $sp['x509cert'] : sprintf('%s/%s', BASE_PATH, $sp['x509cert']);
         $spKeyPath = Director::is_absolute($sp['privateKey']) ? $sp['privateKey'] : sprintf('%s/%s', BASE_PATH, $sp['privateKey']);
         $conf['sp']['entityId'] = $sp['entityId'];
