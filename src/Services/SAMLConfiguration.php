@@ -3,7 +3,7 @@
 namespace SilverStripe\ActiveDirectory\Services;
 
 use OneLogin_Saml2_Constants;
-use SilverStripe\Core\Object;
+use SilverStripe\Core\Injector\Injectable;
 use SilverStripe\Control\Director;
 
 /**
@@ -19,8 +19,10 @@ use SilverStripe\Control\Director;
  *
  * @package activedirectory
  */
-class SAMLConfiguration extends Object
+class SAMLConfiguration
 {
+    use Injectable;
+
     /**
      * @var bool
      */
