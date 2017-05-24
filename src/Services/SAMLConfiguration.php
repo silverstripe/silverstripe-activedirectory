@@ -60,6 +60,9 @@ class SAMLConfiguration extends Object
             ? $sp['privateKey']
             : sprintf('%s/%s', BASE_PATH, $sp['privateKey']);
 
+        // set baseurl for SAML messages coming back to the SP
+        $conf['baseurl'] = $sp['entityId'];
+
         $conf['sp']['entityId'] = $sp['entityId'];
         $conf['sp']['assertionConsumerService'] = [
             'url' => $sp['entityId'] . '/saml/acs',
