@@ -2,8 +2,8 @@
 
 namespace SilverStripe\ActiveDirectory\Helpers;
 
+use SilverStripe\Core\Injector\Injectable;
 use OneLogin_Saml2_Auth;
-use SilverStripe\Core\Object;
 
 /**
  * Class SAMLHelper
@@ -11,8 +11,10 @@ use SilverStripe\Core\Object;
  * SAMLHelper acts as a simple wrapper for the OneLogin implementation, so that we can configure
  * and inject it via the config system.
  */
-class SAMLHelper extends Object
+class SAMLHelper
 {
+    use Injectable;
+
     /**
      * @var array
      */

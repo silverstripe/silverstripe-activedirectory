@@ -10,9 +10,11 @@ use SilverStripe\ActiveDirectory\Model\LDAPGroupMapping;
 use SilverStripe\Assets\Image;
 use SilverStripe\Assets\Filesystem;
 use SilverStripe\Core\Config\Config;
+use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Flushable;
+use SilverStripe\Core\Extensible;
 use SilverStripe\Core\Injector\Injector;
-use SilverStripe\Core\Object;
+use SilverStripe\Core\Injector\Injectable;
 use SilverStripe\ORM\DB;
 use SilverStripe\ORM\FieldType\DBDatetime;
 use SilverStripe\ORM\ValidationException;
@@ -37,8 +39,12 @@ use Zend\Ldap\Ldap;
  *
  * @package activedirectory
  */
-class LDAPService extends Object implements Flushable
+class LDAPService implements Flushable
 {
+    use Injectable;
+    use Extensible;
+    use Configurable;
+
     /**
      * @var array
      */
@@ -136,6 +142,11 @@ class LDAPService extends Object implements Flushable
      * @var LDAPGateway
      */
     public $gateway;
+
+    public function __construct()
+    {
+        $this->constructExtensions();
+    }
 
     /**
      * Setter for gateway. Useful for overriding the gateway with a fake for testing.

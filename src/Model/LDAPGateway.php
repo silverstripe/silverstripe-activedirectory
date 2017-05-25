@@ -3,7 +3,8 @@
 namespace SilverStripe\ActiveDirectory\Model;
 
 use Exception;
-use SilverStripe\Core\Object;
+use SilverStripe\Core\Injector\Injectable;
+use SilverStripe\Core\Config\Configurable;
 use Zend\Authentication\Adapter\Ldap as LdapAdapter;
 use Zend\Authentication\AuthenticationService;
 use Zend\Ldap\Exception\LdapException;
@@ -17,8 +18,11 @@ use Zend\Stdlib\ErrorHandler;
  * Works within the LDAP domain model to provide basic operations.
  * These are exclusively used in LDAPService for constructing more complex operations.
  */
-class LDAPGateway extends Object
+class LDAPGateway
 {
+    use Injectable;
+    use Configurable;
+
     /**
      * @var array
      * @config
@@ -32,7 +36,6 @@ class LDAPGateway extends Object
 
     public function __construct()
     {
-        parent::__construct();
         // due to dependency injection this class can be created without any LDAP options set
         // and \Zend\Ldap\Ldap will throw a warning with an empty array
         if (count($this->config()->options)) {
