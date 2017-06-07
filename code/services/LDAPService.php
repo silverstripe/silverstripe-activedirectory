@@ -1002,6 +1002,29 @@ class LDAPService extends Object implements Flushable
     }
 
     /**
+     * Delete an LDAP group mapped to the Group record
+     * @param Group $group
+     */
+    public function deleteLDAPGroup(Group $group) {
+        if (!$this->enabled()) {
+            return;
+        }
+        if (!$group->GUID) {
+            throw new ValidationException('Group missing GUID. Cannot delete LDAP group');
+        }
+        $data = $this->getGroupByGUID($group->GUID);
+        if (empty($data['distinguishedname'])) {
+            throw new ValidationException('LDAP delete failure: could not find distinguishedname attribute');
+        }
+
+        try {
+            $this->delete($data['distinguishedname']);
+        } catch (\Exception $e) {
+            throw new ValidationException('LDAP delete group failed: '.$e->getMessage());
+        }
+    }
+
+    /**
      * A simple proxy to LDAP update operation.
      *
      * @param string $dn Location to add the entry at.
