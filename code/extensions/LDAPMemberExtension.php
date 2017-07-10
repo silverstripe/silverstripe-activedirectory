@@ -157,6 +157,10 @@ class LDAPMemberExtension extends DataExtension
      */
     public function onBeforeWrite()
     {
+        if ($this->owner->LDAPMemberExtension_NoSync) {
+            return;
+        }
+
         $service = Injector::inst()->get('LDAPService');
         if (
             !$service->enabled() ||
@@ -172,6 +176,10 @@ class LDAPMemberExtension extends DataExtension
 
     public function onAfterWrite()
     {
+        if ($this->owner->LDAPMemberExtension_NoSync) {
+            return;
+        }
+
         if (!$this->owner->config()->update_ldap_from_local) {
             return;
         }
@@ -179,6 +187,10 @@ class LDAPMemberExtension extends DataExtension
     }
 
     public function onAfterDelete() {
+        if ($this->owner->LDAPMemberExtension_NoSync) {
+            return;
+        }
+
         $service = Injector::inst()->get('LDAPService');
         if (
             !$service->enabled() ||
@@ -189,6 +201,22 @@ class LDAPMemberExtension extends DataExtension
         }
 
         $service->deleteLDAPMember($this->owner);
+    }
+
+    /**
+     * Write DataObject without triggering this extension's hooks.
+     *
+     * @throws Exception
+     */
+    public function writeWithoutSync() {
+        $this->owner->LDAPMemberExtension_NoSync = true;
+        try {
+            $this->owner->write();
+        } catch (Exception $e) {
+            $this->owner->LDAPMemberExtension_NoSync = false;
+            throw $e;
+        }
+        $this->owner->LDAPMemberExtension_NoSync = false;
     }
 
     /**

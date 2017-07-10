@@ -434,8 +434,11 @@ class LDAPService extends Object implements Flushable
     /**
      * Update the current Member record with data from LDAP.
      *
+     * It's allowed to pass an unwritten Member record here, because it's not always possible to satisfy
+     * field constraints without importing data from LDAP (for example if the application requires Username
+     * through a Validator). Even though unwritten, it still must have the GUID set.
+     *
      * Constraints:
-     * - Member *must* be in the database before calling this as it will need the ID to be mapped to a {@link Group}.
      * - GUID of the member must have already been set, for integrity reasons we don't allow it to change here.
      *
      * @param Member
@@ -536,6 +539,11 @@ class LDAPService extends Object implements Flushable
         // this is to keep track of which groups the user gets mapped to
         // and we'll use that later to remove them from any groups that they're no longer mapped to
         $mappedGroupIDs = [];
+
+        // Member must have an ID before manipulating Groups, otherwise they will not be added correctly.
+        // However we cannot do a full ->write before the groups are associated, because this will upsync
+        // the Member, in effect deleting all their LDAP group associations!
+        $member->writeWithoutSync();
 
         // ensure the user is in any mapped groups
         if (isset($data['memberof'])) {
