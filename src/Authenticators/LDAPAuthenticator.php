@@ -5,13 +5,15 @@ namespace SilverStripe\ActiveDirectory\Authenticators;
 use SilverStripe\ActiveDirectory\Services\LDAPService;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\Email\Email;
+use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Control\Session;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Injector\Injector;
-use SilverStripe\Forms\Form;
+use SilverStripe\ORM\ValidationResult;
 use SilverStripe\Security\Authenticator;
 use SilverStripe\Security\Member;
-use SilverStripe\Security\MemberAuthenticator;
+use SilverStripe\Security\MemberAuthenticator\LoginHandler;
+use SilverStripe\Security\MemberAuthenticator\LogoutHandler;
 
 /**
  * Class LDAPAuthenticator
@@ -22,7 +24,7 @@ use SilverStripe\Security\MemberAuthenticator;
  *
  * @package activedirectory
  */
-class LDAPAuthenticator extends Authenticator
+class LDAPAuthenticator implements Authenticator
 {
     /**
      * @var string
@@ -78,24 +80,24 @@ class LDAPAuthenticator extends Authenticator
      * Performs the login, but will also create and sync the Member record on-the-fly, if not found.
      *
      * @param array $data
-     * @param Form $form
-     * @return bool|Member|void
-     * @throws HTTPResponse_Exception
+     * @param HTTPRequest $request
+     * @param ValidationResult|null $result
+     * @return bool|Member
+     * @internal param Form $form
      */
-    public static function authenticate($data, Form $form = null)
+    public function authenticate(array $data, HTTPRequest $request, ValidationResult &$result = null)
     {
         $service = Injector::inst()->get(LDAPService::class);
         $login = trim($data['Login']);
         if (Email::is_valid_address($login)) {
             if (Config::inst()->get(self::class, 'allow_email_login') != 'yes') {
-                $form->sessionMessage(
+                $result->addError(
                     _t(
                         'LDAPAuthenticator.PLEASEUSEUSERNAME',
                         'Please enter your username instead of your email to log in.'
-                    ),
-                    'bad'
+                    )
                 );
-                return;
+                return null;
             }
 
             $username = $service->getUsernameByEmail($login);
@@ -103,44 +105,44 @@ class LDAPAuthenticator extends Authenticator
             // No user found with this email.
             if (!$username) {
                 if (Config::inst()->get(self::class, 'fallback_authenticator') === 'yes') {
-                    $fallbackMember = self::fallback_authenticate($data, $form);
-                    if ($fallbackMember) {
-                        return $fallbackMember;
+                    if ($fallbackMember = $this->fallback_authenticate($data, $request)) {
+                        {
+                            return $fallbackMember;
+                        }
                     }
                 }
 
-                $form->sessionMessage(_t('LDAPAuthenticator.INVALIDCREDENTIALS', 'Invalid credentials'), 'bad');
-                return;
+                $result->addError(_t('LDAPAuthenticator.INVALIDCREDENTIALS', 'Invalid credentials'));
+                return null;
             }
         } else {
             $username = $login;
         }
 
-        $result = $service->authenticate($username, $data['Password']);
-        $success = $result['success'] === true;
+        $serviceAuthenticationResult = $service->authenticate($username, $data['Password']);
+        $success = $serviceAuthenticationResult['success'] === true;
         if (!$success) {
             if (Config::inst()->get(self::class, 'fallback_authenticator') === 'yes') {
-                $fallbackMember = self::fallback_authenticate($data, $form);
+                $fallbackMember = $this->fallback_authenticate($data, $request);
                 if ($fallbackMember) {
                     return $fallbackMember;
                 }
             }
 
-            if ($form) {
-                $form->sessionMessage($result['message'], 'bad');
-            }
-            return;
+            $result->addError($result['message']);
+
+            return null;
         }
 
         $data = $service->getUserByUsername($result['identity']);
         if (!$data) {
-            if ($form) {
-                $form->sessionMessage(
-                    _t('LDAPAuthenticator.PROBLEMFINDINGDATA', 'There was a problem retrieving your user data'),
-                    'bad'
-                );
-            }
-            return;
+            $result->addError(
+                _t(
+                    'LDAPAuthenticator.PROBLEMFINDINGDATA',
+                    'There was a problem retrieving your user data'
+                )
+            );
+            return null;
         }
 
         // LDAPMemberExtension::memberLoggedIn() will update any other AD attributes mapped to Member fields
@@ -163,18 +165,107 @@ class LDAPAuthenticator extends Authenticator
      * Try to authenticate using the fallback authenticator.
      *
      * @param array $data
-     * @param null|Form $form
+     * @param HTTPRequest $request
      * @return null|Member
+     * @internal param null|Form $form
      */
-    protected static function fallback_authenticate($data, Form $form = null)
+    protected function fallback_authenticate($data, HTTPRequest $request)
     {
-        return call_user_func(
-            [
-                Config::inst()->get(self::class, 'fallback_authenticator_class'),
-                'authenticate'
-            ],
-            array_merge($data, ['Email' => $data['Login']]),
-            $form
-        );
+        $authenticatorClass = Config::inst()->get(self::class, 'fallback_authenticator_class');
+        if ($authenticator = Injector::inst()->get($authenticatorClass)) {
+            return call_user_func(
+                [
+                    $authenticator,
+                    'authenticate'
+                ],
+                $data,
+                $request
+            );
+        }
+    }
+
+    /**
+     * Returns the services supported by this authenticator
+     *
+     * The number should be a bitwise-OR of 1 or more of the following constants:
+     * Authenticator::LOGIN, Authenticator::LOGOUT, Authenticator::CHANGE_PASSWORD,
+     * Authenticator::RESET_PASSWORD, or Authenticator::CMS_LOGIN
+     *
+     * @return int
+     */
+    public function supportedServices()
+    {
+        // TODO: Implement supportedServices() method.
+    }
+
+    /**
+     * Return RequestHandler to manage the log-in process.
+     *
+     * The default URL of the RequestHandler should return the initial log-in form, any other
+     * URL may be added for other steps & processing.
+     *
+     * URL-handling methods may return an array [ "Form" => (form-object) ] which can then
+     * be merged into a default controller.
+     *
+     * @param string $link The base link to use for this RequestHandler
+     * @return LoginHandler
+     */
+    public function getLoginHandler($link)
+    {
+        // TODO: Implement getLoginHandler() method.
+    }
+
+    /**
+     * Return the RequestHandler to manage the log-out process.
+     *
+     * The default URL of the RequestHandler should log the user out immediately and destroy the session.
+     *
+     * @param string $link The base link to use for this RequestHandler
+     * @return LogoutHandler
+     */
+    public function getLogOutHandler($link)
+    {
+        // TODO: Implement getLogOutHandler() method.
+    }
+
+    /**
+     * Return RequestHandler to manage the change-password process.
+     *
+     * The default URL of the RequetHandler should return the initial change-password form,
+     * any other URL may be added for other steps & processing.
+     *
+     * URL-handling methods may return an array [ "Form" => (form-object) ] which can then
+     * be merged into a default controller.
+     *
+     * @param string $link The base link to use for this RequestHnadler
+     */
+    public function getChangePasswordHandler($link)
+    {
+        // TODO: Implement getChangePasswordHandler() method.
+    }
+
+    /**
+     * @param string $link
+     * @return mixed
+     */
+    public function getLostPasswordHandler($link)
+    {
+        // TODO: Implement getLostPasswordHandler() method.
+    }
+
+    /**
+     * Check if the passed password matches the stored one (if the member is not locked out).
+     *
+     * Note, we don't return early, to prevent differences in timings to give away if a member
+     * password is invalid.
+     *
+     * @param Member $member
+     * @param string $password
+     * @param ValidationResult $result
+     * @return ValidationResult
+     */
+    public function checkPassword(Member $member, $password, ValidationResult &$result = null)
+    {
+        // TODO: Implement checkPassword() method.
     }
 }

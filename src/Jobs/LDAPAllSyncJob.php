@@ -5,9 +5,9 @@ namespace SilverStripe\ActiveDirectory\Jobs;
 use Exception;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Injector\Injector;
-use SilverStripe\QueuedJobs\Services\AbstractQueuedJob;
-use SilverStripe\QueuedJobs\Services\QueuedJob;
-use SilverStripe\QueuedJobs\Services\QueuedJobService;
+use Symbiote\QueuedJobs\Services\AbstractQueuedJob;
+use Symbiote\QueuedJobs\Services\QueuedJob;
+use Symbiote\QueuedJobs\Services\QueuedJobService;
 
 
 /**

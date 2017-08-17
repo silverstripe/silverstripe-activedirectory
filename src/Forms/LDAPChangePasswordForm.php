@@ -9,8 +9,8 @@ use SilverStripe\Control\Session;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Forms\TextField;
-use SilverStripe\Security\ChangePasswordForm;
 use SilverStripe\Security\Member;
+use SilverStripe\Security\MemberAuthenticator\ChangePasswordForm;
 
 /**
  * @package activedirectory

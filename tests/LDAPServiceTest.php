@@ -46,7 +46,7 @@ class LDAPServiceTest extends SapphireTest
         Config::modify()->set(LDAPGateway::class, 'options', ['host' => '1.2.3.4']);
         Config::modify()->set(LDAPService::class, 'groups_search_locations', [
             'CN=Users,DC=playpen,DC=local',
-            'CN=Others,DC=playpen,DC=local'
+            'CN=Others,DC=playpen,DCN=local'
         ]);
         // Prevent other module extension hooks from executing during write() etc.
         Config::modify()->remove(Member::class, 'extensions');
