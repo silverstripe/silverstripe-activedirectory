@@ -156,7 +156,7 @@ class LDAPAuthenticator implements Authenticator
         // This will also write the Member record.
         $service->updateMemberFromLDAP($member);
 
-        Session::clear('BackURL');
+        $request->getSession()->clear('BackURL');
 
         return $member;
     }

@@ -27,13 +27,13 @@ class LDAPChangePasswordForm extends ChangePasswordForm
         // Obtain the Member object. If the user got this far, they must have already been synced.
         $member = Member::currentUser();
         if (!$member) {
-            if (Session::get('AutoLoginHash')) {
-                $member = Member::member_from_autologinhash(Session::get('AutoLoginHash'));
+            if ($this->getSession()->get('AutoLoginHash')) {
+                $member = Member::member_from_autologinhash($this->getSession()->get('AutoLoginHash'));
             }
 
             // The user is not logged in and no valid auto login hash is available
             if (!$member) {
-                Session::clear('AutoLoginHash');
+                $this->getSession()->clear('AutoLoginHash');
                 return $this->controller->redirect($this->controller->Link('login'));
             }
         }
@@ -117,13 +117,13 @@ class LDAPChangePasswordForm extends ChangePasswordForm
         }
 
         if (!$member) {
-            if (Session::get('AutoLoginHash')) {
-                $member = Member::member_from_autologinhash(Session::get('AutoLoginHash'));
+            if ($this->getSession()->get('AutoLoginHash')) {
+                $member = Member::member_from_autologinhash($this->getSession()->get('AutoLoginHash'));
             }
 
             // The user is not logged in and no valid auto login hash is available
             if (!$member) {
-                Session::clear('AutoLoginHash');
+                $this->getSession()->clear('AutoLoginHash');
                 return $this->controller->redirect($this->controller->Link('login'));
             }
         }
@@ -151,7 +151,7 @@ class LDAPChangePasswordForm extends ChangePasswordForm
             if ($validationResult->isValid()) {
                 $member->logIn();
 
-                Session::clear('AutoLoginHash');
+                $this->getSession()->clear('AutoLoginHash');
 
                 // Clear locked out status
                 $member->LockedOutUntil = null;

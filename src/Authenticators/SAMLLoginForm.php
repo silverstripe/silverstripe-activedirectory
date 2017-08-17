@@ -46,7 +46,7 @@ class SAMLLoginForm extends LoginForm
      */
     public function __construct($controller, $name, $fields = null, $actions = null, $checkCurrentUser = true)
     {
-        $backURL = Session::get('BackURL');
+        $backURL = $this->getSession()->get('BackURL');
 
         if (isset($_REQUEST['BackURL'])) {
             $backURL = $_REQUEST['BackURL'];
@@ -113,14 +113,14 @@ class SAMLLoginForm extends LoginForm
         // The "MemberLoginForm.force_message session" is set in Security#permissionFailure()
         // and displays messages like "You don't have access to this page"
         // if force isn't set, it will just display "You're logged in as {name}"
-        if (($member = Member::currentUser()) && !Session::get('MemberLoginForm.force_message')) {
+        if (($member = Member::currentUser()) && !$this->getSession()->get('MemberLoginForm.force_message')) {
             $this->message = _t(
                 'Member.LOGGEDINAS',
                 "You're logged in as {name}.",
                 ['name' => $member->{$this->loggedInAsField}]
             );
         }
-        Session::set('MemberLoginForm.force_message', false);
+        $this->getSession()->set('MemberLoginForm.force_message', false);
         parent::getMessageFromSession();
         return $this->message;
     }

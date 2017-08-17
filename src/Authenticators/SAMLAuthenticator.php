@@ -71,8 +71,8 @@ class SAMLAuthenticator implements Authenticator
     {
         // $data is not used - the form is just one button, with no fields.
         $auth = Injector::inst()->get(SAMLHelper::class)->getSAMLAuth();
-        Session::set('BackURL', isset($data['BackURL']) ? $data['BackURL'] : null);
-        Session::save();
+        $request->getSession()->set('BackURL', isset($data['BackURL']) ? $data['BackURL'] : null);
+        $request->getSession()->save($request);
         $auth->login(Director::absoluteBaseURL().'saml/');
     }
 

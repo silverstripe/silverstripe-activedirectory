@@ -72,7 +72,7 @@ class LDAPLoginForm extends MemberLoginForm
         $this->Fields()->replaceField('Email', $loginField);
         $this->setValidator(new RequiredFields('Login', 'Password'));
         if (Security::config()->remember_username) {
-            $loginField->setValue(Session::get('SessionForms.MemberLoginForm.Email'));
+            $loginField->setValue($this->getSession()->get('SessionForms.MemberLoginForm.Email'));
         } else {
             // Some browsers won't respect this attribute unless it's added to the form
             $this->setAttribute('autocomplete', 'off');

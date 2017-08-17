@@ -56,13 +56,13 @@ class SAMLController extends Controller
         if (!empty($error)) {
             $this->getLogger()->error($error);
             Form::messageForForm('SAMLLoginForm_LoginForm', "Authentication error: '{$error}'", 'bad');
-            Session::save();
+            $this->getRequest()->getSession()->save($this->getRequest());
             return $this->getRedirect();
         }
 
         if (!$auth->isAuthenticated()) {
             Form::messageForForm('SAMLLoginForm_LoginForm', _t('Member.ERRORWRONGCRED'), 'bad');
-            Session::save();
+            $this->getRequest()->getSession()->save($this->getRequest());
             return $this->getRedirect();
         }
 
@@ -70,7 +70,7 @@ class SAMLController extends Controller
         // check that the NameID is a binary string (which signals that it is a guid
         if (ctype_print($decodedNameId)) {
             Form::messageForForm('SAMLLoginForm_LoginForm', 'Name ID provided by IdP is not a binary GUID.', 'bad');
-            Session::save();
+            $this->getRequest()->getSession()->save($this->getRequest());
             return $this->getRedirect();
         }
 
@@ -80,7 +80,7 @@ class SAMLController extends Controller
             $errorMessage = "Not a valid GUID '{$guid}' recieved from server.";
             $this->getLogger()->error($errorMessage);
             Form::messageForForm('SAMLLoginForm_LoginForm', $errorMessage, 'bad');
-            Session::save();
+            $this->getRequest()->getSession()->save($this->getRequest());
             return $this->getRedirect();
         }
 
@@ -154,12 +154,14 @@ class SAMLController extends Controller
     protected function getRedirect()
     {
         // Absolute redirection URLs may cause spoofing
-        if (Session::get('BackURL') && Director::is_site_url(Session::get('BackURL'))) {
-            return $this->redirect(Session::get('BackURL'));
+        if ($this->getRequest()->getSession()->get('BackURL') &&
+            Director::is_site_url($this->getRequest()->getSession()->get('BackURL'))) {
+            return $this->redirect($this->getRequest()->getSession()->get('BackURL'));
         }
 
         // Spoofing attack, redirect to homepage instead of spoofing url
-        if (Session::get('BackURL') && !Director::is_site_url(Session::get('BackURL'))) {
+        if ($this->getRequest()->getSession()->get('BackURL') &&
+            !Director::is_site_url($this->getRequest()->getSession()->get('BackURL'))) {
             return $this->redirect(Director::absoluteBaseURL());
         }
 

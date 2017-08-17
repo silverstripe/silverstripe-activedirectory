@@ -203,8 +203,7 @@ class LDAPMemberExtension extends DataExtension
         }
 
         $service = Injector::inst()->get('SilverStripe\\ActiveDirectory\\Services\\LDAPService');
-        if (
-            !$service->enabled() ||
+        if (!$service->enabled() ||
             !$this->owner->config()->update_ldap_from_local ||
             !$this->owner->GUID
         ) {
@@ -220,8 +219,7 @@ class LDAPMemberExtension extends DataExtension
         }
 
         $service = Injector::inst()->get('SilverStripe\\ActiveDirectory\\Services\\LDAPService');
-        if (
-            !$service->enabled() ||
+        if (!$service->enabled() ||
             !$this->owner->config()->delete_users_in_ldap ||
             !$this->owner->GUID
         ) {
@@ -253,8 +251,7 @@ class LDAPMemberExtension extends DataExtension
     public function sync()
     {
         $service = Injector::inst()->get('SilverStripe\\ActiveDirectory\\Services\\LDAPService');
-        if (
-            !$service->enabled() ||
+        if (!$service->enabled() ||
             !$this->owner->GUID
         ) {
             return;

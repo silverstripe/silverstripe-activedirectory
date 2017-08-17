@@ -391,7 +391,7 @@ class LDAPGateway
                 $dn,
                 ['unicodePwd' => iconv('UTF-8', 'UTF-16LE', sprintf('"%s"', $password))]
             );
-        } catch(LdapException $e) {
+        } catch (LdapException $e) {
             throw new Exception($this->getLastPasswordError());
         }
     }

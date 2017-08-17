@@ -9,7 +9,6 @@ use Symbiote\QueuedJobs\Services\AbstractQueuedJob;
 use Symbiote\QueuedJobs\Services\QueuedJob;
 use Symbiote\QueuedJobs\Services\QueuedJobService;
 
-
 /**
  * Class LDAPMemberSyncJob
  *

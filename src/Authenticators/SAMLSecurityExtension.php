@@ -44,12 +44,12 @@ class SAMLSecurityExtension extends Extension
         if ($member && $member->exists()) {
             return;
         }
-
+        $session = $this->owner->getRequest()->getSession();
         // if there are form messages, don't auto-sign-on, this is most likely because of
         // login errors / failures or other notices.
-        if (Session::get('FormInfo')) {
+        if ($session->get('FormInfo')) {
             // since FormInfo can be a "nulled" array, we have to check
-            foreach (Session::get('FormInfo') as $form => $info) {
+            foreach ($session->get('FormInfo') as $form => $info) {
                 foreach ($info as $name => $value) {
                     if ($value !== null) {
                         return;
@@ -58,7 +58,7 @@ class SAMLSecurityExtension extends Extension
             }
         }
 
-        $backURL = Session::get('BackURL');
+        $backURL = $session->get('BackURL');
         if ($this->owner->request->getVar('BackURL')) {
             $backURL = $this->owner->request->getVar('BackURL');
         }
