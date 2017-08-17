@@ -435,7 +435,12 @@ class LDAPService implements Flushable
     {
         $searchLocations = $this->config()->users_search_locations ?: [null];
         foreach ($searchLocations as $searchLocation) {
-            $records = $this->gateway->getUserByUsername($username, $searchLocation, Ldap::SEARCH_SCOPE_SUB, $attributes);
+            $records = $this->gateway->getUserByUsername(
+                $username,
+                $searchLocation,
+                Ldap::SEARCH_SCOPE_SUB,
+                $attributes
+            );
             if ($records) {
                 return $records[0];
             }
@@ -519,7 +524,8 @@ class LDAPService implements Flushable
             if (!isset($data[$attribute])) {
                 $this->getLogger()->notice(
                     sprintf(
-                        'Attribute %s configured in Member.ldap_field_mappings, but no available attribute in AD data (GUID: %s, Member ID: %s)',
+                        'Attribute %s configured in Member.ldap_field_mappings, ' .
+                                'but no available attribute in AD data (GUID: %s, Member ID: %s)',
                         $attribute,
                         $data['objectguid'],
                         $member->ID
@@ -536,7 +542,8 @@ class LDAPService implements Flushable
                 ) {
                     $this->getLogger()->warn(
                         sprintf(
-                            'Member field %s configured for thumbnailphoto AD attribute, but it isn\'t a valid relation to an Image class',
+                            'Member field %s configured for thumbnailphoto AD attribute, but it isn\'t a ' .
+                            'valid relation to an Image class',
                             $field
                         )
                     );

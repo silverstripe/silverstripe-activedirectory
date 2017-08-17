@@ -70,7 +70,8 @@ class SAMLConfiguration
             'url' => $sp['entityId'] . '/saml/acs',
             'binding' => OneLogin_Saml2_Constants::BINDING_HTTP_POST
         ];
-        $conf['sp']['NameIDFormat'] = isset($sp['nameIdFormat']) ? $sp['nameIdFormat'] : OneLogin_Saml2_Constants::NAMEID_TRANSIENT;
+        $conf['sp']['NameIDFormat'] = isset($sp['nameIdFormat']) ?
+            $sp['nameIdFormat'] : OneLogin_Saml2_Constants::NAMEID_TRANSIENT;
         $conf['sp']['x509cert'] = file_get_contents($spCertPath);
         $conf['sp']['privateKey'] = file_get_contents($spKeyPath);
 

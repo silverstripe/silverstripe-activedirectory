@@ -44,7 +44,10 @@ class LDAPChangePasswordForm extends ChangePasswordForm
 
         $emailField = null;
         $usernameField = null;
-        if (Config::inst()->get('SilverStripe\\ActiveDirectory\\Authenticators\\LDAPAuthenticator', 'allow_email_login') === 'yes'
+        if (Config::inst()->get(
+            'SilverStripe\\ActiveDirectory\\Authenticators\\LDAPAuthenticator',
+            'allow_email_login'
+        ) === 'yes'
             && !empty($member->Email)
         ) {
             $emailField = TextField::create(

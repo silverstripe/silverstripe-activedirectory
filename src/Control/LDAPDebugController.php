@@ -118,7 +118,8 @@ class LDAPDebugController extends ContentController
             $group = Group::get()->filter('Code', $code)->limit(1)->first();
             if (!($group && $group->exists())) {
                 return sprintf(
-                    'WARNING: LDAPService.default_group configured with \'%s\' but there is no Group with that Code in the database!',
+                    'WARNING: LDAPService.default_group configured with \'%s\''
+                        .'but there is no Group with that Code in the database!',
                     $code
                 );
             } else {

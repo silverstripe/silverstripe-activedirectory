@@ -110,7 +110,13 @@ class LDAPGateway
      */
     public function getNodes($baseDn = null, $scope = Ldap::SEARCH_SCOPE_SUB, $attributes = [], $sort = '')
     {
-        return $this->search('(|(objectClass=organizationalUnit)(objectClass=container)(objectClass=domain))', $baseDn, $scope, $attributes, $sort);
+        return $this->search(
+            '(|(objectClass=organizationalUnit)(objectClass=container)(objectClass=domain))',
+            $baseDn,
+            $scope,
+            $attributes,
+            $sort
+        );
     }
 
     /**
@@ -282,14 +288,20 @@ class LDAPGateway
                 throw new Exception('Backslash style not supported in LDAPGateway::getUserByUsername()!');
                 break;
             case Ldap::ACCTNAME_FORM_PRINCIPAL: // principal style usernames, e.g. alice@foo.com
-                $filter = sprintf('(&(objectClass=user)(userprincipalname=%s))', AbstractFilter::escapeValue($username));
+                $filter = sprintf(
+                    '(&(objectClass=user)(userprincipalname=%s))',
+                    AbstractFilter::escapeValue($username)
+                );
                 break;
             case Ldap::ACCTNAME_FORM_DN: // distinguished name, e.g. CN=someone,DC=example,DC=co,DC=nz
                 // @todo Not supported yet!
                 throw new Exception('DN style not supported in LDAPGateway::getUserByUsername()!');
                 break;
             default: // default to principal style
-                $filter = sprintf('(&(objectClass=user)(userprincipalname=%s))', AbstractFilter::escapeValue($username));
+                $filter = sprintf(
+                    '(&(objectClass=user)(userprincipalname=%s))',
+                    AbstractFilter::escapeValue($username)
+                );
                 break;
         }
 

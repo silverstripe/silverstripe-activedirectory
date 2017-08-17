@@ -58,7 +58,11 @@ class LDAPSecurityController extends Security
      */
     public function ChangePasswordForm()
     {
-        return Object::create('SilverStripe\\ActiveDirectory\\Forms\\LDAPChangePasswordForm', $this, 'ChangePasswordForm');
+        return Object::create(
+            'SilverStripe\\ActiveDirectory\\Forms\\LDAPChangePasswordForm',
+            $this,
+            'ChangePasswordForm'
+        );
     }
 
     public function lostpassword()
@@ -70,7 +74,11 @@ class LDAPSecurityController extends Security
             return $response;
         }
 
-        if (Config::inst()->get('SilverStripe\\ActiveDirectory\\Authenticators\\LDAPAuthenticator', 'allow_email_login') === 'yes') {
+        if (Config::inst()->get(
+            'SilverStripe\\ActiveDirectory\\Authenticators\\LDAPAuthenticator',
+            'allow_email_login'
+        ) === 'yes'
+        ) {
             $customisedController = $controller->customise([
                 'Content' =>
                     _t(
