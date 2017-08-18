@@ -10,14 +10,18 @@ We assume ADFS 2.0 or greater is used as an IdP.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 - [Install the module](#install-the-module)
-- [Make x509 certificates available](#make-x509-certificates-available)
+- [Gather pre-requisites](#gather-pre-requisites)
   - [SP certificate and key](#sp-certificate-and-key)
-  - [IdP certificate](#idp-certificate)
+  - [IdP certificate and other requirements](#idp-certificate-and-other-requirements)
 - [YAML configuration](#yaml-configuration)
+  - [Signature algorithm config](#signature-algorithm-config)
+  - [Authentication Context config](#authentication-context-config)
   - [Service Provider (SP)](#service-provider-sp)
   - [Identity Provider (IdP)](#identity-provider-idp)
+- [Check configuration](#check-configuration)
 - [Establish trust](#establish-trust)
 - [Configure SilverStripe Authenticators](#configure-silverstripe-authenticators)
   - [Bypass auto login](#bypass-auto-login)
@@ -38,6 +42,8 @@ We assume ADFS 2.0 or greater is used as an IdP.
   - [Debugging LDAP directly](#debugging-ldap-directly)
 - [Advanced SAML configuration](#advanced-saml-configuration)
 - [Advanced features](#advanced-features)
+  - [Allowing email login on LDAP login form instead of username](#allowing-email-login-on-ldap-login-form-instead-of-username)
+  - [Falling back authentication on LDAP login form](#falling-back-authentication-on-ldap-login-form)
   - [Allowing users to update their AD password](#allowing-users-to-update-their-ad-password)
   - [Writing LDAP data from SilverStripe](#writing-ldap-data-from-silverstripe)
 - [Resources](#resources)
@@ -52,27 +58,34 @@ First step is to add this module into your SilverStripe project. You can use com
 
 Commit the changes.
 
-## Make x509 certificates available
+## Gather pre-requisites
 
-SAML uses pre-shared certificates for establishing trust between the Service Provider (SP - here, SilverStripe) the Identity Provider (IdP - here, ADFS).
+SAML uses pre-shared certificates for establishing trust between the Service Provider (SP - here, SilverStripe, also known as the Relying Party) the Identity Provider (IdP - here, ADFS, also known as the Claims Provider).
 
 ### SP certificate and key
 
-You need to make the SP x509 certificate and private key available to the SilverStripe site to be able to sign SAML requests. The certificate's "Common Name" needs to match the site endpoint that the ADFS will be using.
+You need to create an x509 certificate and private key and make it available to the SilverStripe site to be able to sign SAML requests. The certificate's "Common Name" doesn't need to be anything special - any will do.
 
-For testing purposes, you can generate this yourself by using the `openssl` command:
+You can generate this yourself by using the `openssl` command:
 
 	openssl req -x509 -nodes -newkey rsa:2048 -keyout saml.pem -out saml.crt -days 1826
 
 Contact your system administrator if you are not sure how to install these.
 
-### IdP certificate
+### IdP certificate and other requirements
 
-You also need to make the certificate for your ADFS endpoint available to the SilverStripe site. Talk with your ADFS administrator to find out how to obtain this.
+The following pieces of information are required to configure our SP endpoint:
+ 
+- IdP certificate
+- IdP entityId (e.g. `https://<idp-domain>/adfs/services/trust`)
+- IdP SSO URL (e.g. `https://<idp-domain>/adfs/ls`)
 
-If you are managing ADFS yourself, consult the [ADFS administrator guide](adfs.md).
+Talk with your ADFS administrator to find out how to obtain these. If you are managing ADFS yourself, consult the 
+[ADFS administrator guide](adfs.md).
 
-You may also be able to extract the certificate yourself from the IdP endpoint if it has already been configured: `https://<idp-domain>/FederationMetadata/2007-06/FederationMetadata.xml`.
+It is also possible to extract this metadata from the IdP endpoint, if ADFS is already running and the domain is known.
+Go to `https://<idp-domain>/FederationMetadata/2007-06/FederationMetadata.xml`, and trawl the XML for the required
+pieces.
 
 ## YAML configuration
 
@@ -93,17 +106,15 @@ Add the following configuration to `mysite/_config/saml.yml` (make sure to repla
 	    privateKey: "<path-to-silverstripe-private-key>.pem"
 	    x509cert: "<path-to-silverstripe-cert>.crt"
 	  IdP:
-	    entityId: "https://<idp-domain>/adfs/services/trust"
+	    entityId: "<idp-entity-id>"
 	    x509cert: "<path-to-adfs-cert>.pem"
-	    singleSignOnService: "https://<idp-domain>/adfs/ls/"
-	  Security:
-	    signatureAlgorithm: "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"
+	    singleSignOnService: "https://<idp-domain>/adfs/ls"
 
 If you don't use absolute paths, the certificate paths will be relative to the `BASE_PATH` (your site web root).
 
-All IdP and SP endpoints must use HTTPS scheme with SSL certificates matching the domain names used.
+Certificates and keys should be PEM formatted.
 
-### A note on signature algorithm config
+### Signature algorithm config
 
 The signature algorithm must match the setting in the ADFS relying party trust
 configuration. For ADFS it's possible to downgrade the default from SHA-256 to
@@ -112,26 +123,65 @@ configuration. For ADFS it's possible to downgrade the default from SHA-256 to
 	SAMLConfiguration:
 	  Security:
 	    signatureAlgorithm: "http://www.w3.org/2000/09/xmldsig#rsa-sha1"
+	   
+### Authentication Context config
 
+It is possible to tweak Authentication Context for the SAML requests. In practice, this depends on the [ADFS
+configuration](https://msdn.microsoft.com/en-us/library/hh599318.aspx) and it's hard to recommend something apart
+from saying we have seen two setups that work in practice: the default, and "false".
+
+For the default setting, you don't need to do anything. This module should be able to negotiate federation with ADFS,
+choosing the best available Authentication Context.
+
+If you want an Integrated Windows Authentication (IWA) but ADFS presents you with a dialog box asking for credentials,
+you might want to try a "false" setting instead. This means the Authentication Context node will be omitted from the
+SAML request.
+
+	SAMLConfiguration:
+	  Security:
+        Security:
+          requestedAuthnContextBool: false
+          
+It is also possible to provide custom list of Authentication Contexts, as well as the value for the "Comparison"
+attribute:
+
+	SAMLConfiguration:
+	  Security:
+        Security:
+          requestedAuthnContextArray:
+            - 'urn:federation:authentication:windows',
+          requestedAuthnContextComparison: 'maximum'
+          
 ### Service Provider (SP)
 
- - `entityId`: This should be the base URL with https for the SP
- - `privateKey`: The private key used for signing SAML request
- - `x509cert`: The public key that the IdP is using for verifying a signed request
+ - `entityId`: URI that uniquely identifies the party. We customarily set it to a URL, but the connectivity is not
+ required
+ - `privateKey`: Path to private key used for signing SAML request (the key you have generated)
+ - `x509cert`: Path to certificate for the ADFS to use when verifying SAML requests (the certificate you have generated,
+ matching the key above)
 
 ### Identity Provider (IdP)
 
- - `entityId`: Provided by the IdP, but for ADFS it's typically `https://<idp-domain>/adfs/services/trust`
- - `x509cert`: The token-signing certificate from ADFS (base 64 encoded)
- - `singleSignOnService`: The endpoint on ADFS for where to send the SAML login request
+ - `entityId`: URI that uniquely identifies the party. For ADFS it's typically `https://<idp-domain>/adfs/services/trust`
+ - `x509cert`: The token-signing certificate ADFS is using
+ - `singleSignOnService`: The endpoint on ADFS for where to send the SAML login request. For security reasons this
+ should use SSL, and the webserver must be able to connect.
+
+## Check configuration
+
+At this point you should be able to verify your SAML endpoint is configured correctly. Go to `<your-site>/saml/metadata`
+and see if this is generated without errors. This endpoint will be used by ADFS to set up trust with our SP.
 
 ## Establish trust
 
-At this stage the SilverStripe site trusts the ADFS, but the ADFS does not have any way to establish the identity of the SilverStripe site.
+At this stage the SilverStripe site trusts the ADFS, but the ADFS does not have any way to establish the identity of the
+SilverStripe site. ADFS should now be configured to trust our SP.
 
-ADFS should now be configured to extract the SP certificate from SilverStripe's SP endpoint. Once this is completed, bi-directional trust has been established and the authentication should be possible.
+The only thing required here is to pass `<your-site>/saml/metadata` to the ADFS administrator, and request to set up
+the "Relying Party Trust". Once this is completed the authentication should be possible.
 
-*silverstripe-activedirectory* has some specific requirements on how ADFS is configured. If you are managing ADFS yourself, or you are assisting an ADFS administrator, consult the [ADFS administrator guide](adfs.md).
+*silverstripe-activedirectory* has some specific requirements on how ADFS is configured. To help the other party set
+ADFS up, you might consider passing a link to the [ADFS administrator guide](adfs.md) alongside the metadata link.
 
 ## Configure SilverStripe Authenticators
 
