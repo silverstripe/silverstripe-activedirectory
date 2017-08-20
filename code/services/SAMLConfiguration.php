@@ -15,12 +15,12 @@ class SAMLConfiguration extends Object
     /**
      * @var bool
      */
-    private static $strict;
+    private static $strict = true;
 
     /**
      * @var bool
      */
-    private static $debug;
+    private static $debug = false;
 
     /**
      * @var array
@@ -31,6 +31,13 @@ class SAMLConfiguration extends Object
      * @var array
      */
     private static $IdP;
+
+    /**
+     * @var array
+     */
+    private static $Security = [
+        'signatureAlgorithm' => 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256',
+    ];
 
     /**
      * @return array
@@ -76,10 +83,6 @@ class SAMLConfiguration extends Object
         $idpCertPath = Director::is_absolute($idp['x509cert']) ? $idp['x509cert'] : sprintf('%s/%s', BASE_PATH, $idp['x509cert']);
         $conf['idp']['x509cert'] = file_get_contents($idpCertPath);
 
-        // SECURITY SECTION
-        $security = $this->config()->get('Security');
-        $signatureAlgorithm = $security['signatureAlgorithm'];
-
         $conf['security'] = [
             /** signatures and encryptions offered */
             // Indicates that the nameID of the <samlp:logoutRequest> sent by this SP will be encrypted.
@@ -101,29 +104,76 @@ class SAMLConfiguration extends Object
             // Indicates a requirement for the NameID received by
             // this SP to be encrypted.
             'wantNameIdEncrypted' => false,
+            // Authentication context.
+            // Set to false and no AuthContext will be sent in the AuthNRequest,
+            // Set true or don't present thi parameter and you will get an AuthContext 'exact' 'urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport'
+            // Set an array with the possible auth context values: array ('urn:oasis:names:tc:SAML:2.0:ac:classes:Password', 'urn:oasis:names:tc:SAML:2.0:ac:classes:X509'),
+            'requestedAuthnContext' => $this->getRequestedAuthnContext(),
+            // Indicates if the SP will validate all received xmls.
+            // (In order to validate the xml, 'strict' and 'wantXMLValidation' must be true).
+            'wantXMLValidation' => true,
+        ];
 
+        $security = $this->config()->get('Security');
+
+        if (isset($security['signatureAlgorithm'])) {
             // Algorithm that the toolkit will use on signing process. Options:
             //  - 'http://www.w3.org/2000/09/xmldsig#rsa-sha1'
             //  - 'http://www.w3.org/2000/09/xmldsig#dsa-sha1'
             //  - 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256'
             //  - 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha384'
             //  - 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha512'
-            'signatureAlgorithm' => $signatureAlgorithm,
+            $conf['security']['signatureAlgorithm'] = $security['signatureAlgorithm'];
+        }
 
-            // Authentication context.
-            // Set to false and no AuthContext will be sent in the AuthNRequest,
-            // Set true or don't present thi parameter and you will get an AuthContext 'exact' 'urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport'
-            // Set an array with the possible auth context values: array ('urn:oasis:names:tc:SAML:2.0:ac:classes:Password', 'urn:oasis:names:tc:SAML:2.0:ac:classes:X509'),
-            'requestedAuthnContext' => [
-                'urn:federation:authentication:windows',
-                'urn:oasis:names:tc:SAML:2.0:ac:classes:Password',
-                'urn:oasis:names:tc:SAML:2.0:ac:classes:X509',
-            ],
-            // Indicates if the SP will validate all received xmls.
-            // (In order to validate the xml, 'strict' and 'wantXMLValidation' must be true).
-            'wantXMLValidation' => true,
-        ];
+        if (isset($security['requestedAuthnContextComparison'])) {
+            // Allows the authn comparison parameter to be set, defaults to 'exact' if
+            // the setting is not present.
+            // better | exact | maximum | minimum
+            $conf['security']['requestedAuthnContextComparison'] = $security['requestedAuthnContextComparison'];
+        }
 
         return $conf;
+    }
+
+    /**
+     * @return array
+     * @throws Exception
+     */
+    protected function getRequestedAuthnContext()
+    {
+        $security = $this->config()->get('Security');
+
+        if (isset($security['requestedAuthnContext'])) {
+            throw new Exception(sprintf(
+                'Config setting "%s" is not settable directly. Please set either "%s" or "%s" in your YAML.',
+                'SAMLConfiguration.Security.requestedAuthnContext',
+                'SAMLConfiguration.Security.requestedAuthnContextBool',
+                'SAMLConfiguration.Security.requestedAuthnContextArray'
+            ));
+        }
+        if (isset($security['requestedAuthnContextBool']) && isset($security['requestedAuthnContextArray'])) {
+            throw new Exception(sprintf(
+                'Not permitted to set both "%s" and "%s" configuration elements. Check your config yamls.',
+                'SAMLConfiguration.Security.requestedAuthnContextBool',
+                'SAMLConfiguration.Security.requestedAuthnContextArray'
+            ));
+        }
+
+        $requestedAuthnContext = [
+            'urn:federation:authentication:windows',
+            'urn:oasis:names:tc:SAML:2.0:ac:classes:Password',
+            'urn:oasis:names:tc:SAML:2.0:ac:classes:X509',
+        ];
+
+        if (isset($security['requestedAuthnContextBool'])) {
+            $requestedAuthnContext = $security['requestedAuthnContextBool'];
+        }
+
+        if (isset($security['requestedAuthnContextArray'])) {
+            $requestedAuthnContext = $security['requestedAuthnContextArray'];
+        }
+
+        return $requestedAuthnContext;
     }
 }
