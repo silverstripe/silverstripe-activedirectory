@@ -154,8 +154,7 @@ attribute:
           
 ### Service Provider (SP)
 
- - `entityId`: URI that uniquely identifies the party. We customarily set it to a URL, but the connectivity is not
- required
+ - `entityId`: URI that uniquely identifies the party. This *must* be set to the site URL (e.g.  `https://<your-site-domain>`), because we reuse it as the base URL for the SAML endpoints.
  - `privateKey`: Path to private key used for signing SAML request (the key you have generated)
  - `x509cert`: Path to certificate for the ADFS to use when verifying SAML requests (the certificate you have generated,
  matching the key above)
