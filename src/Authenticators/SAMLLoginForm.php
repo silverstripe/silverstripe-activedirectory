@@ -30,9 +30,15 @@ class SAMLLoginForm extends LoginForm
      */
     protected $authenticator_class = SAMLAuthenticator::class;
 
+    /**
+     * The name of this login form, to display in the frontend
+     * Replaces Authenticator::get_name()
+     *
+     * @return string
+     */
     public function getAuthenticatorName()
     {
-        return "SAML";
+        return _t(self::class . '.AUTHENTICATORNAME', 'SAML');
     }
 
     /**

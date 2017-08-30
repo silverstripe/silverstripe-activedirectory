@@ -112,4 +112,15 @@ JS;
     {
         return LDAPMemberLoginHandler::create($this);
     }
+
+    /**
+     * The name of this login form, to display in the frontend
+     * Replaces Authenticator::get_name()
+     *
+     * @return string
+     */
+    public function getAuthenticatorName()
+    {
+        return _t(self::class . '.AUTHENTICATORNAME', 'LDAP');
+    }
 }

@@ -1,0 +1,6 @@
+SilverStripe\Security\Member:
+  dbOnlyMember:
+    FirstName: Jane
+    Surname: Doe
+    Email: jane@doe.com
+    Password: password

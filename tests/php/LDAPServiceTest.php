@@ -1,14 +1,13 @@
 <?php
 
-namespace SilverStripe\ActiveDirectory\Tests;
+namespace SilverStripe\ActiveDirectory\Tests\Services;
 
 use SilverStripe\ActiveDirectory\Extensions\LDAPGroupExtension;
 use SilverStripe\ActiveDirectory\Extensions\LDAPMemberExtension;
 use SilverStripe\ActiveDirectory\Model\LDAPGateway;
 use SilverStripe\ActiveDirectory\Services\LDAPService;
-use SilverStripe\Dev\SapphireTest;
+use SilverStripe\ActiveDirectory\Tests\FakeGatewayTest;
 use SilverStripe\Core\Config\Config;
-use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Security\Group;
 use SilverStripe\Security\Member;
 
@@ -16,13 +15,8 @@ use SilverStripe\Security\Member;
  * @coversDefaultClass \SilverStripe\ActiveDirectory\Services\LDAPService
  * @package activedirectory
  */
-class LDAPServiceTest extends SapphireTest
+class LDAPServiceTest extends FakeGatewayTest
 {
-    /**
-     * @var LDAPService
-     */
-    protected $service;
-
     /**
      * {@inheritDoc}
      * @var bool
@@ -35,13 +29,6 @@ class LDAPServiceTest extends SapphireTest
     public function setUp()
     {
         parent::setUp();
-
-        $gateway = new Model\LDAPFakeGateway();
-        Injector::inst()->registerService($gateway, LDAPGateway::class);
-
-        $service = Injector::inst()->create(LDAPService::class);
-        $service->setGateway($gateway);
-        $this->service = $service;
 
         Config::modify()->set(LDAPGateway::class, 'options', ['host' => '1.2.3.4']);
         Config::modify()->set(LDAPService::class, 'groups_search_locations', [

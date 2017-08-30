@@ -3,6 +3,7 @@
 namespace SilverStripe\ActiveDirectory\Control;
 
 use SilverStripe\ActiveDirectory\Authenticators\LDAPLoginForm;
+use SilverStripe\ActiveDirectory\Forms\LDAPChangePasswordForm;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\Director;
 use SilverStripe\Core\Convert;
@@ -58,11 +59,7 @@ class LDAPSecurityController extends Security
      */
     public function ChangePasswordForm()
     {
-        return Object::create(
-            'SilverStripe\\ActiveDirectory\\Forms\\LDAPChangePasswordForm',
-            $this,
-            'ChangePasswordForm'
-        );
+        return LDAPChangePasswordForm::create($this, 'ChangePasswordForm');
     }
 
     public function lostpassword()

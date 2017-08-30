@@ -12,8 +12,8 @@ use SilverStripe\Core\Injector\Injector;
 use SilverStripe\ORM\ValidationResult;
 use SilverStripe\Security\Authenticator;
 use SilverStripe\Security\Member;
-use SilverStripe\Security\MemberAuthenticator\LoginHandler;
 use SilverStripe\Security\MemberAuthenticator\LogoutHandler;
+use SilverStripe\Security\MemberAuthenticator\MemberAuthenticator;
 
 /**
  * Class LDAPAuthenticator
@@ -24,7 +24,7 @@ use SilverStripe\Security\MemberAuthenticator\LogoutHandler;
  *
  * @package activedirectory
  */
-class LDAPAuthenticator implements Authenticator
+class LDAPAuthenticator extends MemberAuthenticator
 {
     /**
      * @var string
@@ -87,6 +87,7 @@ class LDAPAuthenticator implements Authenticator
      */
     public function authenticate(array $data, HTTPRequest $request, ValidationResult &$result = null)
     {
+        /** @var LDAPService $service */
         $service = Injector::inst()->get(LDAPService::class);
         $login = trim($data['Login']);
         if (Email::is_valid_address($login)) {
@@ -105,7 +106,7 @@ class LDAPAuthenticator implements Authenticator
             // No user found with this email.
             if (!$username) {
                 if (Config::inst()->get(self::class, 'fallback_authenticator') === 'yes') {
-                    if ($fallbackMember = $this->fallback_authenticate($data, $request)) {
+                    if ($fallbackMember = $this->fallbackAuthenticate($data, $request)) {
                         {
                             return $fallbackMember;
                         }
@@ -123,18 +124,18 @@ class LDAPAuthenticator implements Authenticator
         $success = $serviceAuthenticationResult['success'] === true;
         if (!$success) {
             if (Config::inst()->get(self::class, 'fallback_authenticator') === 'yes') {
-                $fallbackMember = $this->fallback_authenticate($data, $request);
+                $fallbackMember = $this->fallbackAuthenticate($data, $request);
                 if ($fallbackMember) {
                     return $fallbackMember;
                 }
             }
 
-            $result->addError($result['message']);
+            $result->addError($serviceAuthenticationResult['message']);
 
             return null;
         }
 
-        $data = $service->getUserByUsername($result['identity']);
+        $data = $service->getUserByUsername($serviceAuthenticationResult['identity']);
         if (!$data) {
             $result->addError(
                 _t(
@@ -169,11 +170,11 @@ class LDAPAuthenticator implements Authenticator
      * @return null|Member
      * @internal param null|Form $form
      */
-    protected function fallback_authenticate($data, HTTPRequest $request)
+    protected function fallbackAuthenticate($data, HTTPRequest $request)
     {
         $authenticatorClass = Config::inst()->get(self::class, 'fallback_authenticator_class');
         if ($authenticator = Injector::inst()->get($authenticatorClass)) {
-            return call_user_func(
+            $result = call_user_func(
                 [
                     $authenticator,
                     'authenticate'
@@ -181,91 +182,23 @@ class LDAPAuthenticator implements Authenticator
                 $data,
                 $request
             );
+            return $result;
         }
     }
 
     /**
-     * Returns the services supported by this authenticator
-     *
-     * The number should be a bitwise-OR of 1 or more of the following constants:
-     * Authenticator::LOGIN, Authenticator::LOGOUT, Authenticator::CHANGE_PASSWORD,
-     * Authenticator::RESET_PASSWORD, or Authenticator::CMS_LOGIN
-     *
-     * @return int
-     */
-    public function supportedServices()
-    {
-        // TODO: Implement supportedServices() method.
-    }
-
-    /**
-     * Return RequestHandler to manage the log-in process.
-     *
-     * The default URL of the RequestHandler should return the initial log-in form, any other
-     * URL may be added for other steps & processing.
-     *
-     * URL-handling methods may return an array [ "Form" => (form-object) ] which can then
-     * be merged into a default controller.
-     *
-     * @param string $link The base link to use for this RequestHandler
-     * @return LoginHandler
+     * @inheritdoc
      */
     public function getLoginHandler($link)
     {
-        // TODO: Implement getLoginHandler() method.
+        return LDAPLoginHandler::create($link, $this);
     }
 
     /**
-     * Return the RequestHandler to manage the log-out process.
-     *
-     * The default URL of the RequestHandler should log the user out immediately and destroy the session.
-     *
-     * @param string $link The base link to use for this RequestHandler
-     * @return LogoutHandler
+     * @inheritdoc
      */
-    public function getLogOutHandler($link)
+    public function supportedServices()
     {
-        // TODO: Implement getLogOutHandler() method.
-    }
-
-    /**
-     * Return RequestHandler to manage the change-password process.
-     *
-     * The default URL of the RequetHandler should return the initial change-password form,
-     * any other URL may be added for other steps & processing.
-     *
-     * URL-handling methods may return an array [ "Form" => (form-object) ] which can then
-     * be merged into a default controller.
-     *
-     * @param string $link The base link to use for this RequestHnadler
-     */
-    public function getChangePasswordHandler($link)
-    {
-        // TODO: Implement getChangePasswordHandler() method.
-    }
-
-    /**
-     * @param string $link
-     * @return mixed
-     */
-    public function getLostPasswordHandler($link)
-    {
-        // TODO: Implement getLostPasswordHandler() method.
-    }
-
-    /**
-     * Check if the passed password matches the stored one (if the member is not locked out).
-     *
-     * Note, we don't return early, to prevent differences in timings to give away if a member
-     * password is invalid.
-     *
-     * @param Member $member
-     * @param string $password
-     * @param ValidationResult $result
-     * @return ValidationResult
-     */
-    public function checkPassword(Member $member, $password, ValidationResult &$result = null)
-    {
-        // TODO: Implement checkPassword() method.
+        return Authenticator::LOGIN;
     }
 }
