@@ -73,7 +73,7 @@ class LDAPAuthenticator extends MemberAuthenticator
      */
     public static function get_login_form(Controller $controller)
     {
-        return new LDAPLoginForm($controller, 'LoginForm');
+        return LDAPLoginForm::create($controller, LDAPAuthenticator::class, 'LoginForm');
     }
 
     /**

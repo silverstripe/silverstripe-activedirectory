@@ -471,7 +471,7 @@ The fallback authenticator will be used in the following conditions:
 
 If the LDAP bind user that is configured under 'Connect with LDAP' section has permission to write attributes to the AD, it's possible to allow users to update their password via the internet site.
 
-Word of caution, you will potentially open a security hole by exposing an AD user that can write passwords. Normally you would only bind to LDAP via a read-only user. Windows AD stores passwords in a hashed format that is very hard to brute-force. A user with write access can take over an accounts, create objects, delete and have access to all systems that authenticate with AD.
+Word of caution, you will potentially open a security hole by exposing an AD user that can write passwords. Normally you would only bind to LDAP via a read-only user. Windows AD stores passwords in a hashed format that is very hard to brute-force. A user with write access can take over an account, create objects, delete and have access to all systems that authenticate with AD.
 
 If you still need this feature, we recommend that you use a combination of encryption, scheduled password rotation and limit permission for the bind user to minimum required permissions.
 
