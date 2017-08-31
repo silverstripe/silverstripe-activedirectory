@@ -185,19 +185,16 @@ class LDAPAuthenticator extends MemberAuthenticator
         }
     }
 
-    /**
-     * @inheritdoc
-     */
     public function getLoginHandler($link)
     {
         return LDAPLoginHandler::create($link, $this);
     }
 
-    /**
-     * @inheritdoc
-     */
     public function supportedServices()
     {
-        return Authenticator::LOGIN | Authenticator::LOGOUT;
+        $result = (bool)LDAPService::config()->get('allow_password_change') ?
+            Authenticator::LOGIN | Authenticator::LOGOUT | Authenticator::CHANGE_PASSWORD :
+            Authenticator::LOGIN | Authenticator::LOGOUT;
+        return $result;
     }
 }
