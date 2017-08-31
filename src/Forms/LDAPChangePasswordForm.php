@@ -3,12 +3,15 @@
 namespace SilverStripe\ActiveDirectory\Forms;
 
 use Exception;
+use SilverStripe\ActiveDirectory\Authenticators\LDAPAuthenticator;
+use SilverStripe\ActiveDirectory\Services\LDAPService;
 use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTP;
-use SilverStripe\Control\Session;
+use SilverStripe\Control\HTTPResponse;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Forms\TextField;
+use SilverStripe\ORM\ValidationResult;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\MemberAuthenticator\ChangePasswordForm;
 use SilverStripe\Security\Security;
@@ -44,13 +47,13 @@ class LDAPChangePasswordForm extends ChangePasswordForm
         }
 
         $data = Injector::inst()
-            ->get('SilverStripe\\ActiveDirectory\\Services\\LDAPService')
+            ->get(LDAPService::class)
             ->getUserByGUID($member->GUID, ['samaccountname']);
 
         $emailField = null;
         $usernameField = null;
         if (Config::inst()->get(
-            'SilverStripe\\ActiveDirectory\\Authenticators\\LDAPAuthenticator',
+            LDAPAuthenticator::class,
             'allow_email_login'
         ) === 'yes'
             && !empty($member->Email)
@@ -94,7 +97,7 @@ class LDAPChangePasswordForm extends ChangePasswordForm
         /**
          * @var LDAPService $service
          */
-        $service = Injector::inst()->get('SilverStripe\\ActiveDirectory\\Services\\LDAPService');
+        $service = Injector::inst()->get(LDAPService::class);
         $member = Security::getCurrentUser();
         if ($member) {
             try {

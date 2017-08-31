@@ -2,6 +2,8 @@
 
 namespace SilverStripe\ActiveDirectory\Extensions;
 
+use Exception;
+use SilverStripe\ActiveDirectory\Services\LDAPService;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\LiteralField;
@@ -184,7 +186,7 @@ class LDAPMemberExtension extends DataExtension
             return;
         }
 
-        $service = Injector::inst()->get('SilverStripe\\ActiveDirectory\\Services\\LDAPService');
+        $service = Injector::inst()->get(LDAPService::class);
         if (!$service->enabled()
             || !$this->owner->config()->create_users_in_ldap
             || !$this->owner->Username
@@ -202,7 +204,7 @@ class LDAPMemberExtension extends DataExtension
             return;
         }
 
-        $service = Injector::inst()->get('SilverStripe\\ActiveDirectory\\Services\\LDAPService');
+        $service = Injector::inst()->get(LDAPService::class);
         if (!$service->enabled() ||
             !$this->owner->config()->update_ldap_from_local ||
             !$this->owner->GUID
@@ -218,7 +220,7 @@ class LDAPMemberExtension extends DataExtension
             return;
         }
 
-        $service = Injector::inst()->get('SilverStripe\\ActiveDirectory\\Services\\LDAPService');
+        $service = Injector::inst()->get(LDAPService::class);
         if (!$service->enabled() ||
             !$this->owner->config()->delete_users_in_ldap ||
             !$this->owner->GUID
@@ -250,7 +252,7 @@ class LDAPMemberExtension extends DataExtension
      */
     public function sync()
     {
-        $service = Injector::inst()->get('SilverStripe\\ActiveDirectory\\Services\\LDAPService');
+        $service = Injector::inst()->get(LDAPService::class);
         if (!$service->enabled() ||
             !$this->owner->GUID
         ) {
@@ -268,7 +270,7 @@ class LDAPMemberExtension extends DataExtension
     {
         if ($this->owner->GUID) {
             Injector::inst()
-                ->get('SilverStripe\\ActiveDirectory\\Services\\LDAPService')
+                ->get(LDAPService::class)
                 ->updateMemberFromLDAP($this->owner);
         }
     }
