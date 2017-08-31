@@ -168,7 +168,6 @@ class LDAPAuthenticator extends MemberAuthenticator
      * @param array $data
      * @param HTTPRequest $request
      * @return null|Member
-     * @internal param null|Form $form
      */
     protected function fallbackAuthenticate($data, HTTPRequest $request)
     {
