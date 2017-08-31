@@ -37,7 +37,7 @@ class SAMLLoginForm extends LoginForm
      */
     public function getAuthenticatorName()
     {
-        return _t(self::class . '.AUTHENTICATORNAME', 'SAML');
+        return _t(__CLASS__ . '.AUTHENTICATORNAME', 'SAML');
     }
 
     /**

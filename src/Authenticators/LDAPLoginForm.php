@@ -122,6 +122,6 @@ JS;
      */
     public function getAuthenticatorName()
     {
-        return _t(self::class . '.AUTHENTICATORNAME', 'LDAP');
+        return _t(__CLASS__ . '.AUTHENTICATORNAME', 'LDAP');
     }
 }
