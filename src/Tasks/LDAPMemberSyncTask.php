@@ -4,6 +4,7 @@ namespace SilverStripe\ActiveDirectory\Tasks;
 
 use Exception;
 use SilverStripe\Control\Director;
+use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Dev\BuildTask;
 use SilverStripe\ORM\DB;

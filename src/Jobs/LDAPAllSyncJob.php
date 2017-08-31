@@ -3,6 +3,7 @@
 namespace SilverStripe\ActiveDirectory\Jobs;
 
 use Exception;
+use SilverStripe\ActiveDirectory\Tasks\LDAPGroupSyncTask;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Injector\Injector;
 use Symbiote\QueuedJobs\Services\AbstractQueuedJob;
@@ -63,7 +64,7 @@ class LDAPAllSyncJob extends AbstractQueuedJob
      */
     public function validateRegenerateTime()
     {
-        $regenerateTime = Config::inst()->get('SilverStripe\\ActiveDirectory\\Jobs\\LDAPAllSyncJob', 'regenerate_time');
+        $regenerateTime = Config::inst()->get(LDAPAllSyncJob::class, 'regenerate_time');
 
         // don't allow this job to run less than every 15 minutes, as it could take a while.
         if ($regenerateTime !== null && $regenerateTime < 900) {
@@ -76,18 +77,18 @@ class LDAPAllSyncJob extends AbstractQueuedJob
      */
     public function process()
     {
-        $regenerateTime = Config::inst()->get('SilverStripe\\ActiveDirectory\\Jobs\\LDAPAllSyncJob', 'regenerate_time');
+        $regenerateTime = Config::inst()->get(LDAPAllSyncJob::class, 'regenerate_time');
         if ($regenerateTime) {
             $this->validateRegenerateTime();
 
-            $nextJob = Injector::inst()->create('SilverStripe\\ActiveDirectory\\Jobs\\LDAPAllSyncJob');
+            $nextJob = Injector::inst()->create(LDAPAllSyncJob::class);
             singleton(QueuedJobService::class)->queueJob($nextJob, date('Y-m-d H:i:s', time() + $regenerateTime));
         }
 
-        $task = Injector::inst()->create('SilverStripe\\ActiveDirectory\\Tasks\\LDAPGroupSyncTask');
+        $task = Injector::inst()->create(LDAPGroupSyncTask::class);
         $task->run(null);
 
-        $task = Injector::inst()->create('SilverStripe\\ActiveDirectory\\Tasks\\LDAPMemberSyncTask');
+        $task = Injector::inst()->create(LDAPGroupSyncTask::class);
         $task->run(null);
 
         $this->isComplete = true;

@@ -160,7 +160,7 @@ class LDAPChangePasswordForm extends ChangePasswordForm
 
             // try to catch connection and other errors that the ldap service can through
             if ($validationResult->isValid()) {
-                $member->logIn();
+                Security::setCurrentUser($member);
 
                 $this->getSession()->clear('AutoLoginHash');
 

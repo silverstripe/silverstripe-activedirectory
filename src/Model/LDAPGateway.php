@@ -30,7 +30,7 @@ class LDAPGateway
     private static $options = [];
 
     /**
-     * @var Zend\Ldap\Ldap
+     * @var Ldap
      */
     private $ldap;
 
@@ -103,7 +103,8 @@ class LDAPGateway
      * Query for LDAP nodes (organizational units, containers, and domains).
      *
      * @param null|string $baseDn The DN to search from. Default is the baseDn option in the connection if not given
-     * @param int $scope The scope to perform the search. Zend_Ldap::SEARCH_SCOPE_ONE, Zend_LDAP::SEARCH_SCOPE_BASE. Default is Zend_Ldap::SEARCH_SCOPE_SUB
+     * @param int $scope The scope to perform the search. Zend_Ldap::SEARCH_SCOPE_ONE, Zend_LDAP::SEARCH_SCOPE_BASE.
+     *          Default is Zend_Ldap::SEARCH_SCOPE_SUB
      * @param array $attributes Restrict to specific AD attributes. An empty array will return all attributes
      * @param string $sort Sort results by this attribute if given
      * @return array
@@ -123,7 +124,8 @@ class LDAPGateway
      * Query for LDAP groups.
      *
      * @param null|string $baseDn The DN to search from. Default is the baseDn option in the connection if not given
-     * @param int $scope The scope to perform the search. Zend_Ldap::SEARCH_SCOPE_ONE, Zend_LDAP::SEARCH_SCOPE_BASE. Default is Zend_Ldap::SEARCH_SCOPE_SUB
+     * @param int $scope The scope to perform the search. Zend_Ldap::SEARCH_SCOPE_ONE, Zend_LDAP::SEARCH_SCOPE_BASE.
+     *          Default is Zend_Ldap::SEARCH_SCOPE_SUB
      * @param array $attributes Restrict to specific AD attributes. An empty array will return all attributes
      * @param string $sort Sort results by this attribute if given
      * @return array
@@ -138,7 +140,8 @@ class LDAPGateway
      *
      * @param string $dn
      * @param null|string $baseDn The DN to search from. Default is the baseDn option in the connection if not given
-     * @param int $scope The scope to perform the search. Zend_Ldap::SEARCH_SCOPE_ONE, Zend_LDAP::SEARCH_SCOPE_BASE. Default is Zend_Ldap::SEARCH_SCOPE_SUB
+     * @param int $scope The scope to perform the search. Zend_Ldap::SEARCH_SCOPE_ONE, Zend_LDAP::SEARCH_SCOPE_BASE.
+     *                  Default is Zend_Ldap::SEARCH_SCOPE_SUB
      * @param array $attributes Restrict to specific AD attributes. An empty array will return all attributes
      * @return array
      */
@@ -157,7 +160,8 @@ class LDAPGateway
      *
      * @param string $guid
      * @param null|string $baseDn The DN to search from. Default is the baseDn option in the connection if not given
-     * @param int $scope The scope to perform the search. Zend_Ldap::SEARCH_SCOPE_ONE, Zend_LDAP::SEARCH_SCOPE_BASE. Default is Zend_Ldap::SEARCH_SCOPE_SUB
+     * @param int $scope The scope to perform the search. Zend_Ldap::SEARCH_SCOPE_ONE, Zend_LDAP::SEARCH_SCOPE_BASE.
+     *                  Default is Zend_Ldap::SEARCH_SCOPE_SUB
      * @param array $attributes Restrict to specific AD attributes. An empty array will return all attributes
      * @return array
      */
@@ -176,7 +180,8 @@ class LDAPGateway
      *
      * @param string $dn
      * @param null|string $baseDn The DN to search from. Default is the baseDn option in the connection if not given
-     * @param int $scope The scope to perform the search. Zend_Ldap::SEARCH_SCOPE_ONE, Zend_LDAP::SEARCH_SCOPE_BASE. Default is Zend_Ldap::SEARCH_SCOPE_SUB
+     * @param int $scope The scope to perform the search. Zend_Ldap::SEARCH_SCOPE_ONE, Zend_LDAP::SEARCH_SCOPE_BASE.
+     *              Default is Zend_Ldap::SEARCH_SCOPE_SUB
      * @param array $attributes Restrict to specific AD attributes. An empty array will return all attributes
      * @return array
      */
@@ -194,7 +199,8 @@ class LDAPGateway
      * Query for LDAP users, but don't include built-in user accounts.
      *
      * @param null|string $baseDn The DN to search from. Default is the baseDn option in the connection if not given
-     * @param int $scope The scope to perform the search. Zend_Ldap::SEARCH_SCOPE_ONE, Zend_LDAP::SEARCH_SCOPE_BASE. Default is Zend_Ldap::SEARCH_SCOPE_SUB
+     * @param int $scope The scope to perform the search. Zend_Ldap::SEARCH_SCOPE_ONE, Zend_LDAP::SEARCH_SCOPE_BASE.
+     *                  Default is Zend_Ldap::SEARCH_SCOPE_SUB
      * @param array $attributes Restrict to specific AD attributes. An empty array will return all attributes
      * @param string $sort Sort results by this attribute if given
      * @return array
@@ -231,7 +237,8 @@ class LDAPGateway
      *
      * @param string $dn
      * @param null|string $baseDn The DN to search from. Default is the baseDn option in the connection if not given
-     * @param int $scope The scope to perform the search. Zend_Ldap::SEARCH_SCOPE_ONE, Zend_LDAP::SEARCH_SCOPE_BASE. Default is Zend_Ldap::SEARCH_SCOPE_SUB
+     * @param int $scope The scope to perform the search. Zend_Ldap::SEARCH_SCOPE_ONE, Zend_LDAP::SEARCH_SCOPE_BASE.
+     *                  Default is Zend_Ldap::SEARCH_SCOPE_SUB
      * @param array $attributes Restrict to specific AD attributes. An empty array will return all attributes
      * @return array
      */
@@ -266,7 +273,8 @@ class LDAPGateway
      *
      * @param string $username
      * @param null|string $baseDn The DN to search from. Default is the baseDn option in the connection if not given
-     * @param int $scope The scope to perform the search. Zend_Ldap::SEARCH_SCOPE_ONE, Zend_LDAP::SEARCH_SCOPE_BASE. Default is Zend_Ldap::SEARCH_SCOPE_SUB
+     * @param int $scope The scope to perform the search. Zend_Ldap::SEARCH_SCOPE_ONE, Zend_LDAP::SEARCH_SCOPE_BASE.
+     *                      Default is Zend_Ldap::SEARCH_SCOPE_SUB
      * @param array $attributes Restrict to specific AD attributes. An empty array will return all attributes
      * @return array
      * @throws Exception

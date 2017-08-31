@@ -2,6 +2,7 @@
 
 namespace SilverStripe\ActiveDirectory\Helpers;
 
+use SilverStripe\ActiveDirectory\Services\SAMLConfiguration;
 use SilverStripe\Core\Injector\Injectable;
 use OneLogin_Saml2_Auth;
 

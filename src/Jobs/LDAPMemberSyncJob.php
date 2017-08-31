@@ -3,6 +3,7 @@
 namespace SilverStripe\ActiveDirectory\Jobs;
 
 use Exception;
+use SilverStripe\ActiveDirectory\Tasks\LDAPMemberSyncTask;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Injector\Injector;
 use Symbiote\QueuedJobs\Services\AbstractQueuedJob;
@@ -63,7 +64,7 @@ class LDAPMemberSyncJob extends AbstractQueuedJob
     public function validateRegenerateTime()
     {
         $regenerateTime = Config::inst()->get(
-            'SilverStripe\\ActiveDirectory\\Jobs\\LDAPMemberSyncJob',
+            LDAPMemberSyncJob::class,
             'regenerate_time'
         );
 
@@ -79,17 +80,17 @@ class LDAPMemberSyncJob extends AbstractQueuedJob
     public function process()
     {
         $regenerateTime = Config::inst()->get(
-            'SilverStripe\\ActiveDirectory\\Jobs\\LDAPMemberSyncJob',
+            LDAPMemberSyncJob::class,
             'regenerate_time'
         );
         if ($regenerateTime) {
             $this->validateRegenerateTime();
 
-            $nextJob = Injector::inst()->create('SilverStripe\\ActiveDirectory\\Jobs\\LDAPMemberSyncJob');
+            $nextJob = Injector::inst()->create(LDAPMemberSyncJob::class);
             singleton(QueuedJobService::class)->queueJob($nextJob, date('Y-m-d H:i:s', time() + $regenerateTime));
         }
 
-        $task = Injector::inst()->create('SilverStripe\\ActiveDirectory\\Tasks\\LDAPMemberSyncTask');
+        $task = Injector::inst()->create(LDAPMemberSyncTask::class);
         $task->run(null);
 
         $this->isComplete = true;

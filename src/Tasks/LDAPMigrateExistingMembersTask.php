@@ -2,6 +2,7 @@
 
 namespace SilverStripe\ActiveDirectory\Tasks;
 
+use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Dev\BuildTask;
 use SilverStripe\Core\Convert;
 use SilverStripe\Control\Director;

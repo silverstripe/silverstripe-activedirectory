@@ -3,6 +3,7 @@
 namespace SilverStripe\ActiveDirectory\Model;
 
 use SilverStripe\Forms\DropdownField;
+use SilverStripe\Forms\FieldList;
 use SilverStripe\ORM\DataObject;
 
 /**
