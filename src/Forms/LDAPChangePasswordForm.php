@@ -20,6 +20,10 @@ class LDAPChangePasswordForm extends ChangePasswordForm
 {
     /**
      * The sole purpose for overriding the constructor is surfacing the username to the user.
+     * @param \SilverStripe\Control\RequestHandler $controller
+     * @param string $name
+     * @param null $fields
+     * @param null $actions
      */
     public function __construct($controller, $name, $fields = null, $actions = null)
     {

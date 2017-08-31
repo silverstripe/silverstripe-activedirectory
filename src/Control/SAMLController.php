@@ -4,13 +4,15 @@ namespace SilverStripe\ActiveDirectory\Control;
 
 use Exception;
 use OneLogin_Saml2_Error;
+use Psr\Log\LoggerInterface;
+use SilverStripe\ActiveDirectory\Authenticators\SAMLLoginForm;
+use SilverStripe\ActiveDirectory\Helpers\SAMLHelper;
 use SilverStripe\ActiveDirectory\Model\LDAPUtil;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\Director;
-use SilverStripe\Control\Session;
+use SilverStripe\Control\HTTPResponse;
 use SilverStripe\Core\Injector\Injector;
-use SilverStripe\Forms\Form;
-use SilverStirpe\Security\Member;
+use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
 
 /**
@@ -49,19 +51,20 @@ class SAMLController extends Controller
      */
     public function acs()
     {
-        $auth = Injector::inst()->get('SilverStripe\\ActiveDirectory\\Helpers\\SAMLHelper')->getSAMLAuth();
+        $auth = Injector::inst()->get(SAMLHelper::class)->getSAMLAuth();
         $auth->processResponse();
 
         $error = $auth->getLastErrorReason();
         if (!empty($error)) {
             $this->getLogger()->error($error);
-            Form::messageForForm('SAMLLoginForm_LoginForm', "Authentication error: '{$error}'", 'bad');
+
+            $this->getForm()->sessionMessage("Authentication error: '{$error}'", 'bad');
             $this->getRequest()->getSession()->save($this->getRequest());
             return $this->getRedirect();
         }
 
         if (!$auth->isAuthenticated()) {
-            Form::messageForForm('SAMLLoginForm_LoginForm', _t('Member.ERRORWRONGCRED'), 'bad');
+            $this->getForm()->sessionMessage(_t('Member.ERRORWRONGCRED'), 'bad');
             $this->getRequest()->getSession()->save($this->getRequest());
             return $this->getRedirect();
         }
@@ -69,7 +72,7 @@ class SAMLController extends Controller
         $decodedNameId = base64_decode($auth->getNameId());
         // check that the NameID is a binary string (which signals that it is a guid
         if (ctype_print($decodedNameId)) {
-            Form::messageForForm('SAMLLoginForm_LoginForm', 'Name ID provided by IdP is not a binary GUID.', 'bad');
+            $this->getForm()->sessionMessage('Name ID provided by IdP is not a binary GUID.', 'bad');
             $this->getRequest()->getSession()->save($this->getRequest());
             return $this->getRedirect();
         }
@@ -79,7 +82,7 @@ class SAMLController extends Controller
         if (!LDAPUtil::validGuid($guid)) {
             $errorMessage = "Not a valid GUID '{$guid}' recieved from server.";
             $this->getLogger()->error($errorMessage);
-            Form::messageForForm('SAMLLoginForm_LoginForm', $errorMessage, 'bad');
+            $this->getForm()->sessionMessage($errorMessage, 'bad');
             $this->getRequest()->getSession()->save($this->getRequest());
             return $this->getRedirect();
         }
@@ -96,9 +99,10 @@ class SAMLController extends Controller
 
         foreach ($member->config()->claims_field_mappings as $claim => $field) {
             if (!isset($attributes[$claim][0])) {
-                $this->getLogger()->warn(
+                $this->getLogger()->warning(
                     sprintf(
-                        'Claim rule \'%s\' configured in LDAPMember.claims_field_mappings, but wasn\'t passed through. Please check IdP claim rules.',
+                        'Claim rule \'%s\' configured in LDAPMember.claims_field_mappings, ' .
+                                'but wasn\'t passed through. Please check IdP claim rules.',
                         $claim
                     )
                 );
@@ -116,7 +120,7 @@ class SAMLController extends Controller
         // calling this, as any onAfterWrite hooks that attempt to update LDAP won't
         // have the Username field available yet for new Member records, and fail.
         // Both SAML and LDAP identify Members by the GUID field.
-        $member->logIn();
+        Security::setCurrentUser($member);
 
         return $this->getRedirect();
     }
@@ -149,13 +153,13 @@ class SAMLController extends Controller
     }
 
     /**
-     * @return SS_HTTPResponse
+     * @return HTTPResponse
      */
     protected function getRedirect()
     {
         // Absolute redirection URLs may cause spoofing
-        if ($this->getRequest()->getSession()->get('BackURL') &&
-            Director::is_site_url($this->getRequest()->getSession()->get('BackURL'))) {
+        if ($this->getRequest()->getSession()->get('BackURL')
+            && Director::is_site_url($this->getRequest()->getSession()->get('BackURL'))) {
             return $this->redirect($this->getRequest()->getSession()->get('BackURL'));
         }
 
@@ -177,10 +181,20 @@ class SAMLController extends Controller
     /**
      * Get a logger
      *
-     * @return Psr\Log\LoggerInterface
+     * @return LoggerInterface
      */
     public function getLogger()
     {
         return Injector::inst()->get('Logger');
+    }
+
+    /**
+     * Gets the login form
+     *
+     * @return SAMLLoginForm
+     */
+    public function getForm()
+    {
+        return Injector::inst()->get(SAMLLoginForm::class);
     }
 }
