@@ -82,7 +82,7 @@ class LDAPAuthenticator extends MemberAuthenticator
      * @param array $data
      * @param HTTPRequest $request
      * @param ValidationResult|null $result
-     * @return bool|Member
+     * @return null|Member
      * @internal param Form $form
      */
     public function authenticate(array $data, HTTPRequest $request, ValidationResult &$result = null)
