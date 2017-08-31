@@ -139,18 +139,16 @@ SAML request.
 
 	SAMLConfiguration:
 	  Security:
-        Security:
-          requestedAuthnContextBool: false
+        requestedAuthnContextBool: false
           
 It is also possible to provide custom list of Authentication Contexts, as well as the value for the "Comparison"
 attribute:
 
 	SAMLConfiguration:
 	  Security:
-        Security:
-          requestedAuthnContextArray:
-            - 'urn:federation:authentication:windows',
-          requestedAuthnContextComparison: 'maximum'
+        requestedAuthnContextArray:
+          - 'urn:federation:authentication:windows',
+        requestedAuthnContextComparison: 'maximum'
           
 ### Service Provider (SP)
 
