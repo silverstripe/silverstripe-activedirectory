@@ -76,4 +76,20 @@ class SAMLAuthenticator extends MemberAuthenticator
         $request->getSession()->save($request);
         $auth->login(Director::absoluteBaseURL().'saml/');
     }
+
+    /**
+     * @inheritdoc
+     */
+    public function getLoginHandler($link)
+    {
+        return SAMLLoginHandler::create($link, $this);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function supportedServices()
+    {
+        return Authenticator::LOGIN | Authenticator::LOGOUT;
+    }
 }

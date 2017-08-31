@@ -7,6 +7,7 @@ use SilverStripe\Control\Email\Email;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\MemberAuthenticator\LoginHandler;
+use SilverStripe\Security\MemberAuthenticator\MemberAuthenticator;
 
 class LDAPMemberLoginHandler extends LoginHandler
 {

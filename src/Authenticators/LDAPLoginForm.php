@@ -5,9 +5,11 @@ namespace SilverStripe\ActiveDirectory\Authenticators;
 use SilverStripe\ActiveDirectory\Control\LDAPSecurityController;
 use SilverStripe\ActiveDirectory\Services\LDAPService;
 use SilverStripe\Control\Email\Email;
+use SilverStripe\Control\RequestHandler;
 use SilverStripe\Control\Session;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Injector\Injector;
+use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\LiteralField;
 use SilverStripe\Forms\RequiredFields;
 use SilverStripe\Forms\TextField;
@@ -44,15 +46,14 @@ class LDAPLoginForm extends MemberLoginForm
     /**
      * Constructor.
      *
-     * @param Controller $controller
+     * @param RequestHandler $controller
+     * @param string $authenticatorClass
      * @param string $name method on the $controller
-     * @param FieldList $fields
-     * @param FieldList $actions
-     * @param bool $checkCurrentUser - show logout button if logged in
      */
-    public function __construct($controller, $name, $fields = null, $actions = null, $checkCurrentUser = true)
+    public function __construct(RequestHandler $controller, $authenticatorClass, $name)
     {
-        parent::__construct($controller, $name, $fields, $actions, $checkCurrentUser);
+
+        parent::__construct($controller, 'LDAPAuthenticator', $name);
 
         // will be used to get correct Link()
         $this->ldapSecController = Injector::inst()->create(LDAPSecurityController::class);
@@ -110,7 +111,7 @@ JS;
      */
     protected function buildRequestHandler()
     {
-        return LDAPMemberLoginHandler::create($this);
+        return LDAPMemberLoginHandler::create($this, Injector::inst()->get(LDAPAuthenticator::class));
     }
 
     /**

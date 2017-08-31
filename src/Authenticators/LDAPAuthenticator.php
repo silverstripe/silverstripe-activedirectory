@@ -199,6 +199,6 @@ class LDAPAuthenticator extends MemberAuthenticator
      */
     public function supportedServices()
     {
-        return Authenticator::LOGIN;
+        return Authenticator::LOGIN | Authenticator::LOGOUT;
     }
 }

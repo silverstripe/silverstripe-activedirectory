@@ -2,12 +2,11 @@
 
 namespace SilverStripe\ActiveDirectory\Authenticators;
 
-use SilverStripe\Control\Session;
+use SilverStripe\Control\RequestHandler;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\HiddenField;
 use SilverStripe\Forms\FormAction;
 use SilverStripe\Security\LoginForm;
-use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
 
 /**
@@ -44,21 +43,18 @@ class SAMLLoginForm extends LoginForm
     /**
      * Constructor
      *
-     * @param Controller $controller
+     * @param RequestHandler $controller
+     * @param string $authenticatorClass
      * @param string $name method on the $controller
-     * @param FieldList $fields
-     * @param FieldList $actions
-     * @param bool $checkCurrentUser - show logout button if logged in
      */
-    public function __construct($controller, $name, $fields = null, $actions = null, $checkCurrentUser = true)
+    public function __construct(RequestHandler $controller, $authenticatorClass, $name)
     {
         $backURL = $this->getSession()->get('BackURL');
 
         if (isset($_REQUEST['BackURL'])) {
             $backURL = $_REQUEST['BackURL'];
         }
-
-        if ($checkCurrentUser && $this->shouldShowLogoutFields()) {
+        if ($this->shouldShowLogoutFields()) {
             $fields = FieldList::create([
                 HiddenField::create('AuthenticationMethod', null, $this->authenticator_class, $this)
             ]);
@@ -66,12 +62,8 @@ class SAMLLoginForm extends LoginForm
                 FormAction::create('logout', _t('Member.BUTTONLOGINOTHER', 'Log in as someone else'))
             ]);
         } else {
-            if (!$fields) {
-                $fields = $this->getFormFields();
-            }
-            if (!$actions) {
-                $actions = $this->getFormActions();
-            }
+            $fields = $this->getFormFields();
+            $actions = $this->getFormActions();
         }
 
         if ($backURL) {
@@ -102,59 +94,9 @@ class SAMLLoginForm extends LoginForm
      */
     protected function shouldShowLogoutFields()
     {
-        if (!Member::currentUser()) {
-            return false;
-        }
-        if (!Member::logged_in_session_exists()) {
+        if (!Security::getCurrentUser()) {
             return false;
         }
         return true;
-    }
-
-    /**
-     * Get message from session
-     */
-    protected function getMessageFromSession()
-    {
-        // The "MemberLoginForm.force_message session" is set in Security#permissionFailure()
-        // and displays messages like "You don't have access to this page"
-        // if force isn't set, it will just display "You're logged in as {name}"
-        if (($member = Member::currentUser()) && !$this->getSession()->get('MemberLoginForm.force_message')) {
-            $this->message = _t(
-                'Member.LOGGEDINAS',
-                "You're logged in as {name}.",
-                ['name' => $member->{$this->loggedInAsField}]
-            );
-        }
-        $this->getSession()->set('MemberLoginForm.force_message', false);
-        parent::getMessageFromSession();
-        return $this->message;
-    }
-
-    /**
-     * Login form handler method
-     *
-     * This method is called when the user clicks on "Log in"
-     *
-     * @param array $data Submitted data
-     */
-    public function dologin($data)
-    {
-        call_user_func_array([$this->authenticator_class, 'authenticate'], [$data, $this]);
-    }
-
-
-    /**
-     * Log out form handler method
-     *
-     * This method is called when the user clicks on "logout" on the form
-     * created when the parameter <i>$checkCurrentUser</i> of the
-     * {@link __construct constructor} was set to TRUE and the user was
-     * currently logged in.
-     */
-    public function logout()
-    {
-        $s = new Security();
-        $s->logout(false);
     }
 }

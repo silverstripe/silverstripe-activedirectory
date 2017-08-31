@@ -11,6 +11,7 @@ use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Forms\TextField;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\MemberAuthenticator\ChangePasswordForm;
+use SilverStripe\Security\Security;
 
 /**
  * @package activedirectory
@@ -25,7 +26,7 @@ class LDAPChangePasswordForm extends ChangePasswordForm
         parent::__construct($controller, $name, $fields, $actions);
 
         // Obtain the Member object. If the user got this far, they must have already been synced.
-        $member = Member::currentUser();
+        $member = Security::getCurrentUser();
         if (!$member) {
             if ($this->getSession()->get('AutoLoginHash')) {
                 $member = Member::member_from_autologinhash($this->getSession()->get('AutoLoginHash'));
@@ -90,7 +91,7 @@ class LDAPChangePasswordForm extends ChangePasswordForm
          * @var LDAPService $service
          */
         $service = Injector::inst()->get('SilverStripe\\ActiveDirectory\\Services\\LDAPService');
-        $member = Member::currentUser();
+        $member = Security::getCurrentUser();
         if ($member) {
             try {
                 $userData = $service->getUserByGUID($member->GUID);
