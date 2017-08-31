@@ -135,33 +135,32 @@ ADFS should now be configured to extract the SP certificate from SilverStripe's 
 
 ## Configure SilverStripe Authenticators
 
-To be able to use the SAML or the LDAP authenticator you will need to set them up in the `mysite/_config.php`.
+To be able to use the SAML or the LDAP authenticator you will need to set them up in the `mysite/_config/active-directory.yml`.
 
 You can choose which authenticators you would like to display on the login form.
 
-    // Show the SAML Login button on login form
-    \SilverStripe\Security\Authenticator::register_authenticator(
-        'SilverStripe\\ActiveDirectory\\Authenticators\\SAMLAuthenticator'
-    );
-    // Show the LDAP Login form
-    \SilverStripe\Security\Authenticator::register_authenticator(
-        'SilverStripe\\ActiveDirectory\\Authenticators\\LDAPAuthenticator'
-    );
-
-You can unregister the default authenticator by adding this line:
-
-    \SilverStripe\Security\Authenticator::unregister('SilverStripe\\Security\\MemberAuthenticator');
+### Show the SAML Login button on login form
+```yaml
+SilverStripe\Core\Injector\Injector:
+    SilverStripe\Security\Security:
+      properties:
+          Authenticators:
+            default: %$SilverStripe\ActiveDirectory\Authenticators\SAMLAuthenticator
+```
+### Show the LDAP Login button on login form
+```yaml
+SilverStripe\Core\Injector\Injector:
+    SilverStripe\Security\Security:
+      properties:
+          Authenticators:
+            default: %$SilverStripe\ActiveDirectory\Authenticators\LDAPAuthenticator
+```
 
 To prevent locking yourself out, before you remove the "MemberAuthenticator" make sure you map at least one LDAP group to the SilverStripe `Administrator` Security Group. Consult [CMS usage docs](usage.md) for how to do it.
 
 ### Bypass auto login
 
 If you register the SAMLAuthenticator as the default authenticator, it will automatically send users to the ADFS login server when they are required to login.
-
-    \SilverStripe\Security\Authenticator::set_default_authenticator(
-        'SilverStripe\\ActiveDirectory\\Authenticators\\SAMLAuthenticator'
-    );
-
 Should you need to access the login form with all the configured Authenticators, go to:
 
     /Security/login?showloginform=1
