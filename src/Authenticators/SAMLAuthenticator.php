@@ -13,8 +13,6 @@ use SilverStripe\Forms\Form;
 use SilverStripe\ORM\ValidationResult;
 use SilverStripe\Security\Authenticator;
 use SilverStripe\Security\Member;
-use SilverStripe\Security\MemberAuthenticator\LoginHandler;
-use SilverStripe\Security\MemberAuthenticator\LDAPLogoutHandler;
 use SilverStripe\Security\MemberAuthenticator\MemberAuthenticator;
 
 /**
