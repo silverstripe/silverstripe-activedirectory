@@ -164,8 +164,8 @@ class SAMLController extends Controller
         }
 
         // Spoofing attack, redirect to homepage instead of spoofing url
-        if ($this->getRequest()->getSession()->get('BackURL') &&
-            !Director::is_site_url($this->getRequest()->getSession()->get('BackURL'))) {
+        if ($this->getRequest()->getSession()->get('BackURL')
+            && !Director::is_site_url($this->getRequest()->getSession()->get('BackURL'))) {
             return $this->redirect(Director::absoluteBaseURL());
         }
 

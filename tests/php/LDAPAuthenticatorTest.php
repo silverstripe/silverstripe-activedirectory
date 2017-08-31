@@ -79,7 +79,7 @@ class LDAPAuthenticatorTest extends FakeGatewayTest
         $this->data = ['Login' => $member->Email, 'Email' => $member->Email, 'Password' => 'password'];
         $result = $this->callAuthMethod();
         $this->assertInstanceOf(Member::class, $result);
-        $this->assertEquals($result->Email, $member->Email);
+        $this->assertEquals($member->Email, $result->Email);
     }
 
     /**
@@ -90,7 +90,7 @@ class LDAPAuthenticatorTest extends FakeGatewayTest
         $this->data = ['Login' => 'usernotfound', 'Password' => 'passwordnotfound'];
         $this->callAuthMethod();
         $this->assertFalse($this->result->isValid());
-        $this->assertContains($this->result->getMessages()[0]['message'], 'Username not found');
+        $this->assertContains('Username not found', $this->result->getMessages()[0]['message']);
     }
 
     /**

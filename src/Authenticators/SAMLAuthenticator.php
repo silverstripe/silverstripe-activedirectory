@@ -64,7 +64,6 @@ class SAMLAuthenticator extends MemberAuthenticator
      * @param HTTPRequest $request
      * @param ValidationResult|null $result
      * @return bool|Member|void
-     * @internal param Form $form
      */
     public function authenticate(array $data, HTTPRequest $request, ValidationResult &$result = null)
     {
