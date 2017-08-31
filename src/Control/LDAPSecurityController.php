@@ -2,16 +2,19 @@
 
 namespace SilverStripe\ActiveDirectory\Control;
 
+use SilverStripe\ActiveDirectory\Authenticators\LDAPAuthenticator;
 use SilverStripe\ActiveDirectory\Authenticators\LDAPLoginForm;
 use SilverStripe\ActiveDirectory\Forms\LDAPChangePasswordForm;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\Director;
+use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Convert;
-use SilverStripe\Core\Object;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Forms\EmailField;
+use SilverStripe\Forms\Form;
 use SilverStripe\Forms\FormAction;
 use SilverStripe\Forms\FieldList;
+use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
 
 /**
@@ -71,11 +74,7 @@ class LDAPSecurityController extends Security
             return $response;
         }
 
-        if (Config::inst()->get(
-            'SilverStripe\\ActiveDirectory\\Authenticators\\LDAPAuthenticator',
-            'allow_email_login'
-        ) === 'yes'
-        ) {
+        if (Config::inst()->get(LDAPAuthenticator::class, 'allow_email_login') === 'yes') {
             $customisedController = $controller->customise([
                 'Content' =>
                     _t(
@@ -96,7 +95,6 @@ class LDAPSecurityController extends Security
             ]);
         }
 
-        //Controller::$currentController = $controller;
         return $customisedController->renderWith($this->getTemplatesFor('lostpassword'));
     }
 
@@ -131,7 +129,7 @@ class LDAPSecurityController extends Security
      * Show the "password sent" page, after a user has requested
      * to reset their password.
      *
-     * @param SS_HTTPRequest $request The SS_HTTPRequest for this action.
+     * @param HTTPRequest $request The SS_HTTPRequest for this action.
      * @return string Returns the "password sent" page as HTML code.
      */
     public function passwordsent($request)
