@@ -86,6 +86,9 @@ class LDAPAuthenticator extends MemberAuthenticator
      */
     public function authenticate(array $data, HTTPRequest $request, ValidationResult &$result = null)
     {
+        if (is_null($result)) {
+            $result = new ValidationResult();
+        }
         /** @var LDAPService $service */
         $service = Injector::inst()->get(LDAPService::class);
         $login = trim($data['Login']);
@@ -191,9 +194,16 @@ class LDAPAuthenticator extends MemberAuthenticator
 
     public function supportedServices()
     {
-        $result = (bool)LDAPService::config()->get('allow_password_change') ?
-            Authenticator::LOGIN | Authenticator::LOGOUT | Authenticator::CHANGE_PASSWORD :
-            Authenticator::LOGIN | Authenticator::LOGOUT;
+        $result = Authenticator::LOGIN | Authenticator::LOGOUT | Authenticator::RESET_PASSWORD;
+
+        if ((bool)LDAPService::config()->get('allow_password_change')) {
+            $result |= Authenticator::CHANGE_PASSWORD;
+        }
         return $result;
+    }
+
+    public function getLostPasswordHandler($link)
+    {
+        return LDAPLostPasswordHandler::create($link, $this);
     }
 }

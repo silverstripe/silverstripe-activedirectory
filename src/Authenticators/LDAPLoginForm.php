@@ -2,14 +2,9 @@
 
 namespace SilverStripe\ActiveDirectory\Authenticators;
 
-use SilverStripe\ActiveDirectory\Control\LDAPSecurityController;
 use SilverStripe\ActiveDirectory\Services\LDAPService;
-use SilverStripe\Control\Email\Email;
 use SilverStripe\Control\RequestHandler;
-use SilverStripe\Control\Session;
 use SilverStripe\Core\Config\Config;
-use SilverStripe\Core\Injector\Injector;
-use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\LiteralField;
 use SilverStripe\Forms\RequiredFields;
 use SilverStripe\Forms\TextField;
@@ -39,11 +34,6 @@ class LDAPLoginForm extends MemberLoginForm
     protected $authenticator_class = LDAPAuthenticator::class;
 
     /**
-     * @var LDAPSecurityController
-     */
-    protected $ldapSecController = null;
-
-    /**
      * Constructor.
      *
      * @param RequestHandler $controller
@@ -54,9 +44,6 @@ class LDAPLoginForm extends MemberLoginForm
     {
 
         parent::__construct($controller, 'LDAPAuthenticator', $name);
-
-        // will be used to get correct Link()
-        $this->ldapSecController = Injector::inst()->create(LDAPSecurityController::class);
 
         if (Config::inst()->get(LDAPAuthenticator::class, 'allow_email_login') === 'yes') {
             $loginField = TextField::create(
@@ -88,7 +75,7 @@ class LDAPLoginForm extends MemberLoginForm
         if ($allowPasswordChange && $name != 'LostPasswordForm' && !Member::currentUser()) {
             $forgotPasswordLink = sprintf(
                 '<p id="ForgotPassword"><a href="%s">%s</a></p>',
-                $this->ldapSecController->Link('lostpassword'),
+                Security::singleton()->Link('lostpassword'),
                 _t('Member.BUTTONLOSTPASSWORD', "I've lost my password")
             );
             $forgotPassword = LiteralField::create('forgotPassword', $forgotPasswordLink);
@@ -104,14 +91,6 @@ class LDAPLoginForm extends MemberLoginForm
 			})();
 JS;
         Requirements::customScript($js, 'LDAPLoginFormFieldFocus');
-    }
-
-    /**
-     * @return LDAPMemberLoginHandler
-     */
-    protected function buildRequestHandler()
-    {
-        return LDAPMemberLoginHandler::create($this, Injector::inst()->get(LDAPAuthenticator::class));
     }
 
     /**

@@ -3,7 +3,6 @@ Name: ldapconfig
 ---
 SilverStripe\Control\Director:
   rules:
-    'LDAPSecurity': SilverStripe\ActiveDirectory\Control\LDAPSecurityController
     'LDAPDebug': SilverStripe\ActiveDirectory\Control\LDAPDebugController
 
 SilverStripe\Security\Group:

@@ -205,7 +205,7 @@ class LDAPGateway
      * @param string $sort Sort results by this attribute if given
      * @return array
      */
-    public function getUsers($baseDn = null, $scope = Zend\Ldap\Ldap::SEARCH_SCOPE_SUB, $attributes = [], $sort = '')
+    public function getUsers($baseDn = null, $scope = Ldap::SEARCH_SCOPE_SUB, $attributes = [], $sort = '')
     {
         return $this->search(
             '(&(objectClass=user)(!(objectClass=computer))(!(samaccountname=Guest))(!(samaccountname=Administrator))(!(samaccountname=krbtgt)))',
