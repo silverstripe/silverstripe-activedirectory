@@ -14,6 +14,7 @@ use SilverStripe\Security\Authenticator;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\MemberAuthenticator\LogoutHandler;
 use SilverStripe\Security\MemberAuthenticator\MemberAuthenticator;
+use Zend\Authentication\Result;
 
 /**
  * Class LDAPAuthenticator
@@ -118,10 +119,18 @@ class LDAPAuthenticator extends MemberAuthenticator
         } else {
             $username = $login;
         }
+
         $serviceAuthenticationResult = $service->authenticate($username, $data['Password']);
         $success = $serviceAuthenticationResult['success'] === true;
+
         if (!$success) {
-            if (Config::inst()->get(self::class, 'fallback_authenticator') === 'yes') {
+            /*
+             * Try the fallback method  unless the reason was invalid credentials. This is to avoid
+             * having an unhandled exception error thrown by PasswordEncryptor::create_for_algorithm()
+             */
+            if (Config::inst()->get(self::class, 'fallback_authenticator') === 'yes'
+                && !in_array($serviceAuthenticationResult['code'], [Result::FAILURE_CREDENTIAL_INVALID])
+            ) {
                 if ($fallbackMember = $this->fallbackAuthenticate($data, $request)) {
                     return $fallbackMember;
                 }
@@ -167,6 +176,7 @@ class LDAPAuthenticator extends MemberAuthenticator
      */
     protected function fallbackAuthenticate($data, HTTPRequest $request)
     {
+        // Set Email from Login
         if (array_key_exists('Login', $data) && !array_key_exists('Email', $data)) {
             $data['Email'] = $data['Login'];
         }

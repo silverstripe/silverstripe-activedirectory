@@ -209,7 +209,8 @@ class LDAPService implements Flushable
         return [
             'success' => $result->getCode() === 1,
             'identity' => $result->getIdentity(),
-            'message' => $message
+            'message' => $message,
+            'code' => $result->getCode()
         ];
     }
 
