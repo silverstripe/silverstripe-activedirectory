@@ -125,14 +125,16 @@ class LDAPAuthenticator extends MemberAuthenticator
 
         if (!$success) {
             /*
-             * Try the fallback method  unless the reason was invalid credentials. This is to avoid
-             * having an unhandled exception error thrown by PasswordEncryptor::create_for_algorithm()
+             * Try the fallback method if admin or it failed for anything other than invalid credentials
+             * This is to avoid having an unhandled exception error thrown by PasswordEncryptor::create_for_algorithm()
              */
-            if (Config::inst()->get(self::class, 'fallback_authenticator') === 'yes'
-                && !in_array($serviceAuthenticationResult['code'], [Result::FAILURE_CREDENTIAL_INVALID])
-            ) {
-                if ($fallbackMember = $this->fallbackAuthenticate($data, $request)) {
-                    return $fallbackMember;
+            if (Config::inst()->get(self::class, 'fallback_authenticator') === 'yes') {
+                if (!in_array($serviceAuthenticationResult['code'], [Result::FAILURE_CREDENTIAL_INVALID])
+                    || $username === 'admin'
+                ) {
+                    if ($fallbackMember = $this->fallbackAuthenticate($data, $request)) {
+                        return $fallbackMember;
+                    }
                 }
             }
 
@@ -160,7 +162,7 @@ class LDAPAuthenticator extends MemberAuthenticator
 
         // Update the users from LDAP so we are sure that the email is correct.
         // This will also write the Member record.
-        $service->updateMemberFromLDAP($member);
+        $service->updateMemberFromLDAP($member, $data, false);
 
         $request->getSession()->clear('BackURL');
 

@@ -494,12 +494,15 @@ class LDAPService implements Flushable
      * Constraints:
      * - GUID of the member must have already been set, for integrity reasons we don't allow it to change here.
      *
-     * @param Member
+     * @param Member $member
      * @param array|null $data If passed, this is pre-existing AD attribute data to update the Member with.
      *            If not given, the data will be looked up by the user's GUID.
+     * @param bool $updateGroups controls whether to run the resource-intensive group update function as well. This is
+     *                          skipped during login to reduce load.
      * @return bool
+     * @internal param $Member
      */
-    public function updateMemberFromLDAP(Member $member, $data = null)
+    public function updateMemberFromLDAP(Member $member, $data = null, $updateGroups = true)
     {
         if (!$this->enabled()) {
             return false;
@@ -605,7 +608,22 @@ class LDAPService implements Flushable
         // the Member, in effect deleting all their LDAP group associations!
         $member->writeWithoutSync();
 
-        // ensure the user is in any mapped groups
+        if ($updateGroups) {
+            $this->updateMemberGroups($data, $member);
+        }
+
+        // This will throw an exception if there are two distinct GUIDs with the same email address.
+        // We are happy with a raw 500 here at this stage.
+        $member->write();
+    }
+
+    /**
+     * Ensure the user is mapped to any applicable groups.
+     * @param array $data
+     * @param Member $member
+     */
+    public function updateMemberGroups($data, Member $member)
+    {
         if (isset($data['memberof'])) {
             $ldapGroups = is_array($data['memberof']) ? $data['memberof'] : [$data['memberof']];
             foreach ($ldapGroups as $groupDN) {
@@ -673,9 +691,6 @@ class LDAPService implements Flushable
                 }
             }
         }
-        // This will throw an exception if there are two distinct GUIDs with the same email address.
-        // We are happy with a raw 500 here at this stage.
-        $member->write();
     }
 
     /**
