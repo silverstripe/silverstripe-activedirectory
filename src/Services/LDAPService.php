@@ -505,14 +505,14 @@ class LDAPService implements Flushable
         }
 
         if (!$member->GUID) {
-            $this->getLogger()->warn(sprintf('Cannot update Member ID %s, GUID not set', $member->ID));
+            $this->getLogger()->warning(sprintf('Cannot update Member ID %s, GUID not set', $member->ID));
             return false;
         }
 
         if (!$data) {
             $data = $this->getUserByGUID($member->GUID);
             if (!$data) {
-                $this->getLogger()->warn(sprintf('Could not retrieve data for user. GUID: %s', $member->GUID));
+                $this->getLogger()->warning(sprintf('Could not retrieve data for user. GUID: %s', $member->GUID));
                 return false;
             }
         }
@@ -540,7 +540,7 @@ class LDAPService implements Flushable
                 if ($imageClass !== Image::class
                     && !is_subclass_of($imageClass, Image::class)
                 ) {
-                    $this->getLogger()->warn(
+                    $this->getLogger()->warning(
                         sprintf(
                             'Member field %s configured for thumbnailphoto AD attribute, but it isn\'t a ' .
                             'valid relation to an Image class',
@@ -582,7 +582,7 @@ class LDAPService implements Flushable
         if ($this->config()->default_group) {
             $group = Group::get()->filter('Code', $this->config()->default_group)->limit(1)->first();
             if (!($group && $group->exists())) {
-                $this->getLogger()->warn(
+                $this->getLogger()->warning(
                     sprintf(
                         'LDAPService.default_group misconfiguration! There is no such group with Code = \'%s\'',
                         $this->config()->default_group
@@ -610,7 +610,7 @@ class LDAPService implements Flushable
             foreach ($ldapGroups as $groupDN) {
                 foreach (LDAPGroupMapping::get() as $mapping) {
                     if (!$mapping->DN) {
-                        $this->getLogger()->warn(
+                        $this->getLogger()->warning(
                             sprintf(
                                 'LDAPGroupMapping ID %s is missing DN field. Skipping',
                                 $mapping->ID
@@ -1021,7 +1021,7 @@ class LDAPService implements Flushable
         $this->extend('onBeforeSetPassword', $member, $password, $validationResult);
 
         if (!$member->GUID) {
-            $this->getLogger()->warn(sprintf('Cannot update Member ID %s, GUID not set', $member->ID));
+            $this->getLogger()->warning(sprintf('Cannot update Member ID %s, GUID not set', $member->ID));
             $validationResult->addError(
                 _t(
                     'LDAPAuthenticator.NOUSER',
