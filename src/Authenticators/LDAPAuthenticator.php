@@ -100,7 +100,6 @@ class LDAPAuthenticator extends MemberAuthenticator
                 );
                 return null;
             }
-
             $username = $service->getUsernameByEmail($login);
 
             // No user found with this email.
@@ -123,9 +122,7 @@ class LDAPAuthenticator extends MemberAuthenticator
         $success = $serviceAuthenticationResult['success'] === true;
         if (!$success) {
             if (Config::inst()->get(self::class, 'fallback_authenticator') === 'yes') {
-
-                $fallbackMember = $this->fallbackAuthenticate($data, $request);
-                if ($fallbackMember) {
+                if ($fallbackMember = $this->fallbackAuthenticate($data, $request)) {
                     return $fallbackMember;
                 }
             }
@@ -134,7 +131,6 @@ class LDAPAuthenticator extends MemberAuthenticator
 
             return null;
         }
-
         $data = $service->getUserByUsername($serviceAuthenticationResult['identity']);
         if (!$data) {
             $result->addError(

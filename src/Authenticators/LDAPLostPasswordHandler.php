@@ -9,7 +9,6 @@ use SilverStripe\Control\HTTPResponse;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Convert;
 use SilverStripe\Core\Injector\Injector;
-use SilverStripe\Forms\EmailField;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\Form;
 use SilverStripe\Forms\FormAction;
@@ -85,7 +84,6 @@ class LDAPLostPasswordHandler extends LostPasswordHandler
         } else {
             $userData = $service->getUserByUsername($login);
         }
-
         // Avoid information disclosure by displaying the same status,
         // regardless whether the email address actually exists
         if (!isset($userData['objectguid'])) {
@@ -115,7 +113,7 @@ class LDAPLostPasswordHandler extends LostPasswordHandler
             $token = $member->generateAutologinTokenAndStoreHash();
             $e = Email::create()
                 ->setSubject(_t('Member.SUBJECTPASSWORDRESET', 'Your password reset link', 'Email subject'))
-                ->setHTMLTemplate('ForgotPasswordEmail')
+                ->setHTMLTemplate('SilverStripe\\Control\\Email\\ForgotPasswordEmail')
                 ->setData($member)
                 ->setData(['PasswordResetLink' => Security::getPasswordResetLink($member, $token)]);
             $e->setTo($member->Email);
