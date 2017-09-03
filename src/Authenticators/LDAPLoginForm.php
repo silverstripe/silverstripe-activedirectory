@@ -72,7 +72,7 @@ class LDAPLoginForm extends MemberLoginForm
         $this->Actions()->remove($this->Actions()->fieldByName('forgotPassword'));
         $allowPasswordChange = Config::inst()
             ->get(LDAPService::class, 'allow_password_change');
-        if ($allowPasswordChange && $name != 'LostPasswordForm' && !Member::currentUser()) {
+        if ($allowPasswordChange && $name != 'LostPasswordForm' && !Security::getCurrentUser()) {
             $forgotPasswordLink = sprintf(
                 '<p id="ForgotPassword"><a href="%s">%s</a></p>',
                 Security::singleton()->Link('lostpassword'),
