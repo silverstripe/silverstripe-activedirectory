@@ -327,7 +327,6 @@ class LDAPGateway
     {
         $options = $this->config()->options;
         $option = isset($options['accountCanonicalForm']) ? $options['accountCanonicalForm'] : null;
-
         switch ($option) {
             case Ldap::ACCTNAME_FORM_USERNAME: // traditional style usernames, e.g. alice
                 if (empty($data['samaccountname'])) {

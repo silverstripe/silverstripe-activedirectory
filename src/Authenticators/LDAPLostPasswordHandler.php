@@ -13,6 +13,7 @@ use SilverStripe\Forms\EmailField;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\Form;
 use SilverStripe\Forms\FormAction;
+use SilverStripe\Forms\TextField;
 use SilverStripe\ORM\FieldType\DBField;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\MemberAuthenticator\LostPasswordForm;
@@ -65,7 +66,6 @@ class LDAPLostPasswordHandler extends LostPasswordHandler
         /** @var Controller $controller */
         $controller = $form->getController();
 
-        d($controller);
         // No need to protect against injections, LDAPService will ensure that this is safe
         $login = trim($data['Login']);
 
@@ -154,13 +154,24 @@ class LDAPLostPasswordHandler extends LostPasswordHandler
      */
     public function lostPasswordForm()
     {
-        $email = EmailField::create('Email', _t('Member.EMAIL', 'Email'));
+        if (Config::inst()->get(LDAPAuthenticator::class, 'allow_email_login') === 'yes') {
+            $loginField = TextField::create(
+                'Login',
+                _t('LDAPLoginForm.USERNAMEOREMAIL', 'Username or email'),
+                null,
+                null,
+                $this
+            );
+        } else {
+            $loginField = TextField::create('Login', _t('LDAPLoginForm.USERNAME', 'Username'), null, null, $this);
+        }
+
         $action = FormAction::create('forgotPassword', _t('Security.BUTTONSEND', 'Send me the password reset link'));
         return LostPasswordForm::create(
             $this,
             $this->authenticatorClass,
             'LostPasswordForm',
-            FieldList::create([$email]),
+            FieldList::create([$loginField]),
             FieldList::create([$action]),
             false
         );

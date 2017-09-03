@@ -121,7 +121,6 @@ class LDAPAuthenticator extends MemberAuthenticator
         } else {
             $username = $login;
         }
-
         $serviceAuthenticationResult = $service->authenticate($username, $data['Password']);
         $success = $serviceAuthenticationResult['success'] === true;
         if (!$success) {
