@@ -14,5 +14,4 @@ class LDAPMemberLoginHandler extends LoginHandler
      * @var string
      */
     protected $authenticator_class = LDAPAuthenticator::class;
-
 }
