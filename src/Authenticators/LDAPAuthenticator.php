@@ -86,9 +86,7 @@ class LDAPAuthenticator extends MemberAuthenticator
      */
     public function authenticate(array $data, HTTPRequest $request, ValidationResult &$result = null)
     {
-        if (is_null($result)) {
-            $result = new ValidationResult();
-        }
+        $result = $result ?: ValidationResult::create();
         /** @var LDAPService $service */
         $service = Injector::inst()->get(LDAPService::class);
         $login = trim($data['Login']);
@@ -125,6 +123,7 @@ class LDAPAuthenticator extends MemberAuthenticator
         $success = $serviceAuthenticationResult['success'] === true;
         if (!$success) {
             if (Config::inst()->get(self::class, 'fallback_authenticator') === 'yes') {
+
                 $fallbackMember = $this->fallbackAuthenticate($data, $request);
                 if ($fallbackMember) {
                     return $fallbackMember;
@@ -172,6 +171,9 @@ class LDAPAuthenticator extends MemberAuthenticator
      */
     protected function fallbackAuthenticate($data, HTTPRequest $request)
     {
+        if (array_key_exists('Login', $data) && !array_key_exists('Email', $data)) {
+            $data['Email'] = $data['Login'];
+        }
         $authenticatorClass = Config::inst()->get(self::class, 'fallback_authenticator_class');
         if ($authenticator = Injector::inst()->get($authenticatorClass)) {
             $result = call_user_func(
