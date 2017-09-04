@@ -217,8 +217,9 @@ class LDAPLostPasswordHandler extends LostPasswordHandler
     public function passwordsent()
     {
         $username = Convert::raw2xml(
-            rawurldecode($this->getRequest()->param('OtherID')) . '.' . $this->request->getExtension()
+            rawurldecode($this->getRequest()->param('OtherID'))
         );
+        $username .= ($extension = $this->request->getExtension()) ? '.' . $extension : '';
 
         return [
             'Title' => _t(
