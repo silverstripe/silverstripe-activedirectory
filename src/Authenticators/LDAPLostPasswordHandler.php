@@ -73,7 +73,7 @@ class LDAPLostPasswordHandler extends LostPasswordHandler
             if (Config::inst()->get(LDAPAuthenticator::class, 'allow_email_login') != 'yes') {
                 $form->sessionMessage(
                     _t(
-                        'SilverStripe\\ActiveDirectory\\Authenticators\\LDAPLoginForm.USERNAMEINSTEADOFEMAIL',
+                        'SilverStripe\\ActiveDirectory\\Forms\\LDAPLoginForm.USERNAMEINSTEADOFEMAIL',
                         'Please enter your username instead of your email to get a password reset link.'
                     ),
                     'bad'
@@ -133,7 +133,7 @@ class LDAPLostPasswordHandler extends LostPasswordHandler
             if (Config::inst()->get(LDAPAuthenticator::class, 'allow_email_login') === 'yes') {
                 $form->sessionMessage(
                     _t(
-                        'SilverStripe\\ActiveDirectory\\Authenticators\\LDAPLoginForm.ENTERUSERNAMEOREMAIL',
+                        'SilverStripe\\ActiveDirectory\\Forms\\LDAPLoginForm.ENTERUSERNAMEOREMAIL',
                         'Please enter your username or your email address to get a password reset link.'
                     ),
                     'bad'
@@ -141,7 +141,7 @@ class LDAPLostPasswordHandler extends LostPasswordHandler
             } else {
                 $form->sessionMessage(
                     _t(
-                        'SilverStripe\\ActiveDirectory\\Authenticators\\LDAPLoginForm.ENTERUSERNAME',
+                        'SilverStripe\\ActiveDirectory\\Forms\\LDAPLoginForm.ENTERUSERNAME',
                         'Please enter your username to get a password reset link.'
                     ),
                     'bad'
@@ -161,7 +161,7 @@ class LDAPLostPasswordHandler extends LostPasswordHandler
         if (Config::inst()->get(LDAPAuthenticator::class, 'allow_email_login') === 'yes') {
             $loginField = TextField::create(
                 'Login',
-                _t('SilverStripe\\ActiveDirectory\\Authenticators\\LDAPLoginForm.USERNAMEOREMAIL', 'Username or email'),
+                _t('SilverStripe\\ActiveDirectory\\Forms\\LDAPLoginForm.USERNAMEOREMAIL', 'Username or email'),
                 null,
                 null,
                 $this
@@ -170,7 +170,7 @@ class LDAPLostPasswordHandler extends LostPasswordHandler
             $loginField = TextField::create(
                 'Login',
                 _t(
-                    'SilverStripe\\ActiveDirectory\\Authenticators\\LDAPLoginForm.USERNAME',
+                    'SilverStripe\\ActiveDirectory\\Forms\\LDAPLoginForm.USERNAME',
                     'Username'
                 ),
                 null,

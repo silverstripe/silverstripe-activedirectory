@@ -1,6 +1,6 @@
 <?php
 
-namespace SilverStripe\ActiveDirectory\Authenticators;
+namespace SilverStripe\ActiveDirectory\Forms;
 
 use SilverStripe\ActiveDirectory\Services\LDAPService;
 use SilverStripe\Control\RequestHandler;
@@ -8,7 +8,6 @@ use SilverStripe\Core\Config\Config;
 use SilverStripe\Forms\LiteralField;
 use SilverStripe\Forms\RequiredFields;
 use SilverStripe\Forms\TextField;
-use SilverStripe\Security\Member;
 use SilverStripe\Security\MemberAuthenticator\MemberLoginForm;
 use SilverStripe\Security\Security;
 use SilverStripe\View\Requirements;

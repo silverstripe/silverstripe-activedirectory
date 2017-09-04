@@ -2,17 +2,16 @@
 
 namespace SilverStripe\ActiveDirectory\Authenticators;
 
+use SilverStripe\ActiveDirectory\Forms\LDAPLoginForm;
 use SilverStripe\ActiveDirectory\Services\LDAPService;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\Email\Email;
 use SilverStripe\Control\HTTPRequest;
-use SilverStripe\Control\Session;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\ORM\ValidationResult;
 use SilverStripe\Security\Authenticator;
 use SilverStripe\Security\Member;
-use SilverStripe\Security\MemberAuthenticator\LogoutHandler;
 use SilverStripe\Security\MemberAuthenticator\MemberAuthenticator;
 use Zend\Authentication\Result;
 
@@ -214,5 +213,14 @@ class LDAPAuthenticator extends MemberAuthenticator
     public function getLostPasswordHandler($link)
     {
         return LDAPLostPasswordHandler::create($link, $this);
+    }
+
+    /**
+     * @param string $link
+     * @return LDAPChangePasswordHandler
+     */
+    public function getChangePasswordHandler($link)
+    {
+        return LDAPChangePasswordHandler::create($link, $this);
     }
 }

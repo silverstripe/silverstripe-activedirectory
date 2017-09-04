@@ -2,6 +2,7 @@
 
 namespace SilverStripe\ActiveDirectory\Authenticators;
 
+use SilverStripe\ActiveDirectory\Forms\LDAPLoginForm;
 use SilverStripe\Security\MemberAuthenticator\LoginHandler;
 
 class LDAPLoginHandler extends LoginHandler
