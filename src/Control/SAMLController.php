@@ -64,7 +64,7 @@ class SAMLController extends Controller
         }
 
         if (!$auth->isAuthenticated()) {
-            $this->getForm()->sessionMessage(_t('Member.ERRORWRONGCRED'), 'bad');
+            $this->getForm()->sessionMessage(_t('SilverStripe\\Security\\Member.ERRORWRONGCRED'), 'bad');
             $this->getRequest()->getSession()->save($this->getRequest());
             return $this->getRedirect();
         }

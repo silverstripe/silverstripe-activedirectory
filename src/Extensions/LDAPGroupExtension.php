@@ -64,7 +64,7 @@ class LDAPGroupExtension extends DataExtension
             'Root.LDAP',
             ReadonlyField::create(
                 'LastSynced',
-                _t('LDAPGroupExtension.LASTSYNCED', 'Last synced')
+                _t(__CLASS__ . '.LASTSYNCED', 'Last synced')
             )
         );
 
@@ -75,7 +75,7 @@ class LDAPGroupExtension extends DataExtension
             $fields->addFieldToTab('Root.Members', ReadonlyField::create('Code'), 'Members');
 
             $message = _t(
-                'LDAPGroupExtension.INFOIMPORTED',
+                __CLASS__ . '.INFOIMPORTED',
                 'This group is automatically imported from LDAP.'
             );
             $fields->addFieldToTab(
@@ -89,7 +89,7 @@ class LDAPGroupExtension extends DataExtension
 
             $fields->addFieldToTab('Root.LDAP', ReadonlyField::create(
                 'LDAPGroupMappingsRO',
-                _t('LDAPGroupExtension.AUTOMAPPEDGROUPS', 'Automatically mapped LDAP Groups'),
+                _t(__CLASS__ . '.AUTOMAPPEDGROUPS', 'Automatically mapped LDAP Groups'),
                 implode('; ', $this->owner->LDAPGroupMappings()->column('DN'))
             ));
         } else {
@@ -100,7 +100,7 @@ class LDAPGroupExtension extends DataExtension
             );
             $config = GridFieldConfig_RecordEditor::create();
             $config->getComponentByType('GridFieldAddNewButton')
-                ->setButtonName(_t('LDAPGroupExtension.ADDMAPPEDGROUP', 'Add LDAP group mapping'));
+                ->setButtonName(_t(__CLASS__ . '.ADDMAPPEDGROUP', 'Add LDAP group mapping'));
 
             $field->setConfig($config);
             $fields->addFieldToTab('Root.LDAP', $field);

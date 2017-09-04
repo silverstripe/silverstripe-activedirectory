@@ -44,7 +44,7 @@ class LDAPGroupSyncTask extends BuildTask
      */
     public function getTitle()
     {
-        return _t('LDAPGroupSyncJob.SYNCTITLE', 'Sync all groups from Active Directory');
+        return _t(__CLASS__ . '.SYNCTITLE', 'Sync all groups from Active Directory');
     }
 
     /**

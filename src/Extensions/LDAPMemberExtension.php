@@ -106,14 +106,14 @@ class LDAPMemberExtension extends DataExtension
             'IsExpired',
             $ldapMetadata[] = ReadonlyField::create(
                 'IsExpired',
-                _t('LDAPMemberExtension.ISEXPIRED', 'Has user\'s LDAP/AD login expired?')
+                _t(__CLASS__ . '.ISEXPIRED', 'Has user\'s LDAP/AD login expired?')
             )
         );
         $fields->replaceField(
             'LastSynced',
             $ldapMetadata[] = ReadonlyField::create(
                 'LastSynced',
-                _t('LDAPMemberExtension.LASTSYNCED', 'Last synced')
+                _t(__CLASS__ . '.LASTSYNCED', 'Last synced')
             )
         );
         $fields->addFieldsToTab('Root.LDAP', $ldapMetadata);
@@ -121,7 +121,7 @@ class LDAPMemberExtension extends DataExtension
         $message = '';
         if ($this->owner->GUID && $this->owner->config()->update_ldap_from_local) {
             $message = _t(
-                'LDAPMemberExtension.CHANGEFIELDSUPDATELDAP',
+                __CLASS__ . '.CHANGEFIELDSUPDATELDAP',
                 'Changing fields here will update them in LDAP.'
             );
         } elseif ($this->owner->GUID && !$this->owner->config()->update_ldap_from_local) {
@@ -133,11 +133,11 @@ class LDAPMemberExtension extends DataExtension
                     // Set to readonly, but not disabled so that the data is still sent to the
                     // server and doesn't break Member_Validator
                     $field->setReadonly(true);
-                    $field->setTitle($field->Title()._t('LDAPMemberExtension.IMPORTEDFIELD', ' (imported)'));
+                    $field->setTitle($field->Title()._t(__CLASS__ . '.IMPORTEDFIELD', ' (imported)'));
                 }
             }
             $message = _t(
-                'LDAPMemberExtension.INFOIMPORTED',
+                __CLASS__ . '.INFOIMPORTED',
                 'This user is automatically imported from LDAP. '.
                     'Manual changes to imported fields will be removed upon sync.'
             );

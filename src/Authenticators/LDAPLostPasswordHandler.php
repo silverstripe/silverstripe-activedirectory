@@ -73,7 +73,7 @@ class LDAPLostPasswordHandler extends LostPasswordHandler
             if (Config::inst()->get(LDAPAuthenticator::class, 'allow_email_login') != 'yes') {
                 $form->sessionMessage(
                     _t(
-                        'LDAPLoginForm.USERNAMEINSTEADOFEMAIL',
+                        'SilverStripe\\ActiveDirectory\\Authenticators\\LDAPLoginForm.USERNAMEINSTEADOFEMAIL',
                         'Please enter your username instead of your email to get a password reset link.'
                     ),
                     'bad'
@@ -100,7 +100,7 @@ class LDAPLostPasswordHandler extends LostPasswordHandler
 
         // Update the users from LDAP so we are sure that the email is correct.
         // This will also write the Member record.
-        $service->updateMemberFromLDAP($member);
+        $service->updateMemberFromLDAP($member, $userData, false);
 
         // Allow vetoing forgot password requests
         $results = $this->extend('forgotPassword', $member);
@@ -112,7 +112,13 @@ class LDAPLostPasswordHandler extends LostPasswordHandler
             /** @see MemberLoginForm::forgotPassword */
             $token = $member->generateAutologinTokenAndStoreHash();
             $e = Email::create()
-                ->setSubject(_t('Member.SUBJECTPASSWORDRESET', 'Your password reset link', 'Email subject'))
+                ->setSubject(
+                    _t(
+                        'Silverstripe\\Security\\Member.SUBJECTPASSWORDRESET',
+                        'Your password reset link',
+                        'Email subject'
+                    )
+                )
                 ->setHTMLTemplate('SilverStripe\\Control\\Email\\ForgotPasswordEmail')
                 ->setData($member)
                 ->setData(['PasswordResetLink' => Security::getPasswordResetLink($member, $token)]);
@@ -127,7 +133,7 @@ class LDAPLostPasswordHandler extends LostPasswordHandler
             if (Config::inst()->get(LDAPAuthenticator::class, 'allow_email_login') === 'yes') {
                 $form->sessionMessage(
                     _t(
-                        'LDAPLoginForm.ENTERUSERNAMEOREMAIL',
+                        'SilverStripe\\ActiveDirectory\\Authenticators\\LDAPLoginForm.ENTERUSERNAMEOREMAIL',
                         'Please enter your username or your email address to get a password reset link.'
                     ),
                     'bad'
@@ -135,7 +141,7 @@ class LDAPLostPasswordHandler extends LostPasswordHandler
             } else {
                 $form->sessionMessage(
                     _t(
-                        'LDAPLoginForm.ENTERUSERNAME',
+                        'SilverStripe\\ActiveDirectory\\Authenticators\\LDAPLoginForm.ENTERUSERNAME',
                         'Please enter your username to get a password reset link.'
                     ),
                     'bad'
@@ -155,16 +161,28 @@ class LDAPLostPasswordHandler extends LostPasswordHandler
         if (Config::inst()->get(LDAPAuthenticator::class, 'allow_email_login') === 'yes') {
             $loginField = TextField::create(
                 'Login',
-                _t('LDAPLoginForm.USERNAMEOREMAIL', 'Username or email'),
+                _t('SilverStripe\\ActiveDirectory\\Authenticators\\LDAPLoginForm.USERNAMEOREMAIL', 'Username or email'),
                 null,
                 null,
                 $this
             );
         } else {
-            $loginField = TextField::create('Login', _t('LDAPLoginForm.USERNAME', 'Username'), null, null, $this);
+            $loginField = TextField::create(
+                'Login',
+                _t(
+                    'SilverStripe\\ActiveDirectory\\Authenticators\\LDAPLoginForm.USERNAME',
+                    'Username'
+                ),
+                null,
+                null,
+                $this
+            );
         }
 
-        $action = FormAction::create('forgotPassword', _t('Security.BUTTONSEND', 'Send me the password reset link'));
+        $action = FormAction::create(
+            'forgotPassword',
+            _t('SilverStripe\\Security\\Security.BUTTONSEND', 'Send me the password reset link')
+        );
         return LostPasswordForm::create(
             $this,
             $this->authenticatorClass,
@@ -179,13 +197,13 @@ class LDAPLostPasswordHandler extends LostPasswordHandler
     {
         if (Config::inst()->get(LDAPAuthenticator::class, 'allow_email_login') === 'yes') {
             $message = _t(
-                'LDAPLostPasswordHandler.NOTERESETPASSWORDUSERNAMEOREMAIL',
+                __CLASS__ . '.NOTERESETPASSWORDUSERNAMEOREMAIL',
                 'Enter your username or your email address and we will send you a link with which '
                 . 'you can reset your password'
             );
         } else {
             $message = _t(
-                'LDAPLostPasswordHandler.NOTERESETPASSWORDUSERNAME',
+                __CLASS__ . '.NOTERESETPASSWORDUSERNAME',
                 'Enter your username and we will send you a link with which you can reset your password'
             );
         }
@@ -198,17 +216,19 @@ class LDAPLostPasswordHandler extends LostPasswordHandler
 
     public function passwordsent()
     {
-        $username = Convert::raw2xml(rawurldecode($this->getRequest()->param('ID')));
+        $username = Convert::raw2xml(
+            rawurldecode($this->getRequest()->param('OtherID')) . '.' . $this->request->getExtension()
+        );
 
         return [
             'Title' => _t(
-                'LDAPSecurity.PASSWORDSENTHEADER',
+                __CLASS__ . '.PASSWORDSENTHEADER',
                 "Password reset link sent to '{username}'",
                 ['username' => $username]
             ),
             'Content' =>
                 _t(
-                    'LDAPSecurity.PASSWORDSENTTEXT',
+                    __CLASS__ . '.PASSWORDSENTTEXT',
                     "Thank you! A reset link has been sent to '{username}', provided an account exists.",
                     ['username' => $username]
                 ),

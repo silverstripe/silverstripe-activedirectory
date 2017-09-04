@@ -194,14 +194,14 @@ class LDAPService implements Flushable
         // show better errors than the defaults for various status codes returned by LDAP
         if (!empty($messages[1]) && strpos($messages[1], 'NT_STATUS_ACCOUNT_LOCKED_OUT') !== false) {
             $message = _t(
-                'LDAPService.ACCOUNTLOCKEDOUT',
+                __CLASS__ . '.ACCOUNTLOCKEDOUT',
                 'Your account has been temporarily locked because of too many failed login attempts. ' .
                 'Please try again later.'
             );
         }
         if (!empty($messages[1]) && strpos($messages[1], 'NT_STATUS_LOGON_FAILURE') !== false) {
             $message = _t(
-                'LDAPService.INVALIDCREDENTIALS',
+                __CLASS__ . '.INVALIDCREDENTIALS',
                 'The provided details don\'t seem to be correct. Please try again.'
             );
         }
@@ -1040,7 +1040,7 @@ class LDAPService implements Flushable
             $this->getLogger()->warning(sprintf('Cannot update Member ID %s, GUID not set', $member->ID));
             $validationResult->addError(
                 _t(
-                    'LDAPAuthenticator.NOUSER',
+                    'SilverStripe\\ActiveDirectory\\Authenticators\\LDAPAuthenticator.NOUSER',
                     'Your account hasn\'t been setup properly, please contact an administrator.'
                 )
             );
@@ -1051,7 +1051,7 @@ class LDAPService implements Flushable
         if (empty($userData['distinguishedname'])) {
             $validationResult->addError(
                 _t(
-                    'LDAPAuthenticator.NOUSER',
+                    'SilverStripe\\ActiveDirectory\\Authenticators\\LDAPAuthenticator.NOUSER',
                     'Your account hasn\'t been setup properly, please contact an administrator.'
                 )
             );

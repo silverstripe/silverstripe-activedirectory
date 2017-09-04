@@ -47,7 +47,7 @@ class LDAPMemberSyncJob extends AbstractQueuedJob
      */
     public function getTitle()
     {
-        return _t('LDAPMemberSyncJob.SYNCTITLE', 'Sync all users from Active Directory');
+        return _t(__CLASS__ . '.SYNCTITLE', 'Sync all users from Active Directory');
     }
 
     /**

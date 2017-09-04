@@ -480,7 +480,7 @@ class LDAPGateway
     private function getLastPasswordError()
     {
         $defaultError = _t(
-            'LDAPAuthenticator.CANTCHANGEPASSWORD',
+            'SilverStripe\\ActiveDirectory\\Authenticators\\LDAPAuthenticator.CANTCHANGEPASSWORD',
             'We couldn\'t change your password, please contact an administrator.'
         );
         $error = '';

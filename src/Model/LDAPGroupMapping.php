@@ -57,8 +57,8 @@ class LDAPGroupMapping extends DataObject
         $fields = parent::getCMSFields();
         $fields->removeByName('DN');
 
-        $field = DropdownField::create('DN', _t('LDAPGroupMapping.LDAPGROUP', 'LDAP Group'));
-        $field->setEmptyString(_t('LDAPGroupMapping.SELECTONE', 'Select one'));
+        $field = DropdownField::create('DN', _t(__CLASS__ . '.LDAPGROUP', 'LDAP Group'));
+        $field->setEmptyString(_t(__CLASS__ . '.SELECTONE', 'Select one'));
         $groups = $this->ldapService->getGroups(true, ['dn', 'name']);
         if ($groups) {
             foreach ($groups as $dn => $record) {
@@ -72,12 +72,12 @@ class LDAPGroupMapping extends DataObject
         $fields->removeByName('Scope');
         $fields->addFieldToTab(
             'Root.Main',
-            DropdownField::create('Scope', _t('LDAPGroupMapping.SCOPE', 'Scope'), [
+            DropdownField::create('Scope', _t(__CLASS__ . '.SCOPE', 'Scope'), [
                 'Subtree' => _t(
-                    'LDAPGroupMapping.SUBTREE_DESCRIPTION',
+                    __CLASS__ . '.SUBTREE_DESCRIPTION',
                     'Users within this group and all nested groups within'
                 ),
-                'OneLevel' => _t('LDAPGroupMapping.ONELEVEL_DESCRIPTION', 'Only users within this group'),
+                'OneLevel' => _t(__CLASS__ . '.ONELEVEL_DESCRIPTION', 'Only users within this group'),
             ])
         );
 

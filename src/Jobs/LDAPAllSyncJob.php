@@ -48,7 +48,7 @@ class LDAPAllSyncJob extends AbstractQueuedJob
      */
     public function getTitle()
     {
-        return _t('LDAPAllSyncJob.SYNCTITLE', 'Sync all groups and users from Active Directory, and set mappings up.');
+        return _t(__CLASS__ . '.SYNCTITLE', 'Sync all groups and users from Active Directory, and set mappings up.');
     }
 
     /**

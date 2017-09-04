@@ -48,13 +48,13 @@ class LDAPLoginForm extends MemberLoginForm
         if (Config::inst()->get(LDAPAuthenticator::class, 'allow_email_login') === 'yes') {
             $loginField = TextField::create(
                 'Login',
-                _t('LDAPLoginForm.USERNAMEOREMAIL', 'Username or email'),
+                _t(__CLASS__ . '.USERNAMEOREMAIL', 'Username or email'),
                 null,
                 null,
                 $this
             );
         } else {
-            $loginField = TextField::create('Login', _t('LDAPLoginForm.USERNAME', 'Username'), null, null, $this);
+            $loginField = TextField::create('Login', _t(__CLASS__ . '.USERNAME', 'Username'), null, null, $this);
         }
 
         $this->Fields()->replaceField('Email', $loginField);
@@ -76,7 +76,7 @@ class LDAPLoginForm extends MemberLoginForm
             $forgotPasswordLink = sprintf(
                 '<p id="ForgotPassword"><a href="%s">%s</a></p>',
                 Security::singleton()->Link('lostpassword'),
-                _t('Member.BUTTONLOSTPASSWORD', "I've lost my password")
+                _t('SilverStripe\\Security\\Member.BUTTONLOSTPASSWORD', "I've lost my password")
             );
             $forgotPassword = LiteralField::create('forgotPassword', $forgotPasswordLink);
             $this->Actions()->add($forgotPassword);

@@ -95,7 +95,7 @@ class LDAPAuthenticator extends MemberAuthenticator
             if (Config::inst()->get(self::class, 'allow_email_login') != 'yes') {
                 $result->addError(
                     _t(
-                        'LDAPAuthenticator.PLEASEUSEUSERNAME',
+                        __CLASS__ . '.PLEASEUSEUSERNAME',
                         'Please enter your username instead of your email to log in.'
                     )
                 );
@@ -113,7 +113,7 @@ class LDAPAuthenticator extends MemberAuthenticator
                     }
                 }
 
-                $result->addError(_t('LDAPAuthenticator.INVALIDCREDENTIALS', 'Invalid credentials'));
+                $result->addError(_t(__CLASS__ . '.INVALIDCREDENTIALS', 'Invalid credentials'));
                 return null;
             }
         } else {
@@ -146,7 +146,7 @@ class LDAPAuthenticator extends MemberAuthenticator
         if (!$data) {
             $result->addError(
                 _t(
-                    'LDAPAuthenticator.PROBLEMFINDINGDATA',
+                    __CLASS__ . '.PROBLEMFINDINGDATA',
                     'There was a problem retrieving your user data'
                 )
             );

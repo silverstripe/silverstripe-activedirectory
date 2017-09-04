@@ -60,7 +60,7 @@ class LDAPChangePasswordForm extends ChangePasswordForm
         ) {
             $emailField = TextField::create(
                 'Email',
-                _t('LDAPLoginForm.USERNAMEOREMAIL', 'Email'),
+                _t(__CLASS__ . '.USERNAMEOREMAIL', 'Email'),
                 $member->Email,
                 null,
                 $this
@@ -69,7 +69,7 @@ class LDAPChangePasswordForm extends ChangePasswordForm
         if (!empty($data['samaccountname'])) {
             $usernameField = TextField::create(
                 'Username',
-                _t('LDAPLoginForm.USERNAME', 'Username'),
+                _t(__CLASS__ . '.USERNAME', 'Username'),
                 $data['samaccountname'],
                 null,
                 $this
@@ -108,7 +108,7 @@ class LDAPChangePasswordForm extends ChangePasswordForm
                 $this->clearMessage();
                 $this->sessionMessage(
                     _t(
-                        'LDAPAuthenticator.NOUSER',
+                        __CLASS__ . '.NOUSER',
                         'Your account hasn\'t been setup properly, please contact an administrator.'
                     ),
                     'bad'
@@ -119,7 +119,10 @@ class LDAPChangePasswordForm extends ChangePasswordForm
             if (!$loginResult['success']) {
                 $this->clearMessage();
                 $this->sessionMessage(
-                    _t('Member.ERRORPASSWORDNOTMATCH', 'Your current password does not match, please try again'),
+                    _t(
+                        'SilverStripe\\Security\\Member.ERRORPASSWORDNOTMATCH',
+                        'Your current password does not match, please try again'
+                    ),
                     'bad'
                 );
                 // redirect back to the form, instead of using redirectBack() which could send the user elsewhere.
@@ -143,7 +146,10 @@ class LDAPChangePasswordForm extends ChangePasswordForm
         if (empty($data['NewPassword1'])) {
             $this->clearMessage();
             $this->sessionMessage(
-                _t('Member.EMPTYNEWPASSWORD', "The new password can't be empty, please try again"),
+                _t(
+                    'SilverStripe\\Security\\Member.EMPTYNEWPASSWORD',
+                    "The new password can't be empty, please try again"
+                ),
                 'bad'
             );
 
@@ -194,7 +200,10 @@ class LDAPChangePasswordForm extends ChangePasswordForm
         } else {
             $this->clearMessage();
             $this->sessionMessage(
-                _t('Member.ERRORNEWPASSWORD', 'You have entered your new password differently, try again'),
+                _t(
+                    'SilverStripe\\Security\\Member.ERRORNEWPASSWORD',
+                    'You have entered your new password differently, try again'
+                ),
                 'bad'
             );
 

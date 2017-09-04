@@ -59,7 +59,7 @@ class SAMLLoginForm extends LoginForm
                 HiddenField::create('AuthenticationMethod', null, $this->authenticator_class, $this)
             ]);
             $actions = FieldList::create([
-                FormAction::create('logout', _t('Member.BUTTONLOGINOTHER', 'Log in as someone else'))
+                FormAction::create('logout', _t('SilverStripe\\Security\\Member.BUTTONLOGINOTHER', 'Log in as someone else'))
             ]);
         } else {
             $fields = $this->getFormFields();
@@ -85,7 +85,7 @@ class SAMLLoginForm extends LoginForm
     protected function getFormActions()
     {
         return FieldList::create([
-            FormAction::create('dologin', _t('Member.BUTTONLOGIN', 'Log in'))
+            FormAction::create('dologin', _t('SilverStripe\\Security\\Member.BUTTONLOGIN', 'Log in'))
         ]);
     }
 
