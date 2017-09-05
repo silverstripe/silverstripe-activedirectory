@@ -3,6 +3,7 @@
 namespace SilverStripe\ActiveDirectory\Authenticators;
 
 use Exception;
+use Psr\Log\LoggerInterface;
 use SilverStripe\ActiveDirectory\Forms\LDAPChangePasswordForm;
 use SilverStripe\ActiveDirectory\Services\LDAPService;
 use SilverStripe\Control\Director;
@@ -52,7 +53,7 @@ class LDAPChangePasswordHandler extends ChangePasswordHandler
             try {
                 $userData = $service->getUserByGUID($member->GUID);
             } catch (Exception $e) {
-                Injector::inst()->get('Logger')->error($e->getMessage());
+                Injector::inst()->get(LoggerInterface::class)->error($e->getMessage());
 
                 $form->clearMessage();
                 $form->sessionMessage(

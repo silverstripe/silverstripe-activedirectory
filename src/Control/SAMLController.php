@@ -185,7 +185,7 @@ class SAMLController extends Controller
      */
     public function getLogger()
     {
-        return Injector::inst()->get('Logger');
+        return Injector::inst()->get(LoggerInterface::class);
     }
 
     /**
