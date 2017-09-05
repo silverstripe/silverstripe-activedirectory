@@ -125,11 +125,11 @@ class LDAPChangePasswordHandler extends ChangePasswordHandler
                 $member->FailedLoginCount = null;
                 $member->write();
 
-                if (!empty($_REQUEST['BackURL'])
+                if (!empty($this->getRequest()->requestVar('BackURL'))
                     // absolute redirection URLs may cause spoofing
-                    && Director::is_site_url($_REQUEST['BackURL'])
+                    && Director::is_site_url($this->getRequest()->requestVar('BackURL'))
                 ) {
-                    $url = Director::absoluteURL($_REQUEST['BackURL']);
+                    $url = Director::absoluteURL($this->getRequest()->requestVar('BackURL'));
                     return $form->getController()->redirect($url);
                 } else {
                     // Redirect to default location - the login form saying "You are logged in as..."

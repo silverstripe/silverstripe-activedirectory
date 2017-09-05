@@ -51,15 +51,18 @@ class SAMLLoginForm extends LoginForm
     {
         $backURL = $this->getSession()->get('BackURL');
 
-        if (isset($_REQUEST['BackURL'])) {
-            $backURL = $_REQUEST['BackURL'];
+        if (!empty($this->getRequest()->requestVar('BackURL'))) {
+            $backURL = $this->getRequest()->requestVar('BackURL');
         }
         if ($this->shouldShowLogoutFields()) {
             $fields = FieldList::create([
                 HiddenField::create('AuthenticationMethod', null, $this->authenticator_class, $this)
             ]);
             $actions = FieldList::create([
-                FormAction::create('logout', _t('SilverStripe\\Security\\Member.BUTTONLOGINOTHER', 'Log in as someone else'))
+                FormAction::create(
+                    'logout',
+                    _t('SilverStripe\\Security\\Member.BUTTONLOGINOTHER', 'Log in as someone else')
+                )
             ]);
         } else {
             $fields = $this->getFormFields();
