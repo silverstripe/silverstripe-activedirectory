@@ -682,12 +682,14 @@ class LDAPService implements Flushable
             )
         );
 
-        foreach ($groupRecords as $groupRecord) {
-            if (!in_array($groupRecord['GroupID'], $mappedGroupIDs)) {
-                $group = Group::get()->byId($groupRecord['GroupID']);
-                // Some groups may no longer exist. SilverStripe does not clean up join tables.
-                if ($group) {
-                    $group->Members()->remove($member);
+        if (!empty($mappedGroupIDs)) {
+            foreach ($groupRecords as $groupRecord) {
+                if (!in_array($groupRecord['GroupID'], $mappedGroupIDs)) {
+                    $group = Group::get()->byId($groupRecord['GroupID']);
+                    // Some groups may no longer exist. SilverStripe does not clean up join tables.
+                    if ($group) {
+                        $group->Members()->remove($member);
+                    }
                 }
             }
         }
