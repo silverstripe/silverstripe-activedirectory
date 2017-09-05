@@ -158,26 +158,10 @@ class LDAPLostPasswordHandler extends LostPasswordHandler
      */
     public function lostPasswordForm()
     {
-        if (Config::inst()->get(LDAPAuthenticator::class, 'allow_email_login') === 'yes') {
-            $loginField = TextField::create(
-                'Login',
-                _t('SilverStripe\\ActiveDirectory\\Forms\\LDAPLoginForm.USERNAMEOREMAIL', 'Username or email'),
-                null,
-                null,
-                $this
-            );
-        } else {
-            $loginField = TextField::create(
-                'Login',
-                _t(
-                    'SilverStripe\\ActiveDirectory\\Forms\\LDAPLoginForm.USERNAME',
-                    'Username'
-                ),
-                null,
-                null,
-                $this
-            );
-        }
+        $loginFieldLabel = (Config::inst()->get(LDAPAuthenticator::class, 'allow_email_login') === 'yes') ?
+            _t('SilverStripe\\ActiveDirectory\\Forms\\LDAPLoginForm.USERNAMEOREMAIL', 'Username or email') :
+            _t('SilverStripe\\ActiveDirectory\\Forms\\LDAPLoginForm.USERNAME', 'Username');
+        $loginField = TextField::create('Login', $loginFieldLabel);
 
         $action = FormAction::create(
             'forgotPassword',

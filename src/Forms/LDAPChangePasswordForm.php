@@ -10,6 +10,7 @@ use SilverStripe\Control\HTTP;
 use SilverStripe\Control\HTTPResponse;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Injector\Injector;
+use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\TextField;
 use SilverStripe\ORM\ValidationResult;
 use SilverStripe\Security\Member;
@@ -25,8 +26,8 @@ class LDAPChangePasswordForm extends ChangePasswordForm
      * The sole purpose for overriding the constructor is surfacing the username to the user.
      * @param \SilverStripe\Control\RequestHandler $controller
      * @param string $name
-     * @param null $fields
-     * @param null $actions
+     * @param FieldList $fields
+     * @param FieldList $actions
      */
     public function __construct($controller, $name, $fields = null, $actions = null)
     {
