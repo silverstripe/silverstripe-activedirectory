@@ -161,7 +161,7 @@ class LDAPAuthenticator extends MemberAuthenticator
 
         // Update the users from LDAP so we are sure that the email is correct.
         // This will also write the Member record.
-        $service->updateMemberFromLDAP($member, $data, false);
+        $service->updateMemberFromLDAP($member, $data);
 
         $request->getSession()->clear('BackURL');
 
