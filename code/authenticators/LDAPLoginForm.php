@@ -29,6 +29,12 @@ class LDAPLoginForm extends MemberLoginForm
      */
     const RESPONSE_TIME = 2;
 
+    /**
+     * Enables consistent handling times of password resets
+     * @config
+     */
+    private static $consistent_password_times = false;
+
 
     /**
      * Constructor.
@@ -200,6 +206,10 @@ JS;
      */
     protected function consistentResponseTime($startTime)
     {
+        if (!Config::inst()->get('LDAPLoginForm', 'consistent_password_times')) {
+            return;
+        }
+
         $timeTaken = microtime() - $startTime;
         if ($timeTaken < self::RESPONSE_TIME) {
             $sleepTime = self::RESPONSE_TIME - $timeTaken;
