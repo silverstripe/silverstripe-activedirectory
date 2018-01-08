@@ -75,12 +75,12 @@ Contact your system administrator if you are not sure how to install these.
 ### IdP certificate and other requirements
 
 The following pieces of information are required to configure our SP endpoint:
- 
+
 - IdP certificate
 - IdP entityId (e.g. `https://<idp-domain>/adfs/services/trust`)
 - IdP SSO URL (e.g. `https://<idp-domain>/adfs/ls`)
 
-Talk with your ADFS administrator to find out how to obtain these. If you are managing ADFS yourself, consult the 
+Talk with your ADFS administrator to find out how to obtain these. If you are managing ADFS yourself, consult the
 [ADFS administrator guide](adfs.md).
 
 It is also possible to extract this metadata from the IdP endpoint, if ADFS is already running and the domain is known.
@@ -123,7 +123,7 @@ configuration. For ADFS it's possible to downgrade the default from SHA-256 to
 	SAMLConfiguration:
 	  Security:
 	    signatureAlgorithm: "http://www.w3.org/2000/09/xmldsig#rsa-sha1"
-	   
+
 ### Authentication Context config
 
 It is possible to tweak Authentication Context for the SAML requests. In practice, this depends on the [ADFS
@@ -140,7 +140,7 @@ SAML request.
 	SAMLConfiguration:
 	  Security:
         requestedAuthnContextBool: false
-          
+
 It is also possible to provide custom list of Authentication Contexts, as well as the value for the "Comparison"
 attribute:
 
@@ -149,7 +149,7 @@ attribute:
         requestedAuthnContextArray:
           - 'urn:federation:authentication:windows',
         requestedAuthnContextComparison: 'maximum'
-          
+
 ### Service Provider (SP)
 
  - `entityId`: URI that uniquely identifies the party. This *must* be set to the site URL (e.g.  `https://<your-site-domain>`), because we reuse it as the base URL for the SAML endpoints.
@@ -554,6 +554,15 @@ If you enable `update_ldap_from_local` saving a user in the Security section of 
 a Member object will push up the mapped fields to LDAP, assuming that Member record has a `GUID` field.
 
 See "Map AD attributes to Member fields" section above for more information on mapping fields.
+
+### Ensuring consistent response times
+
+It is possible to figure out if a user exists in the database when sending a password reset link by observing the response time. To ensure response times are the same regardless of if the user exists you can enable the following configuration:
+
+```yaml
+LDAPLoginForm:
+  consistent_password_times: true
+```
 
 ## Resources
 

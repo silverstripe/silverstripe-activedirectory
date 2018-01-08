@@ -23,6 +23,20 @@ class LDAPLoginForm extends MemberLoginForm
     protected $ldapSecController = null;
 
     /**
+     * Time in seconds that we use to ensure consistent repsonse times
+     *
+     * @var int
+     */
+    const RESPONSE_TIME = 2;
+
+    /**
+     * Enables consistent handling times of password resets
+     * @config
+     */
+    private static $consistent_password_times = false;
+
+
+    /**
      * Constructor.
      *
      * @param Controller $controller
@@ -70,10 +84,10 @@ class LDAPLoginForm extends MemberLoginForm
         // Focus on the Username field when the page is loaded
         Requirements::block('MemberLoginFormFieldFocus');
         $js = <<<JS
-			(function() {
-				var el = document.getElementById("Login");
-				if(el && el.focus && (typeof jQuery == 'undefined' || jQuery(el).is(':visible'))) el.focus();
-			})();
+            (function() {
+                var el = document.getElementById("Login");
+                if(el && el.focus && (typeof jQuery == 'undefined' || jQuery(el).is(':visible'))) el.focus();
+            })();
 JS;
         Requirements::customScript($js, 'LDAPLoginFormFieldFocus');
     }
@@ -96,6 +110,7 @@ JS;
      */
     public function forgotPassword($data)
     {
+        $startTime = microtime();
         // No need to protect against injections, LDAPService will ensure that this is safe
         $login = trim($data['Login']);
 
@@ -109,6 +124,7 @@ JS;
                     ),
                     'bad'
                 );
+                $this->consistentResponseTime($startTime);
                 $this->controller->redirect($this->controller->Link('lostpassword'));
                 return;
             }
@@ -120,6 +136,7 @@ JS;
         // Avoid information disclosure by displaying the same status,
         // regardless whether the email address actually exists
         if (!isset($userData['objectguid'])) {
+            $this->consistentResponseTime($startTime);
             return $this->controller->redirect($this->controller->Link('passwordsent/')
                 . urlencode($data['Login']));
         }
@@ -138,6 +155,7 @@ JS;
         // Allow vetoing forgot password requests
         $results = $this->extend('forgotPassword', $member);
         if ($results && is_array($results) && in_array(false, $results, true)) {
+            $this->consistentResponseTime($startTime);
             return $this->controller->redirect($this->ldapSecController->Link('lostpassword'));
         }
 
@@ -150,10 +168,12 @@ JS;
             ]);
             $e->setTo($member->Email);
             $e->send();
+            $this->consistentResponseTime($startTime);
             $this->controller->redirect($this->controller->Link('passwordsent/') . urlencode($data['Login']));
         } elseif ($data['Login']) {
             // Avoid information disclosure by displaying the same status,
             // regardless whether the email address actually exists
+            $this->consistentResponseTime($startTime);
             $this->controller->redirect($this->controller->Link('passwordsent/') . urlencode($data['Login']));
         } else {
             if (Config::inst()->get('LDAPAuthenticator', 'allow_email_login')==='yes') {
@@ -173,7 +193,29 @@ JS;
                     'bad'
                 );
             }
+            $this->consistentResponseTime($startTime);
             $this->controller->redirect($this->controller->Link('lostpassword'));
         }
+    }
+
+    /**
+     * Ensures response times are the same across all scenarios i.e. email exists or doesn't
+     * this helps to avoid issues where malicious users could find if an email is legitimate based on response time
+     *
+     * @param float $startTime
+     */
+    protected function consistentResponseTime($startTime)
+    {
+        if (!Config::inst()->get('LDAPLoginForm', 'consistent_password_times')) {
+            return;
+        }
+
+        $timeTaken = microtime() - $startTime;
+        if ($timeTaken < self::RESPONSE_TIME) {
+            $sleepTime = self::RESPONSE_TIME - $timeTaken;
+            // usleep takes microseconds, so we times our sleep period by 1mil (1mil ms = 1s)
+            usleep($sleepTime * 1000000);
+        }
+
     }
 }
