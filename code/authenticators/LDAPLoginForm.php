@@ -110,7 +110,8 @@ JS;
      */
     public function forgotPassword($data)
     {
-        $startTime = microtime();
+        // Passing true returns a float rather than a string
+        $startTime = microtime(true);
         // No need to protect against injections, LDAPService will ensure that this is safe
         $login = trim($data['Login']);
 
@@ -210,7 +211,7 @@ JS;
             return;
         }
 
-        $timeTaken = microtime() - $startTime;
+        $timeTaken = microtime(true) - $startTime;
         if ($timeTaken < self::RESPONSE_TIME) {
             $sleepTime = self::RESPONSE_TIME - $timeTaken;
             // usleep takes microseconds, so we times our sleep period by 1mil (1mil ms = 1s)
