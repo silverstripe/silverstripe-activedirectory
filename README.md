@@ -29,6 +29,9 @@ This module has been tested on the following configurations:
 
 This module has not been tested on non-Microsoft directory products, such as OpenLDAP.
 
+**Note:** This module will not be supported on SilverStripe 4. Please use either [silverstripe/ldap](https://github.com/silverstripe/silverstripe-ldap)
+or [silverstripe/saml](https://github.com/silverstripe/silverstripe-saml) for SilverStripe 4 compatibility.
+
 ## Overview
 
 ![](docs/en/img/saml_ad_integration.png)
