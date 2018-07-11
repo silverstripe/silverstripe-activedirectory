@@ -1,5 +1,5 @@
 {
-    "name": "silverstripe/activedirectory",
+    "name": "zenril/activedirectory",
     "description": "Adds Active Directory support to SilverStripe including user synchronisation and SSO/LDAP authentication",
     "type": "silverstripe-module",
     "keywords": ["silverstripe", "ad", "active", "directory", "ldap", "sso", "saml"],
