@@ -90,7 +90,7 @@ class SAMLController extends Controller
                 continue;
             }
 
-            $member->$field = $attributes[$claim][0];
+            $member->$field = $attributes[$claim];
         }
 
         $member->SAMLSessionIndex = $auth->getSessionIndex();
