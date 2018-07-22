@@ -90,7 +90,11 @@ class SAMLController extends Controller
                 continue;
             }
 
-            $member->$field = $attributes[$claim][0];
+            if(count($attributes[$claim]) > 1) {
+                $member->$field = $attributes[$claim];
+            } else {
+                $member->$field = $attributes[$claim][0];
+            }
         }
 
         $member->SAMLSessionIndex = $auth->getSessionIndex();
