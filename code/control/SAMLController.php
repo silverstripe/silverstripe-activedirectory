@@ -90,7 +90,7 @@ class SAMLController extends Controller
                 continue;
             }
 
-            if(is_array($attributes[$claim]) && count($attributes[$claim]) > 1) {
+            if(count($attributes[$claim]) > 1) {
                 $member->$field = $attributes[$claim];
             } else {
                 $member->$field = $attributes[$claim][0];
