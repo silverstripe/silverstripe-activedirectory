@@ -33,6 +33,25 @@ class SAMLConfiguration extends Object
     private static $IdP;
 
     /**
+     * @config
+     * @var bool Whether or not we expect to receive a binary NameID from the IdP. We expect to receive a binary NameID
+     * from ADFS, but don't expect it from Azure AD or most other SAML implementations that provide GUIDs.
+     *
+     * Defaults to true to preserve backwards compatibility (ADFS).
+     */
+    private static $expect_binary_nameid = true;
+
+    /**
+     * @config
+     * @var bool Whether or not we allow searching for existing members in the SilverStripe database based on their
+     * email address. Marked as insecure because if warnings in developer documentation are not read and understood,
+     * this can provide access to the website to people who should not otherwise have access.
+     *
+     * Defaults to false to prevent looking up members based on email address.
+     */
+    private static $allow_insecure_email_linking = false;
+
+    /**
      * @var array
      */
     private static $Security = [

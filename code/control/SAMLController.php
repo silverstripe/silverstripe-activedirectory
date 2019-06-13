@@ -33,6 +33,7 @@ class SAMLController extends Controller
      */
     public function acs()
     {
+        /** @var OneLogin_Saml2_Auth $auth */
         $auth = Injector::inst()->get('SAMLHelper')->getSAMLAuth();
         $auth->processResponse();
 
@@ -41,12 +42,14 @@ class SAMLController extends Controller
             SS_Log::log($error, SS_Log::ERR);
             Form::messageForForm("SAMLLoginForm_LoginForm", "Authentication error: '{$error}'", 'bad');
             Session::save();
+
             return $this->getRedirect();
         }
 
         if (!$auth->isAuthenticated()) {
             Form::messageForForm("SAMLLoginForm_LoginForm", _t('Member.ERRORWRONGCRED'), 'bad');
             Session::save();
+
             return $this->getRedirect();
         }
 
@@ -55,28 +58,52 @@ class SAMLController extends Controller
         if (ctype_print($decodedNameId)) {
             Form::messageForForm("SAMLLoginForm_LoginForm", "Name ID provided by IdP is not a binary GUID.", 'bad');
             Session::save();
+
             return $this->getRedirect();
         }
 
-        // transform the NameId to guid
-        $guid = LDAPUtil::bin_to_str_guid($decodedNameId);
-        if (!LDAPUtil::validGuid($guid)) {
-            $errorMessage = "Not a valid GUID '{$guid}' recieved from server.";
-            SS_Log::log($errorMessage, SS_Log::ERR);
-            Form::messageForForm("SAMLLoginForm_LoginForm", $errorMessage, 'bad');
-            Session::save();
-            return $this->getRedirect();
+        /**
+         * If processing reaches here, then the user is authenticated - the rest of this method is just processing their
+         * legitimate information and configuring their account.
+         */
+
+        // If we expect the NameID to be a binary version of the GUID (ADFS), check that it actually is
+        // If we are configured not to expect a binary NameID, then we assume it is a direct GUID (Azure AD)
+        if (Config::inst()->get('SAMLConfiguration', 'expect_binary_nameid')) {
+            // transform the binary NameId to guid
+            $guid = LDAPUtil::bin_to_str_guid($decodedNameId);
+
+            if (!LDAPUtil::validGuid($guid)) {
+                $errorMessage = "Not a valid GUID '{$guid}' recieved from server.";
+                SS_Log::log($errorMessage, SS_Log::ERR);
+                Form::messageForForm("SAMLLoginForm_LoginForm", $errorMessage, 'bad');
+                Session::save();
+                return $this->getRedirect();
+            }
+        } else {
+            $guid = $auth->getNameId();
         }
+
+        $fieldToClaimMap = array_flip(Member::config()->claims_field_mappings);
+        $attributes = $auth->getAttributes();
 
         // Write a rudimentary member with basic fields on every login, so that we at least have something
-        // if LDAP synchronisation fails.
+        // if there is no further sync (e.g. via LDAP)
         $member = Member::get()->filter('GUID', $guid)->limit(1)->first();
-        if (!($member && $member->exists())) {
+        if (!($member && $member->exists()) &&  Config::inst()->get('SAMLConfiguration', 'allow_insecure_email_linking') && isset($fieldToClaimMap['Email'])) {
+            // If there is no member found via GUID and we allow linking via email, search by email
+            $member = Member::get()->filter('Email', $attributes[$fieldToClaimMap['Email']])->limit(1)->first();
+
+            if (!($member && $member->exists())) {
+                $member = new Member();
+            }
+
+            $member->GUID = $guid;
+        } elseif (!($member && $member->exists())) {
+            // If the member doesn't exist and we don't allow linking via email, then create a new member
             $member = new Member();
             $member->GUID = $guid;
         }
-
-        $attributes = $auth->getAttributes();
 
         foreach ($member->config()->claims_field_mappings as $claim => $field) {
             if (!isset($attributes[$claim][0])) {
@@ -84,7 +111,8 @@ class SAMLController extends Controller
                     sprintf(
                         'Claim rule \'%s\' configured in LDAPMember.claims_field_mappings, but wasn\'t passed through. Please check IdP claim rules.',
                         $claim
-                    ), SS_Log::WARN
+                    ),
+                    SS_Log::WARN
                 );
 
                 continue;
@@ -94,6 +122,8 @@ class SAMLController extends Controller
         }
 
         $member->SAMLSessionIndex = $auth->getSessionIndex();
+
+        $member->write();
 
         // This will trigger LDAP update through LDAPMemberExtension::memberLoggedIn.
         // The LDAP update will also write the Member record. We shouldn't write before
