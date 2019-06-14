@@ -84,6 +84,8 @@ class SAMLController extends Controller
             $guid = $auth->getNameId();
         }
 
+        $this->extend('updateGuid', $guid);
+
         $fieldToClaimMap = array_flip(Member::config()->claims_field_mappings);
         $attributes = $auth->getAttributes();
 

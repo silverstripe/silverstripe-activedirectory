@@ -22,6 +22,7 @@ We assume ADFS 2.0 or greater is used as an IdP.
   - [Service Provider (SP)](#service-provider-sp)
   - [Identity Provider (IdP)](#identity-provider-idp)
 - [Check configuration](#check-configuration)
+- [GUID Transformation](#guid-transformation)
 - [Establish trust](#establish-trust)
 - [Configure SilverStripe Authenticators](#configure-silverstripe-authenticators)
   - [Bypass auto login](#bypass-auto-login)
@@ -177,6 +178,11 @@ attribute:
 
 At this point you should be able to verify your SAML endpoint is configured correctly. Go to `<your-site>/saml/metadata`
 and see if this is generated without errors. This endpoint will be used by ADFS to set up trust with our SP.
+
+## GUID Transformation
+
+ If you prefer to receive the GUID in lower-case or upper-case format you can use the 
+`updateGuid()` extension point on `SAMLController`.
 
 ## Establish trust
 
