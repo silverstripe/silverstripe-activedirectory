@@ -14,7 +14,7 @@ class LDAPUtil
      */
     public static function validGuid($guid)
     {
-        if (preg_match('/^[A-Z0-9]{8}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{12}?$/', $guid)) {
+        if (preg_match('/^[A-F0-9]{8}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{12}?$/', $guid)) {
             return true;
         }
         return false;
