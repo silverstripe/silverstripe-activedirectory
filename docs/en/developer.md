@@ -10,7 +10,7 @@ We assume ADFS 2.0 or greater is used as an IdP.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
 
 - [Install the module](#install-the-module)
 - [Gather pre-requisites](#gather-pre-requisites)
@@ -22,6 +22,7 @@ We assume ADFS 2.0 or greater is used as an IdP.
   - [Service Provider (SP)](#service-provider-sp)
   - [Identity Provider (IdP)](#identity-provider-idp)
 - [Check configuration](#check-configuration)
+- [GUID Transformation](#guid-transformation)
 - [Establish trust](#establish-trust)
 - [Configure SilverStripe Authenticators](#configure-silverstripe-authenticators)
   - [Bypass auto login](#bypass-auto-login)
@@ -41,11 +42,14 @@ We assume ADFS 2.0 or greater is used as an IdP.
   - [Debugging LDAP from SilverStripe](#debugging-ldap-from-silverstripe)
   - [Debugging LDAP directly](#debugging-ldap-directly)
 - [Advanced SAML configuration](#advanced-saml-configuration)
+  - [Custom Configuration](#custom-configuration)
+  - [Allow insecure linking-by-email](#allow-insecure-linking-by-email)
 - [Advanced features](#advanced-features)
   - [Allowing email login on LDAP login form instead of username](#allowing-email-login-on-ldap-login-form-instead-of-username)
   - [Falling back authentication on LDAP login form](#falling-back-authentication-on-ldap-login-form)
   - [Allowing users to update their AD password](#allowing-users-to-update-their-ad-password)
   - [Writing LDAP data from SilverStripe](#writing-ldap-data-from-silverstripe)
+  - [Ensuring consistent response times](#ensuring-consistent-response-times)
 - [Resources](#resources)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -87,11 +91,17 @@ It is also possible to extract this metadata from the IdP endpoint, if ADFS is a
 Go to `https://<idp-domain>/FederationMetadata/2007-06/FederationMetadata.xml`, and trawl the XML for the required
 pieces.
 
+* If you are integrating with Azure AD, direct the Azure AD administrator to the [Azure AD administrator guide](azure-ad.md).
+
+Note: For Azure AD, you will first need to decide on the Entity ID (see next step) so that you can provide this to the Azure AD administrator - they can't provide you the certificates until you provide them the Entity ID and Reply URL values.
+
 ## YAML configuration
 
 Now we need to make the *silverstripe-activedirectory* module aware of where the certificates can be found.
 
 Add the following configuration to `mysite/_config/saml.yml` (make sure to replace paths to the certificates and keys):
+
+**Note:** If you are configuring this application for integration with Azure AD, a couple of extra keys need to be set. See the '[Additional configuration for Azure AD](#additional-configuration-for-azure-ad)' section below.
 
 	---
 	Name: mysamlsettings
@@ -168,6 +178,11 @@ attribute:
 
 At this point you should be able to verify your SAML endpoint is configured correctly. Go to `<your-site>/saml/metadata`
 and see if this is generated without errors. This endpoint will be used by ADFS to set up trust with our SP.
+
+## GUID Transformation
+
+ If you prefer to receive the GUID in lower-case or upper-case format you can use the 
+`updateGuid()` extension point on `SAMLController`.
 
 ## Establish trust
 
@@ -440,6 +455,9 @@ ldapsearch \
 
 ## Advanced SAML configuration
 
+
+### Custom Configuration 
+
 It is possible to customize all the settings provided by the 3rd party SAML code.
 
 This can be done by registering your own `SAMLConfiguration` object via `mysite/_config/saml.yml`:
@@ -467,6 +485,36 @@ and the MySAMLConfiguration.php:
 
 See the [advanced\_settings\_example.php](https://github.com/onelogin/php-saml/blob/master/advanced_settings_example.php)
 for the advanced settings.
+
+### Allow insecure linking-by-email
+
+Normally the SAML module looks for a `Member` record based only on the GUID returned by the IdP. However, this can break in some situations, particularly when you are retrofitting single-sign-on into an existing system that already has member records in the database. A common use-case is that the website is setup, with centralised SSO being added later. At that point, you already have members that are setup with standard email/password logins, and those email addresses are the same as the user's primary email in the IdP. When the SAML module searches for a user when they login via SSO for the first time, it won't find them based on GUID, and will throw an error because it will attempt to create a new member with the same email as an existing user.
+
+For this reason, the `allow_insecure_email_linking` YML config variable exists. During the transition period, you can enable this option so that if the lookup-by-GUID fails to find a valid member, the module will then attempt to lookup via the provided email address before falling back to creating a new member record.
+
+**Note: This is not recommended in production.** If this setting is enabled, then we fall back to relying on the non-unique email address to log in to an existing member's account. For example, consider the situation where John Smith previously had an email/password login to your website. They leave the company, and a new John Smith (unrelated to the website) inherits the email address when they join the company. If this option is enabled and the new John Smith attempts to login, despite them not being allowed access, we will set the user up and link them to the old accounts (and whatever permissions the old user had).
+
+We strongly recommend that you perform a full review of all users and permission levels for all members in the CMS **before you enable this setting** to ensure you will only create accounts for people that currently exist at the IdP.
+
+You can enable this setting with the following YML config:
+
+```yaml
+
+---
+Name: mysamlsettings
+After: '#samlsettings'
+---
+SAMLConfiguration:
+  allow_insecure_email_linking: true
+```
+
+**Note**: You will also need to specify a `SAMLMemberExtension.claims_field_mappings` claim map that sets a value for 'Email', so that the IdP provides a value to include in the email field, for example:
+
+```yaml
+SAMLMemberExtension:
+  claims_field_mappings:
+    - 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress': 'Email'
+```
 
 ## Advanced features
 
