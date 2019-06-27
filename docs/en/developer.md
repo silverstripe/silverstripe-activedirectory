@@ -50,6 +50,7 @@ We assume ADFS 2.0 or greater is used as an IdP.
   - [Allowing users to update their AD password](#allowing-users-to-update-their-ad-password)
   - [Writing LDAP data from SilverStripe](#writing-ldap-data-from-silverstripe)
   - [Ensuring consistent response times](#ensuring-consistent-response-times)
+  - [Additional GET Query Params for SAML](#additional-get-query-params-for-saml)
 - [Resources](#resources)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -611,6 +612,18 @@ It is possible to figure out if a user exists in the database when sending a pas
 LDAPLoginForm:
   consistent_password_times: true
 ```
+
+### Additional GET Query Params for SAML
+example:
+```yaml
+SAMLAuthenticator:
+  additional_get_query_params:
+    someGetQueryParameter: 'value'
+    AnotherParameter: 'differentValue'
+```
+
+this configuration allows you to add two GET query parameters to endpoint request URL:
+`https://your-idp.com/singleSignOnService/saml2?someGetQueryParameter=value&AnotherParameter=differentValue&SAMLRequest=XYZ....`
 
 ## Resources
 
