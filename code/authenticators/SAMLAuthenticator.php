@@ -21,6 +21,14 @@ class SAMLAuthenticator extends Authenticator
     private $name = 'SAML';
 
     /**
+     * @example ['GET Query Parameter Name' => 'Parameter Value', ... ]
+     *
+     * @var string[]
+     * @config
+     */
+    private static $additional_get_query_params = [];
+
+    /**
      * @return string
      */
     public static function get_name()
@@ -51,8 +59,20 @@ class SAMLAuthenticator extends Authenticator
     {
         // $data is not used - the form is just one button, with no fields.
         $auth = Injector::inst()->get('SAMLHelper')->getSAMLAuth();
+        /** @var $auth \OneLogin_Saml2_Auth */
+
         Session::set('BackURL', isset($data['BackURL']) ? $data['BackURL'] : null);
         Session::save();
-        $auth->login(Director::absoluteBaseURL().'saml/');
+
+        $additionalGetQueryParams = SAMLAuthenticator::config()->get('additional_get_query_params');
+
+        if (!is_array($additionalGetQueryParams)) {
+            $additionalGetQueryParams = [];
+        }
+
+        $auth->login(
+            Director::absoluteBaseURL().'saml/',
+            $additionalGetQueryParams
+        );
     }
 }
