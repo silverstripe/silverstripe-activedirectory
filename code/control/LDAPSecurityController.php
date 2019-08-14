@@ -42,7 +42,7 @@ class LDAPSecurityController extends Security
      */
     public function ChangePasswordForm()
     {
-        return Object::create('LDAPChangePasswordForm', $this, 'ChangePasswordForm');
+        return SS_Object::create('LDAPChangePasswordForm', $this, 'ChangePasswordForm');
     }
 
     public function lostpassword()

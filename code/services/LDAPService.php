@@ -12,7 +12,7 @@
  *
  * LDAPService relies on Zend LDAP module's data structures for some parameters and some return values.
  */
-class LDAPService extends Object implements Flushable
+class LDAPService extends SS_Object implements Flushable
 {
     /**
      * @var array
