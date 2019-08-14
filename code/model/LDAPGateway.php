@@ -5,7 +5,7 @@
  * Works within the LDAP domain model to provide basic operations.
  * These are exclusively used in LDAPService for constructing more complex operations.
  */
-class LDAPGateway extends Object
+class LDAPGateway extends SS_Object
 {
     /**
      * @var array
