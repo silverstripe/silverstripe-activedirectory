@@ -117,6 +117,7 @@ class SAMLController extends Controller
     public function metadata()
     {
         try {
+            /** @var OneLogin_Saml2_Auth $auth */
             $auth = Injector::inst()->get('SAMLHelper')->getSAMLAuth();
             $settings = $auth->getSettings();
             $metadata = $settings->getSPMetadata();
