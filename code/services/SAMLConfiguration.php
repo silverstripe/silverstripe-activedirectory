@@ -116,6 +116,10 @@ class SAMLConfiguration extends Object
 
         $security = $this->config()->get('Security');
 
+        if (isset($security['wantAssertionsEncrypted'])) {
+            $conf['security']['wantAssertionsEncrypted'] = (bool)$security['wantAssertionsEncrypted'];
+        }
+
         if (isset($security['signatureAlgorithm'])) {
             // Algorithm that the toolkit will use on signing process. Options:
             //  - 'http://www.w3.org/2000/09/xmldsig#rsa-sha1'
