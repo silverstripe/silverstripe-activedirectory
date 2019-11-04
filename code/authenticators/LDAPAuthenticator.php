@@ -71,70 +71,113 @@ class LDAPAuthenticator extends Authenticator
      */
     public static function authenticate($data, Form $form = null)
     {
+        /** @var LDAPService $service */
         $service = Injector::inst()->get('LDAPService');
+
         $login = trim($data['Login']);
-        if (Email::validEmailAddress($login)) {
-            if ('yes' != Config::inst()->get('LDAPAuthenticator', 'allow_email_login')) {
-                $form->sessionMessage(
-                    _t(
-                        'LDAPAuthenticator.PLEASEUSEUSERNAME',
-                        'Please enter your username instead of your email to log in.'
-                    ),
-                    'bad'
-                );
+        $username = $login;
+        if (Email::is_valid_address($login)) {
+            if (!self::allow_email_logins()) {
+                self::form_error_msg($form, _t('LDAPAuthenticator.PLEASEUSEUSERNAME', 'Please enter your username instead of your email to log in.'));
 
                 return;
             }
-
             $username = $service->getUsernameByEmail($login);
 
-            // No user found with this email.
             if (!$username) {
-                if ('yes' === Config::inst()->get('LDAPAuthenticator', 'fallback_authenticator')) {
-                    $fallbackMember = self::fallback_authenticate($data, $form);
-                    if ($fallbackMember) {
-                        return $fallbackMember;
-                    }
-                }
-
-                $form->sessionMessage(_t('LDAPAuthenticator.INVALIDCREDENTIALS', 'Invalid credentials'), 'bad');
-
-                return;
-            }
-        } else {
-            $username = $login;
-        }
-
-        $result = $service->authenticate($username, $data['Password']);
-        $success = true === $result['success'];
-        if (!$success) {
-            if ('yes' === Config::inst()->get('LDAPAuthenticator', 'fallback_authenticator')) {
                 $fallbackMember = self::fallback_authenticate($data, $form);
                 if ($fallbackMember) {
                     return $fallbackMember;
                 }
+
+                self::form_error_msg($form, _t('LDAPAuthenticator.INVALIDCREDENTIALS', 'Invalid credentials'));
+
+                return;
+            }
+        }
+
+        $result = $service->authenticate($username, $data['Password']);
+        if (true !== $result['success']) {
+            $fallbackMember = self::fallback_authenticate($data, $form);
+            if ($fallbackMember) {
+                return $fallbackMember;
             }
 
-            if ($form) {
-                $form->sessionMessage($result['message'], 'bad');
-            }
+            self::form_error_msg($form, $result['message']);
 
             return;
         }
 
-        $data = $service->getUserByUsername($result['identity']);
-        if (!$data) {
-            if ($form) {
-                $form->sessionMessage(
-                    _t('LDAPAuthenticator.PROBLEMFINDINGDATA', 'There was a problem retrieving your user data'),
-                    'bad'
-                );
-            }
+        $identity = $result['identity'];
 
+        $member = self::get_member($identity);
+        if (!$member) {
+            self::form_error_msg($form, _t('LDAPAuthenticator.PROBLEMFINDINGDATA', 'There was a problem retrieving your user data'));
+        }
+
+        Session::clear('BackURL');
+
+        return $member;
+    }
+
+    /**
+     * Try to authenticate using the fallback authenticator if enabled via config fallback_authenticator.
+     *
+     * @param array     $data
+     * @param Form|null $form
+     *
+     * @return Member|null
+     */
+    protected static function fallback_authenticate($data, Form $form = null)
+    {
+        if ('yes' !== Config::inst()->get('LDAPAuthenticator', 'fallback_authenticator')) {
+            return null;
+        }
+
+        $authClass = Config::inst()->get('LDAPAuthenticator', 'fallback_authenticator_class');
+
+        SS_Log::log(sprintf('Using fallback authenticator "%s"', $authClass), SS_Log::DEBUG);
+
+        return call_user_func(
+            [$authClass, 'authenticate'],
+            array_merge($data, ['Email' => $data['Login']]),
+            $form
+        );
+    }
+
+    private static function form_error_msg($form, $message)
+    {
+        if (!$form) {
             return;
+        }
+
+        $form->sessionMessage($message, 'bad');
+    }
+
+    /**
+     * @return bool
+     */
+    private static function allow_email_logins()
+    {
+        return 'yes' === Config::inst()->get('LDAPAuthenticator', 'allow_email_login');
+    }
+
+    /**
+     * @param string $identity
+     * @return Member|null
+     */
+    private static function get_member($identity)
+    {
+        /** @var LDAPService $service */
+        $service = Injector::inst()->get('LDAPService');
+
+        $data = $service->getUserByUsername($identity);
+        if (!$data) {
+            return null;
         }
 
         // LDAPMemberExtension::memberLoggedIn() will update any other AD attributes mapped to Member fields
+        /** @var Member $member */
         $member = Member::get()->filter('GUID', $data['objectguid'])->limit(1)->first();
         if (!($member && $member->exists())) {
             $member = new Member();
@@ -145,25 +188,6 @@ class LDAPAuthenticator extends Authenticator
         // This will also write the Member record.
         $service->updateMemberFromLDAP($member);
 
-        Session::clear('BackURL');
-
         return $member;
-    }
-
-    /**
-     * Try to authenticate using the fallback authenticator.
-     *
-     * @param array     $data
-     * @param Form|null $form
-     *
-     * @return Member|null
-     */
-    protected static function fallback_authenticate($data, Form $form = null)
-    {
-        return call_user_func(
-            [Config::inst()->get('LDAPAuthenticator', 'fallback_authenticator_class'), 'authenticate'],
-            array_merge($data, ['Email' => $data['Login']]),
-            $form
-        );
     }
 }
