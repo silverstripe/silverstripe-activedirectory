@@ -1,3 +1,9 @@
+# WARNING
+
+This package is no longer being maintained.
+
+Consider using alternatives like [`silverstripe/ldap`](https://packagist.org/packages/silverstripe/ldap) instead.
+
 # SilverStripe Active Directory module
 
 [![Build Status](https://secure.travis-ci.org/silverstripe/silverstripe-activedirectory.svg)](https://travis-ci.org/silverstripe/silverstripe-activedirectory)
